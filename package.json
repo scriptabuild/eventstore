@@ -1,0 +1,20 @@
+{
+  "name": "@aeinbu/eventstore",
+  "version": "0.0.1",
+  "description": "A simple filebased eventsourced store",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scriptabuild/eventstore.git"
+  },
+  "keywords": [],
+  "author": "Arjan Einbu <arjan@einbu.no>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/scriptabuild/eventstore/issues"
+  },
+  "homepage": "https://github.com/scriptabuild/eventstore#readme"
+}
