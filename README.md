@@ -8,55 +8,82 @@ npm install @aeinbu/eventstore
 ```
 
 ## Usage
+
 ```javascript
-// contactbook.js
+// contactlist.js
+function ContactList(dispatch, registerEventhandlers){
 
-function ContactBook(dispatch, registerEventhandlers){
-	let contacts = {};
+	let contacts = {};  // This is where the actual data is stored
 
+	// These are the eventhandlers, that manipulate the data.
 	registerEventhandlers({
-		onContactAdded: {name, address, phone} => {
-			contacts[name] = {name, address, phone};
+		onContactAdded(event){
+			if(!contacts[event.contact.name])
+			{
+				contacts[event.contact.name] = event.contact;
+				return;
+			}
+			throw new Error("Contact already exists");
 		},
-		onContactRemoved: {name} => {
-			delete contacts[name];
+		onContactRemoved(event){
+			if(contacts[event.contactname])
+			{
+				delete contacts[event.contactname];
+				return;
+			}
+			throw new Error("Contact doesnt exists");			
 		}
 	});
 
-	// commands
-	this.addContact = (name, city, phone) =>{
-		dispatch("contactAdded", {name, city, phone});
+	// These are the command methods that are exposed to the developer using this class
+	this.addContact = (contact) => {
+		dispatch("contactAdded", {contact});
 	};
 
-	this.removeContact = name => {
-		dispatch("contactRemoved", {name});
+	this.removeContact = (contactname) => {
+		dispatch("contactRemoved", {contactname});
 	};
 
-	this.getContacts = name => contacts[name];
-	this.getAllContacts = () => contacts;
+	// This is a query method that is exposed to the developer using this class
+	this.getAllContacts = () => {
+		return Object.keys(contacts).map(key => contacts[key]);
+	};
 }
 ```
 
 ```javascript
+// demo.js
 const initStore = require("@aeinbu/eventstore");
-const ContactBook = require("./contactbook.js");
-const folder = "/path/to/store";
-const createFunc = (dispatch, registerEventhandlers, registerSnapshothandlers) => new ContactBook(dispatch, registerEventhandlers);
+const ContactBook = require("./contactlist.js");
 
+const folder = "/path/to/store";
+const createFunc = (dispatch, registerEventhandlers, registerSnapshothandlers) => new ContactList(dispatch, registerEventhandlers);
 const store = initStore(folder, createFunc);
 
+const assert = require("assert");
+const path = require("path");
+const initStore = require("../source/store.js");
+const Contactlist = require("./ContactList");
 
-store.withRetries((instance, rollback) => {
-	// do something with instance.
-	instance.addContact({name: "peter", city: "oslo", phone: "11223344"});
-	instance.addContact({name: "annie", city: "stockholm", phone: "44332211"});
+const folder = path.resolve(__dirname, "../temp");
+
+// TODO: remove folder before running tests
+
+const createContactlistFn = (dispatch, reh, rsh) => new Contactlist(dispatch, reh);
+let store = initStore(folder, createContactlistFn);
+
+// TODO: check folder is created, but is empty
+
+store.withRetries((contactlist, rollback) => {
+	contactlist.addContact({name: "Mickey Mouse", city: "Duckburgh", species: "Mouse"});
+	contactlist.addContact({name: "Goofey", city: "Duckburgh", species: "Dog"});
 }); // Everything is saved to log at end of block.
 
-
-store.withRetries((instance, rollback) => {
-	// do something with instance.
-	instance.removeContact("peter");
-
-	if(true) rollback();
+store.withRetries((contactlist, rollback) => {
+	contactlist.addContact({name: "Peter Pan", city: "Never Never Land", species: "Boy"});
+	contactlist.removeContact("Goofey");
+	rollback();
 }); // Nothing is saved to log because of rollback.
 ```
+
+_See the `tests/` folder for a more complete example, including support for snapshots_

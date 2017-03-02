@@ -18,7 +18,7 @@ function camelToPascalCase(camelcaseString) {
 
 // constructor function
 
-function Store(folder, createInstance) {
+function Store(folder, createInstance, stopReplayAfterPredicate = (filename, events, instance) => false) {
 
 	let instance = undefined;
 
@@ -28,7 +28,7 @@ function Store(folder, createInstance) {
 	let latestLogOrSnapshotNo = undefined;
 	let eventlog = [];
 
-	init();
+	//init();
 
 	// private methods
 
@@ -71,6 +71,9 @@ function Store(folder, createInstance) {
 			events.forEach(eventEntry => {
 				handleEvent(eventEntry.eventname, eventEntry.event);
 			});
+
+			if(stopReplayAfterPredicate && stopReplayAfterPredicate(logfile, events, instance))
+				break;
 		}
 	}
 
@@ -120,7 +123,7 @@ function Store(folder, createInstance) {
 		let isCancelled = false;
 
 		let retryCount = 0;
-		while(retryCount < maxRetries) {
+		while (retryCount < maxRetries) {
 			if (!instance) init();
 
 			action(instance, () => {
@@ -128,7 +131,7 @@ function Store(folder, createInstance) {
 			});
 			if (isCancelled) {
 				instance = undefined;
-				eventlog = [];			
+				eventlog = [];
 				return this;
 			} else {
 				try {
@@ -144,11 +147,20 @@ function Store(folder, createInstance) {
 }
 
 
+function ensureFolder(folder) {
+	try {
+		fs.mkdirSync(folder);
+	} catch (err) {
+		if (err.code != 'EEXIST') throw err;
+	}
+}
+
 // external surface of Store
 // Parameter "folder": folder to store logs and snapshots to
 // Parameter "createInstance": creator function, signature: (dispatch, registerEventhandler, registerSnapshothandler)
-const initStore = (folder, createInstance) => {
-	let underlyingStore = new Store(folder, createInstance);
+const initStore = (folder, createInstance, stopReplayAfterPredicate) => {
+	ensureFolder(folder);
+	let underlyingStore = new Store(folder, createInstance, stopReplayAfterPredicate);
 	return underlyingStore;
 };
 
