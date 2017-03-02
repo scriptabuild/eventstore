@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/scriptabuild/eventstore.git"
   },
-  "keywords": [],
+  "keywords": ["eventstore", "eventsource", "commands"],
   "author": "Arjan Einbu <arjan@einbu.no>",
   "license": "MIT",
   "bugs": {

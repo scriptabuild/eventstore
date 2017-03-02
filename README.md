@@ -9,6 +9,8 @@ npm install @aeinbu/eventstore
 
 ## Usage
 
+Example of an object to be stored with this eventstore:
+
 ```javascript
 // contactlist.js
 function ContactList(dispatch, registerEventhandlers){
@@ -51,33 +53,25 @@ function ContactList(dispatch, registerEventhandlers){
 }
 ```
 
+Usage of `contactlist` with the eventstore:
+
 ```javascript
 // demo.js
 const initStore = require("@aeinbu/eventstore");
-const ContactBook = require("./contactlist.js");
-
-const folder = "/path/to/store";
-const createFunc = (dispatch, registerEventhandlers, registerSnapshothandlers) => new ContactList(dispatch, registerEventhandlers);
-const store = initStore(folder, createFunc);
-
 const assert = require("assert");
 const path = require("path");
-const initStore = require("../source/store.js");
 const Contactlist = require("./ContactList");
 
-const folder = path.resolve(__dirname, "../temp");
-
-// TODO: remove folder before running tests
-
+const folder = "path/to/store";
 const createContactlistFn = (dispatch, reh, rsh) => new Contactlist(dispatch, reh);
 let store = initStore(folder, createContactlistFn);
 
-// TODO: check folder is created, but is empty
 
 store.withRetries((contactlist, rollback) => {
 	contactlist.addContact({name: "Mickey Mouse", city: "Duckburgh", species: "Mouse"});
 	contactlist.addContact({name: "Goofey", city: "Duckburgh", species: "Dog"});
 }); // Everything is saved to log at end of block.
+
 
 store.withRetries((contactlist, rollback) => {
 	contactlist.addContact({name: "Peter Pan", city: "Never Never Land", species: "Boy"});
