@@ -1,4 +1,4 @@
-const fs = require("fs");
+const fsp = require("fs-promise");
 const path = require("path");
 
 // helper functions
@@ -28,7 +28,7 @@ function Store(folder, createInstance, stopReplayAfterPredicate = (filename, eve
 	let latestLogOrSnapshotNo = undefined;
 	let eventlog = [];
 
-	//init();
+
 
 	// private methods
 
@@ -40,39 +40,30 @@ function Store(folder, createInstance, stopReplayAfterPredicate = (filename, eve
 		snapshothandlers = newSnapshothandlers
 	};
 
-	function init() {
-		if (!instance) instance = createInstance(dispatch, registerEventhandlers, registerSnapshothandlers);
-
-		let files = fs.readdirSync(folder);
-		let latestSnapshotNo = getLatestFileNo(files, ".snapshot");
-		let latestLogNo = getLatestFileNo(files, ".log");
-		latestLogOrSnapshotNo = Math.max(latestSnapshotNo, latestLogNo)
-
-		restore(latestSnapshotNo);
-		replay(latestSnapshotNo + 1, latestLogNo);
-	}
-
-	function restore(snapshotNo) {
+	async function restore(snapshotNo) {
 		if (snapshothandlers, snapshotNo) {
 			let snapshotfile = path.resolve(folder, snapshotNo + ".snapshot");
-			console.log("Reading snapshot file:", snapshotfile)
-			let snapshotContents = JSON.parse(fs.readFileSync(snapshotfile).toString());
+			console.log("Reading snapshot file:", snapshotfile);
+
+			let file = await fsp.readFile(snapshotfile);
+			let snapshotContents = JSON.parse(file.toString());
 			snapshothandlers.restoreFromSnapshot(snapshotContents);
 		}
 	}
 
-	function replay(fromLogNo, toLogNo) {
+	async function replay(fromLogNo, toLogNo) {
 		for (let logNo = fromLogNo; logNo <= toLogNo; logNo++) {
 			let logfile = path.resolve(folder, logNo + ".log");
 			console.log("Reading log file:", logfile);
 
-			let events = JSON.parse(fs.readFileSync(logfile).toString());
+			let file = await fsp.readFile(logfile);
+			let events = JSON.parse(file.toString());
 
 			events.forEach(eventEntry => {
 				handleEvent(eventEntry.eventname, eventEntry.event);
 			});
 
-			if(stopReplayAfterPredicate && stopReplayAfterPredicate(logfile, events, instance))
+			if (stopReplayAfterPredicate && stopReplayAfterPredicate(logfile, events, instance))
 				break;
 		}
 	}
@@ -95,36 +86,53 @@ function Store(folder, createInstance, stopReplayAfterPredicate = (filename, eve
 		handleEvent(eventname, event);
 	}
 
-	function save() {
-		if (eventlog && eventlog.length) {
-			let logfile = path.resolve(folder, ++latestLogOrSnapshotNo + ".log");
-			fs.appendFileSync(logfile, JSON.stringify(eventlog), {
-				flag: "wx"
-			});
+	async function save() {
+		try {
+			if (eventlog && eventlog.length) {
+				let logfile = path.resolve(folder, ++latestLogOrSnapshotNo + ".log");
+				await fsp.appendFile(logfile, JSON.stringify(eventlog), {
+					flag: "wx"
+				});
 
-			eventlog = [];
+				eventlog = [];
+			}
+		}
+		catch(err){
+			console.error(err);
 		}
 	}
 
 	// public methods
 
-	this.snapshot = () => {
+	this.init = async() => {
+		if (!instance) instance = createInstance(dispatch, registerEventhandlers, registerSnapshothandlers);
+
+		let files = await fsp.readdir(folder);
+		let latestSnapshotNo = getLatestFileNo(files, ".snapshot");
+		let latestLogNo = getLatestFileNo(files, ".log");
+		latestLogOrSnapshotNo = Math.max(latestSnapshotNo, latestLogNo)
+
+		await restore(latestSnapshotNo);
+		await replay(latestSnapshotNo + 1, latestLogNo);
+	}
+
+	this.snapshot = async() => {
 		if (!instance) init();
 
 		let state = snapshothandlers.createSnapshotData();
 
 		let snapshotfile = path.resolve(folder, latestLogOrSnapshotNo + ".snapshot");
-		fs.appendFileSync(snapshotfile, JSON.stringify(state), {
+		await fsp.appendFile(snapshotfile, JSON.stringify(state), {
 			flag: "w"
 		});
 	}
 
-	this.withRetries = (action, maxRetries = 5) => {
+	this.withRetries = async(action, maxRetries = 5) => {
 		let isCancelled = false;
 
 		let retryCount = 0;
 		while (retryCount < maxRetries) {
-			if (!instance) init();
+			if (!instance) await this.init();
 
 			action(instance, () => {
 				isCancelled = true;
@@ -135,7 +143,7 @@ function Store(folder, createInstance, stopReplayAfterPredicate = (filename, eve
 				return this;
 			} else {
 				try {
-					save();
+					await save();
 					return this;
 				} catch (err) {
 					retryCount++;
@@ -147,9 +155,11 @@ function Store(folder, createInstance, stopReplayAfterPredicate = (filename, eve
 }
 
 
-function ensureFolder(folder) {
+
+
+async function ensureFolder(folder) {
 	try {
-		fs.mkdirSync(folder);
+		await fsp.mkdir(folder);
 	} catch (err) {
 		if (err.code != 'EEXIST') throw err;
 	}
@@ -158,9 +168,11 @@ function ensureFolder(folder) {
 // external surface of Store
 // Parameter "folder": folder to store logs and snapshots to
 // Parameter "createInstance": creator function, signature: (dispatch, registerEventhandler, registerSnapshothandler)
-const initStore = (folder, createInstance, stopReplayAfterPredicate) => {
-	ensureFolder(folder);
+
+const initStore = async(folder, createInstance, stopReplayAfterPredicate) => {
+	await ensureFolder(folder);
 	let underlyingStore = new Store(folder, createInstance, stopReplayAfterPredicate);
+	await underlyingStore.init();
 	return underlyingStore;
 };
 

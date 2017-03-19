@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/scriptabuild/eventstore/issues"
   },
-  "homepage": "https://github.com/scriptabuild/eventstore#readme"
+  "homepage": "https://github.com/scriptabuild/eventstore#readme",
+  "dependencies": {
+    "fs-promise": "^2.0.0"
+  }
 }

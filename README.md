@@ -62,22 +62,24 @@ const assert = require("assert");
 const path = require("path");
 const Contactlist = require("./ContactList");
 
-const folder = "path/to/store";
-const createContactlistFn = (dispatch, reh, rsh) => new Contactlist(dispatch, reh);
-let store = initStore(folder, createContactlistFn);
+(async funtion(){
+	const folder = "path/to/store";
+	const createContactlistFn = (dispatch, reh, rsh) => new Contactlist(dispatch, reh);
+	let store = await initStore(folder, createContactlistFn);
 
 
-store.withRetries((contactlist, rollback) => {
-	contactlist.addContact({name: "Mickey Mouse", city: "Duckburgh", species: "Mouse"});
-	contactlist.addContact({name: "Goofey", city: "Duckburgh", species: "Dog"});
-}); // Everything is saved to log at end of block.
+	store.withRetries((contactlist, rollback) => {
+		contactlist.addContact({name: "Mickey Mouse", city: "Duckburgh", species: "Mouse"});
+		contactlist.addContact({name: "Goofey", city: "Duckburgh", species: "Dog"});
+	}); // Everything is saved to log at end of block.
 
 
-store.withRetries((contactlist, rollback) => {
-	contactlist.addContact({name: "Peter Pan", city: "Never Never Land", species: "Boy"});
-	contactlist.removeContact("Goofey");
-	rollback();
-}); // Nothing is saved to log because of rollback.
+	store.withRetries((contactlist, rollback) => {
+		contactlist.addContact({name: "Peter Pan", city: "Never Never Land", species: "Boy"});
+		contactlist.removeContact("Goofey");
+		rollback();
+	}); // Nothing is saved to log because of rollback.
+})();
 ```
 
 _See the `tests/` folder for a more complete example, including support for snapshots_
