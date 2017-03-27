@@ -27,7 +27,7 @@ function ContactList(dispatch, registerEventhandlers, registerSnapshothandlers){
 				delete contacts[event.contactname];
 				return;
 			}
-			throw new Error("Contact doesnt exists");			
+			throw new Error("Contact doesnt exist");			
 		},
 		onContactReplaced(event){
 			if(contacts[event.contact.name])
@@ -35,7 +35,7 @@ function ContactList(dispatch, registerEventhandlers, registerSnapshothandlers){
 				contacts[event.contact.name] = event.contacts;
 				return;
 			}
-			throw new Error("Contact doesnt exists");			
+			throw new Error("Contact doesnt exist");			
 		}
 	});
 

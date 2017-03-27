@@ -1,20 +1,24 @@
 const assert = require("assert");
 const path = require("path");
-const initStore = require("../source/store.js");
+const defineStore = require("../source/defineStore.js");
 const Contactlist = require("./ContactList");
 
 const folder = path.resolve(__dirname, "../temp");
-
 // TODO: remove folder before running tests
+
 (async function() {
 
 	const createContactlistFn = (dispatch, reh, rsh) => new Contactlist(dispatch, reh, rsh);
-	const stopReplayPredicate = (filename, events, instance) => (filename.endsWith("1.log"));
-	let store = await initStore(folder, createContactlistFn /*, stopReplayPredicate*/ );
+	// const stopReplayPredicate = (filename, events, instance) => (filename.endsWith("1.log"));
+	let store = await defineStore(folder);
+	let rw = store.defineReadWriteModel("rw", createContactlistFn);
+	// let historical = store.defineReadModel("historical", createContactlistFn);
 
 	// TODO: check folder is created, but is empty
 
-	await store.withRetries((contactlist, rollback) =>  {
+
+
+	await rw.withReadWriteModel((contactlist, readyToCommit) =>  {
 		contactlist.addContact({
 			name: "Mickey Mouse",
 			city: "Duckburgh",
@@ -25,39 +29,46 @@ const folder = path.resolve(__dirname, "../temp");
 			city: "Duckburgh",
 			species: "Dog"
 		});
+		readyToCommit();
 	});
 
 	// TODO: check that contactlist contains exactly two contacts: mickey & goofey
 	// TODO: check that folder holds exactly one file: 1.log
 
-	await store.withRetries((contactlist, rollback) =>  {
+
+
+	await rw.withReadWriteModel((contactlist, readyToCommit) =>  {
 		contactlist.addContact({
 			name: "Peter Pan",
 			city: "Never Never Land",
 			species: "Boy"
 		});
 		contactlist.removeContact("Goofey");
-		rollback();
 	});
 
 	// TODO: check that contactlist still contains exactly two contacts: mickey & goofey
 	// TODO: check that folder still holds exactly one file: 1.log
 
-	await store.withRetries((contactlist, rollback) =>  {
+
+
+	await rw.withReadWriteModel((contactlist, readyToCommit) =>  {
 		contactlist.addContact({
 			name: "Donald Duck",
 			city: "Duckburgh",
 			species: "Duck"
 		});
 		contactlist.removeContact("Goofey");
+		readyToCommit();
 	});
 
 	// TODO: check that contactlist contains exactly two contacts: mickey & donald
 	// TODO: check that folder holds exactly two files: 1.log, 2.log
 
-	await store.snapshot();
 
-	await store.withRetries(contactlist => {
+
+	await rw.snapshot();
+
+	await rw.withReadWriteModel((contactlist, readyToCommit) => {
 		contactlist.getAllContacts().forEach(contact => console.log(contact));
 	});
 	// TODO: assert folder holds exactly three files: 1.log, 2.log, 3.log

@@ -33,7 +33,7 @@ function ContactList(dispatch, registerEventhandlers){
 				delete contacts[event.contactname];
 				return;
 			}
-			throw new Error("Contact doesnt exists");			
+			throw new Error("Contact doesnt exist");			
 		}
 	});
 
@@ -57,7 +57,7 @@ Usage of `contactlist` with the eventstore:
 
 ```javascript
 // demo.js
-const initStore = require("@aeinbu/eventstore");
+const defineStore = require("@aeinbu/eventstore");
 const assert = require("assert");
 const path = require("path");
 const Contactlist = require("./ContactList");
@@ -65,20 +65,21 @@ const Contactlist = require("./ContactList");
 (async funtion(){
 	const folder = "path/to/store";
 	const createContactlistFn = (dispatch, reh, rsh) => new Contactlist(dispatch, reh);
-	let store = await initStore(folder, createContactlistFn);
+	let store = await defineStore(folder);
+	let rw = store.defineReadWriteModel("rw", createContactlistFn);
 
-
-	store.withRetries((contactlist, rollback) => {
+	rw.withRetries((contactlist, readyToCommit) => {
 		contactlist.addContact({name: "Mickey Mouse", city: "Duckburgh", species: "Mouse"});
 		contactlist.addContact({name: "Goofey", city: "Duckburgh", species: "Dog"});
+
+		readyToCommit();
 	}); // Everything is saved to log at end of block.
 
 
-	store.withRetries((contactlist, rollback) => {
+	rw.withRetries((contactlist, readyToCommit) => {
 		contactlist.addContact({name: "Peter Pan", city: "Never Never Land", species: "Boy"});
 		contactlist.removeContact("Goofey");
-		rollback();
-	}); // Nothing is saved to log because of rollback.
+	}); // Nothing is saved to log. This unit of work was rolled back because no call was made to readyToCommit().
 })();
 ```
 
