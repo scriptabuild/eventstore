@@ -10,6 +10,19 @@ async function defineStore(folder) {
 		}
 	}
 
+	function getLatestFileNo(files, ext) {
+		return files
+			.map(files => path.parse(files))
+			.filter(fi => fi.ext == ext && !isNaN(fi.name))
+			.map(fi => parseInt(fi.name))
+			.reduce((max, num) => num > max ? num : max, 0);
+	}
+
+	function camelToPascalCase(camelcaseString) {
+		return camelcaseString[0].toUpperCase() + camelcaseString.substring(1);
+	}
+
+
 	await ensureFolder(folder);
 
 	let public = {
@@ -17,7 +30,14 @@ async function defineStore(folder) {
 		// defineReadModel(modelname, createModelFn) {
 		// 	return {
 		// 		async snapshot() {
-		// 			snapshot();
+		// 			if (!instance) init();
+
+		// 			let state = snapshothandlers.createSnapshotData();
+
+		// 			let snapshotfile = path.resolve(folder, latestLogOrSnapshotNo + `.${modelname}-snapshot`);
+		// 			await fsp.appendFile(snapshotfile, JSON.stringify(state), {
+		// 				flag: "w"
+		// 			});
 		// 		},
 		// 		async withReadModel(action) {
 		// 			if (!instance) await init();
@@ -47,7 +67,9 @@ async function defineStore(folder) {
 				let latestLogNo = getLatestFileNo(files, ".log");
 				latestLogOrSnapshotNo = Math.max(latestSnapshotNo, latestLogNo)
 
-				await restore(latestSnapshotNo);
+				if (latestSnapshotNo) {
+					await restore(latestSnapshotNo);
+				}
 				await replay(latestSnapshotNo + 1, latestLogNo);
 			}
 
@@ -59,27 +81,15 @@ async function defineStore(folder) {
 				snapshothandlers = newSnapshothandlers
 			}
 
-			function getLatestFileNo(files, ext) {
-				return files
-					.map(files => path.parse(files))
-					.filter(fi => fi.ext == ext && !isNaN(fi.name))
-					.map(fi => parseInt(fi.name))
-					.reduce((max, num) => num > max ? num : max, 0);
-			}
-
-			function camelToPascalCase(camelcaseString) {
-				return camelcaseString[0].toUpperCase() + camelcaseString.substring(1);
-			}
-
 			async function restore(snapshotNo) {
-				if (snapshothandlers, snapshotNo) {
-					let snapshotfile = path.resolve(folder, snapshotNo + `.${modelname}-snapshot`);
-					console.log("Reading snapshot file:", snapshotfile);
+				if (snapshothandlers === undefined) throw new Error(`Can't restore snapshot. Missing snapshothandler for "${modelname}".`);
 
-					let file = await fsp.readFile(snapshotfile);
-					let snapshotContents = JSON.parse(file.toString());
-					snapshothandlers.restoreFromSnapshot(snapshotContents);
-				}
+				let snapshotfile = path.resolve(folder, snapshotNo + `.${modelname}-snapshot`);
+				console.log("Reading snapshot file:", snapshotfile);
+
+				let file = await fsp.readFile(snapshotfile);
+				let snapshotContents = JSON.parse(file.toString());
+				snapshothandlers.restoreFromSnapshot(snapshotContents);
 			}
 
 			async function replay(fromLogNo, toLogNo) {
@@ -132,20 +142,16 @@ async function defineStore(folder) {
 				}
 			}
 
-			async function snapshot() {
-				if (!instance) init();
-
-				let state = snapshothandlers.createSnapshotData();
-
-				let snapshotfile = path.resolve(folder, latestLogOrSnapshotNo + `.${modelname}-snapshot`);
-				await fsp.appendFile(snapshotfile, JSON.stringify(state), {
-					flag: "w"
-				});
-			}
-
 			return {
 				async snapshot() {
-					snapshot();
+					if (!instance) init();
+
+					let state = snapshothandlers.createSnapshotData();
+
+					let snapshotfile = path.resolve(folder, latestLogOrSnapshotNo + `.${modelname}-snapshot`);
+					await fsp.appendFile(snapshotfile, JSON.stringify(state), {
+						flag: "w"
+					});
 				},
 				async withReadWriteModel(action, maxRetries = 5) {
 					let isReadyToCommitt = false;
