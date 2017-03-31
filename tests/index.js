@@ -1,7 +1,7 @@
 const assert = require("assert");
 const path = require("path");
 const defineStore = require("../source/defineStore.js");
-const Contactlist = require("./ContactList");
+const Contactlist = require("./contactList");
 
 const folder = path.resolve(__dirname, "../temp");
 // TODO: remove folder before running tests

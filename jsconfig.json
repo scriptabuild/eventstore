@@ -1,0 +1,10 @@
+{
+	"typeAcquisition": {
+		"enable": true
+	},"compilerOptions": {
+		"noEmit": false
+	},
+	"exclude": [
+		"node_modules"
+	]
+}
