@@ -1,6 +1,6 @@
 {
   "name": "@aeinbu/eventstore",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "A simple filebased eventsourced store",
   "main": "index.js",
   "scripts": {
