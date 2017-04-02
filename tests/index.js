@@ -1,4 +1,4 @@
-const assert = require("assert");
+// const assert = require("assert");
 const path = require("path");
 const defineStore = require("../source/defineStore.js");
 const Contactlist = require("./contactList");
@@ -44,6 +44,9 @@ const folder = path.resolve(__dirname, "../temp");
 			species: "Boy"
 		});
 		contactlist.removeContact("Goofey");
+
+		let ok = false;
+		if(ok) readyToCommit();
 	});
 
 	// TODO: check that contactlist still contains exactly two contacts: mickey & goofey
@@ -70,6 +73,9 @@ const folder = path.resolve(__dirname, "../temp");
 
 	await rw.withReadWriteModel((contactlist, readyToCommit) => {
 		contactlist.getAllContacts().forEach(contact => console.log(contact));
+
+		let ok = false;
+		if(ok) readyToCommit();
 	});
 	// TODO: assert folder holds exactly three files: 1.log, 2.log, 3.log
 
