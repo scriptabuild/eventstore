@@ -2,7 +2,7 @@ const fsp = require("fs-promise");
 const path = require("path");
 
 class Store {
-	constructor(folder, modelname, createModelCallback) {
+	constructor(folder, modelname, createModelCallback, metadataCallback = () => {}) {
 		this.folder = folder;
 		this.modelname = modelname;
 		this.createModelCallback = createModelCallback;
@@ -11,6 +11,7 @@ class Store {
 
 		this._eventhandlers = undefined;
 		this._snapshothandlers = undefined;
+		this._metadataCallback = metadataCallback;
 
 		this._latestLogOrSnapshotNo = undefined;
 		this.eventlog = [];
@@ -58,23 +59,28 @@ class Store {
 
 		let file = await fsp.readFile(snapshotfile);
 		let snapshotContents = JSON.parse(file.toString());
-		this._snapshothandlers.restoreFromSnapshot(snapshotContents);
+		this._snapshothandlers.restoreFromSnapshot(snapshotContents.snapshot);
+		// return {metadata: snapshotContents.metadata, customMetadata: snapshotContents.customMetadata}; // would this be usefull to anyone?
 	}
 
-	async replay(fromLogNo, toLogNo) {
+	async replay(fromLogNo, toLogNo, stopReplayPredicates) {
 		for (let logNo = fromLogNo; logNo <= toLogNo; logNo++) {
 			let logfile = path.resolve(this.folder, logNo + ".log");
 			console.log("Reading log file:", logfile);
 
 			let file = await fsp.readFile(logfile);
-			let events = JSON.parse(file.toString());
-
+			let logfileContents = JSON.parse(file.toString());
+			if(stopReplayPredicates && stopReplayPredicates.BeforeApply && stopReplayPredicates.BeforeApply(file, logfileContents, this.instance)){
+				break;
+			}
+			let events = logfileContents.events;
 			events.forEach(eventEntry => {
 				this.handleEvent(eventEntry.eventname, eventEntry.event);
 			});
 
-			// if (stopReplayAfterPredicate && stopReplayAfterPredicate(logfile, events, this.instance))
-			// 	break;
+			if(stopReplayPredicates && stopReplayPredicates.AfterApply && stopReplayPredicates.AfterApply(file, logfileContents, this.instance)){
+				break;
+			}
 		}
 	}
 
@@ -99,8 +105,10 @@ class Store {
 	async save() {
 		try {
 			if (this.eventlog && this.eventlog.length) {
+				let metadata = this._metadataCallback();
+
 				let logfile = path.resolve(this.folder, ++this._latestLogOrSnapshotNo + ".log");
-				await fsp.appendFile(logfile, JSON.stringify(this.eventlog), {
+				await fsp.appendFile(logfile, JSON.stringify({ metadata, events: this.eventlog}), {
 					flag: "wx"
 				});
 
@@ -111,11 +119,12 @@ class Store {
 		}
 	}
 
-	async snapshot() {
+	async snapshot(snapshotMetadata) {
 		if (!this.instance) this.init();
 
-		let state = this._snapshothandlers.createSnapshotData();
+		let metadata = this._metadataCallback();
 
+		let state = { metadata, snapshotMetadata, snapshot: this._snapshothandlers.createSnapshotData() };
 		let snapshotfile = path.resolve(this.folder, this._latestLogOrSnapshotNo + `.${this.modelname}-snapshot`);
 		await fsp.appendFile(snapshotfile, JSON.stringify(state), {
 			flag: "w"
@@ -123,7 +132,6 @@ class Store {
 	}
 }
 
-// TODO: Add metadata to the recorded events. By default it should store now(). This should be configurable by supplying a createMetadataCallback()
 // TODO: Add resetModel() and getModel()/ensureModel() methods5
 // TODO: Rename Store::init() to reset()/restore()???
 
