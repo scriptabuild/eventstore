@@ -1,31 +1,23 @@
 {
-    "env": {
-        "browser": false,
-        "commonjs": true,
-        "es6": true,
-        "node": true
-    },
-    "parserOptions": {
-        "ecmaVersion": 2017,
-        "ecmaFeatures": {
-            "jsx": false
-        },
-        "sourceType": "module"
-    },
-    "rules": {
-        "no-const-assign": "warn",
-        "no-this-before-super": "warn",
-        "no-undef": "warn",
-        "no-unreachable": "warn",
-        "no-unused-vars": "warn",
-        "no-with": "warn",
-        "no-alert": "error",
-        "no-dupe-args": "error",
-        "no-dupe-keys": "error",
-        "no-dupe-class-members": "error",
-        "no-duplicate-case": "error",
-        "no-duplicate-imports": "error",
-        "constructor-super": "warn",
-        "valid-typeof": "warn"
-    }
+	"extends": "eslint:recommended",
+	"env": {
+		"browser": false,
+		"commonjs": true,
+		"es6": true,
+		"node": true
+	},
+	"parserOptions": {
+		"ecmaVersion": 2017,
+		"ecmaFeatures": {
+			"jsx": false
+		},
+		"sourceType": "module"
+	},
+	"rules": {
+        "no-irregular-whitespace": "off",
+        "no-console": "off",
+        "radix": "warn",
+        "no-eval": "warn",
+		"no-with": "warn"
+	}
 }

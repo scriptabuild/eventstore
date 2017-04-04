@@ -25,6 +25,5 @@
     "fs-promise": "^2.0.0"
   },
   "devDependencies": {
-    "eslint-plugin-async-await": "0.0.0"
   }
 }

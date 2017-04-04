@@ -1,5 +1,7 @@
 # Eventstore
-A simple filebased eventsourced store
+A simple filebased eventsourced data store for node.js.
+
+Instead of storing the current state of our data, eventsourcing lets us record our intention while creating/manipulating our data.
 
 ## Installation
 

@@ -1,83 +1,131 @@
 // const assert = require("assert");
 const path = require("path");
 const defineStore = require("../source/defineStore.js");
-const Contactlist = require("./contactList");
+const MemberList = require("./memberList");
+const AllHistoricalMemberList = require("./allHistoricalMemberList");
+const ResidensHistoryForMembers = require("./residensHistoryForMembers")
 
 const folder = path.resolve(__dirname, "../temp");
 // TODO: remove folder before running tests
 
-(async function() {
+(async function () {
 
-	const createContactlistFn = (dispatch, reh, rsh) => new Contactlist(dispatch, reh, rsh);
-	// const stopReplayPredicate = (filename, events, instance) => (filename.endsWith("1.log"));
 	let store = await defineStore(folder);
-	let rw = store.defineReadWriteModel("rw", createContactlistFn);
-	// let historical = store.defineReadModel("historical", createContactlistFn);
 
-	// TODO: check folder is created, but is empty
+	const createMembersModelCallback = (dispatch, reh, rsh) => new MemberList(dispatch, reh, rsh);
+	let currentMembers = store.defineReadWriteModel("members", createMembersModelCallback);
+
+	const createHistoricalMembersModelCallback = (dispatch, reh, rsh) => new AllHistoricalMemberList(dispatch, reh, rsh);
+	let allHistoricalMembers = store.defineReadModel("historical", createHistoricalMembersModelCallback);
+
+	const createResidensHistoryForMembersModelCallback = (dispatch, reh, rsh) => new ResidensHistoryForMembers(dispatch, reh, rsh);
+	let residensHistoryForMembers = store.defineReadModel("residens-history", createResidensHistoryForMembersModelCallback);
 
 
 
-	await rw.withReadWriteModel((contactlist, readyToCommit) =>  {
-		contactlist.addContact({
-			name: "Mickey Mouse",
-			city: "Duckburgh",
-			species: "Mouse"
+	await currentMembers.withReadWriteModel((membersModel, readyToCommit) => {
+		membersModel.registerNewMember({
+			name: "Nina Hansen",
+			address: {
+				street: "Kirkeveien 271"
+			},
+			membershipLevel: "gold"
 		});
-		contactlist.addContact({
-			name: "Goofey",
-			city: "Duckburgh",
-			species: "Dog"
+		membersModel.registerNewMember({
+			name: "Oskar Jensen",
+			address: {
+				street: "Store Ringvei 100"
+			},
+			membershipLevel: "silver"
+		});
+		membersModel.registerNewMember({
+			name: "Kim Jamesson",
+			address: {
+				street: "Trondheimsveien 453"
+			},
+			membershipLevel: "bronze"
+		});
+		membersModel.registerNewMember({
+			name: "Kari Kongsli",
+			address: {
+				street: "Trondheimsveien 453"
+			},
+			membershipLevel: "silver"
 		});
 		readyToCommit();
 	});
 
-	// TODO: check that contactlist contains exactly two contacts: mickey & goofey
-	// TODO: check that folder holds exactly one file: 1.log
 
 
-
-	await rw.withReadWriteModel((contactlist, readyToCommit) =>  {
-		contactlist.addContact({
-			name: "Peter Pan",
-			city: "Never Never Land",
-			species: "Boy"
-		});
-		contactlist.removeContact("Goofey");
-
-		let ok = false;
-		if(ok) readyToCommit();
-	});
-
-	// TODO: check that contactlist still contains exactly two contacts: mickey & goofey
-	// TODO: check that folder still holds exactly one file: 1.log
-
-
-
-	await rw.withReadWriteModel((contactlist, readyToCommit) =>  {
-		contactlist.addContact({
-			name: "Donald Duck",
-			city: "Duckburgh",
-			species: "Duck"
-		});
-		contactlist.removeContact("Goofey");
+	await currentMembers.withReadWriteModel((memberModel, readyToCommit) => {
+		memberModel.correctAddress( "Kim Jamesson", { street: "Trondheimsveien 435" });
 		readyToCommit();
 	});
 
-	// TODO: check that contactlist contains exactly two contacts: mickey & donald
-	// TODO: check that folder holds exactly two files: 1.log, 2.log
+
+
+	await currentMembers.withReadWriteModel((memberModel, readyToCommit) => {
+		memberModel.endMembership("Kari Kongsli");
+		readyToCommit();
+	});
 
 
 
-	await rw.snapshot();
+	await currentMembers.withReadWriteModel((memberModel, readyToCommit) => {
+		memberModel.memberHasMoved("Kim Jamesson", { street: "Bærumsveien 301" });
+		readyToCommit();
+	});
 
-	await rw.withReadWriteModel((contactlist, readyToCommit) => {
-		contactlist.getAllContacts().forEach(contact => console.log(contact));
+
+
+	await currentMembers.snapshot();
+
+
+
+	await currentMembers.withReadWriteModel((membersModel, readyToCommit) => {
+		membersModel.registerNewMember({
+			name: "Pernille Bråthen",
+			address: {
+				street: "Smetten 12"
+			},
+			membershipLevel: "silver"
+		});
+		membersModel.registerNewMember({
+			name: "Karl Gudesen",
+			address: {
+				street: "Drammensveien 100"
+			},
+			membershipLevel: "blue"
+		});
+		readyToCommit();
+	});
+
+
+
+	await currentMembers.withReadWriteModel((membersModel, readyToCommit) => {
+		membersModel.listMembers().forEach(contact => console.log(contact.name));
 
 		let ok = false;
-		if(ok) readyToCommit();
+		if (ok) readyToCommit();
 	});
-	// TODO: assert folder holds exactly three files: 1.log, 2.log, 3.log
+
+	console.log("---");
+	
+	await allHistoricalMembers.snapshot();
+	await allHistoricalMembers.withReadModel((historicalModel) => {
+		historicalModel.listMembers().forEach(contact => console.log(`${contact.name} - ${contact.isMember}`));		
+	});
+
+	console.log("---");
+
+	await residensHistoryForMembers.snapshot();
+	await residensHistoryForMembers.withReadModel((residensModel) => {
+		residensModel.listMembers().forEach(contact => console.log(`${contact.name} - ${JSON.stringify(contact.residenses)}`));		
+
+	});
+
+
+
 
 
 

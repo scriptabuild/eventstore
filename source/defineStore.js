@@ -21,7 +21,7 @@ class Store {
 		return files
 			.map(files => path.parse(files))
 			.filter(fi => fi.ext == ext && !isNaN(fi.name))
-			.map(fi => parseInt(fi.name))
+			.map(fi => parseInt(fi.name, 10))
 			.reduce((max, num) => num > max ? num : max, 0);
 	}
 
@@ -87,11 +87,13 @@ class Store {
 	handleEvent(eventname, event) {
 		let eventhandlername = "on" + this.camelToPascalCase(eventname);
 		let eventhandler = this._eventhandlers[eventhandlername];
-		if (eventhandler === undefined) {
-			throw new Error(`Cannot handle event. Can't find "${eventhandlername}" eventhandler.`);
-		}
 
-		return eventhandler(event);
+		// TODO: should a RW model have ALL commandhandlers?
+		// if (eventhandler === undefined) {
+		// 	throw new Error(`Cannot handle event. Can't find "${eventhandlername}" eventhandler.`);
+		// }
+
+		eventhandler && eventhandler(event);
 	}
 
 	dispatch(eventname, event) {
@@ -112,7 +114,7 @@ class Store {
 					flag: "wx"
 				});
 
-				this._eventlog = [];
+				this.eventlog = [];
 			}
 		} catch (err) {
 			console.error(err);
@@ -120,7 +122,7 @@ class Store {
 	}
 
 	async snapshot(snapshotMetadata) {
-		if (!this.instance) this.init();
+		if (!this.instance) await this.init();
 
 		let metadata = this._metadataCallback();
 
@@ -151,7 +153,8 @@ async function defineStore(folder) {
 		defineReadModel(modelname, createModelCallback) {
 			let store = new Store(folder, modelname, createModelCallback);
 			return {
-				async snapshot() {
+				async snapshot(snapshotMetadata) {
+					return await store.snapshot(snapshotMetadata);					
 				},
 				async withReadModel(action) {
 					if (!store.instance) await store.init();
@@ -164,7 +167,7 @@ async function defineStore(folder) {
 		// 	let store = new Store(folder);
 		// 	// return an eventwriter
 		// 	return {
-		// 		storeEvent(){
+		// 		writeEvents(){
 		// 			store....
 		// 		}
 		// 	};
@@ -173,8 +176,8 @@ async function defineStore(folder) {
 		defineReadWriteModel(modelname, createModelCallback) {
 			let store = new Store(folder, modelname, createModelCallback);
 			return {
-				async snapshot() {
-					return await store.snapshot();
+				async snapshot(snapshotMetadata) {
+					return await store.snapshot(snapshotMetadata);
 				},
 				async withReadWriteModel(action, maxRetries = 5) {
 					let isReadyToCommitt = false;
@@ -206,6 +209,6 @@ async function defineStore(folder) {
 			}
 		}
 	};
-};
+}
 
 module.exports = defineStore;
