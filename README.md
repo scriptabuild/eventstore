@@ -9,7 +9,7 @@ Instead of storing the current state of our data, eventsourcing lets us record o
 npm install @aeinbu/eventstore
 ```
 
-## Usage
+## Example
 
 Example of an object to be stored with this eventstore:
 
@@ -86,3 +86,13 @@ const Contactlist = require("./ContactList");
 ```
 
 _See the `tests/` folder for a more complete example, including support for snapshots_
+
+## Documentation
+
+- `let storeBase = defineStore(folder)` - Sets up a folder as a database. Is the base for creating models on that folder.
+
+- `storeBase.defineReadModel(action)` - 
+
+- `storeBase.defineWriteModel(action)` - 
+
+- `storeBase.defineReadWriteModel(action, commitCallback)` - 
