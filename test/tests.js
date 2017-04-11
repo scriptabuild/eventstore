@@ -1,39 +1,146 @@
-const {	suite, setup, teardown, test } = require("mocha");
+const {	suite, setup, test } = require("mocha");
 const assert = require("assert");
 const FakeFsp = require("./FakeFsp");
+
 const defineStore = require("../source/defineStore");
+
 const MemberList = require("../demo/memberList.js")
 const AllHistoricalMemberList = require("../demo/allHistoricalMemberList.js")
 
 suite("defineStore", function () {
-	let options;
+	let fsp;
 	let store;
 
 	setup(async function () {
-		options = {
-			fsp: new FakeFsp({})
-		};
+		fsp = new FakeFsp();
 
-		store = await defineStore("not-a-folder", options);
+		store = await defineStore("not-a-folder", {fsp});
 	});
 	
 	suite("defineReadWriteModel", function () {
 
-		test("with empty init", function (done) {
+		test("with no files", function (done) {
 			const createMembersModelCallback = (dispatch, reh, rsh) => new MemberList(dispatch, reh, rsh);
 			let currentMembers = store.defineReadWriteModel("members", createMembersModelCallback);
 
 			currentMembers.withReadWriteModel(model => {
-				assert.equal(0, model.listMembers.length);
+				assert.equal(0, model.listMembers().length);
 			})
 			done();
+		});
+
+		test("with one log file containing one event", async function () {
+			fsp.files = {
+				"1.log": `
+					{
+						"events": [{
+							"eventname": "newMemberRegistered",
+							"event": {
+								"member": {
+									"name": "Nina Hansen",
+									"address": {
+										"street": "Kirkeveien 271"
+									},
+									"membershipLevel": "gold"
+								}
+							}
+						}]
+					}`
+			};
+
+			const createMembersModelCallback = (dispatch, reh, rsh) => new MemberList(dispatch, reh, rsh);
+			let currentMembers = store.defineReadWriteModel("members", createMembersModelCallback);
+
+			await currentMembers.withReadWriteModel(model => {
+				assert.equal(1, model.listMembers().length);
+			});
+		});
+
+		test("with one log file containing multiple events", async function () {
+			fsp.files = {
+				"1.log": `
+					{
+						"events": [{
+							"eventname": "newMemberRegistered",
+							"event": {
+								"member": {
+									"name": "Nina Hansen",
+									"address": {
+										"street": "Kirkeveien 271"
+									},
+									"membershipLevel": "gold"
+								}
+							}
+						}, {
+							"eventname": "newMemberRegistered",
+							"event": {
+								"member": {
+									"name": "Oskar Jensen",
+									"address": {
+										"street": "Store Ringvei 100"
+									},
+									"membershipLevel": "silver"
+								}
+							}
+						}]
+					}`
+			};
+
+			const createMembersModelCallback = (dispatch, reh, rsh) => new MemberList(dispatch, reh, rsh);
+			let currentMembers = store.defineReadWriteModel("members", createMembersModelCallback);
+
+			await currentMembers.withReadWriteModel(model => {
+				assert.equal(2, model.listMembers().length);
+			});
+		});
+
+		test("with two log files", async function () {
+			fsp.files = {
+				"1.log": `
+					{
+						"events": [{
+							"eventname": "newMemberRegistered",
+							"event": {
+								"member": {
+									"name": "Nina Hansen",
+									"address": {
+										"street": "Kirkeveien 271"
+									},
+									"membershipLevel": "gold"
+								}
+							}
+						}]
+					}`,
+				"2.log": `
+					{
+						"events": [{
+							"eventname": "newMemberRegistered",
+							"event": {
+								"member": {
+									"name": "Oskar Jensen",
+									"address": {
+										"street": "Store Ringvei 100"
+									},
+									"membershipLevel": "silver"
+								}
+							}
+						}]
+					}`
+			};
+
+			const createMembersModelCallback = (dispatch, reh, rsh) => new MemberList(dispatch, reh, rsh);
+			let currentMembers = store.defineReadWriteModel("members", createMembersModelCallback);
+
+			await currentMembers.withReadWriteModel(model => {
+				assert.equal(2, model.listMembers().length);
+			});
 		});
 
 	});
 	
 	suite("defineReadModel", function () {
 
-		test("with empty init", async function () {
+		test("with no files", async function () {
 			const createHistoricalMembersModelCallback = (dispatch, reh, rsh) => new AllHistoricalMemberList(dispatch, reh, rsh);
 			let allHistoricalMembers = store.defineReadModel("historical", createHistoricalMembersModelCallback);
 

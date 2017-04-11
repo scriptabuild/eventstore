@@ -1,3 +1,5 @@
+const path = require("path");
+const valueAsPromise = p => new Promise(resolve => resolve(p));
 
 class FakeFsp {
 	constructor(files = {}){
@@ -5,19 +7,21 @@ class FakeFsp {
 	}
 
 	mkdir(/*folder*/){
-		return new Promise(resolve => resolve());
+		return valueAsPromise();
 	}
 
 	readdir(/*folder*/){
-		return new Promise(resolve => resolve(Object.keys(this.files)));
+		return valueAsPromise(Object.keys(this.files));
 	}
 
 	readFile(filename){
-		return new Promise(resolve => resolve(this.files[filename]));
+		filename = path.basename(filename);
+		return valueAsPromise(this.files[filename]);
 	}
 
 	appendFile(filename, data){
-		return new Promise(resolve => resolve(this.files[filename] = data));
+		filename = path.basename(filename);
+		return valueAsPromise(this.files[filename] = data);
 	}
 }
 
