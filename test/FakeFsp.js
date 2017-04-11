@@ -1,5 +1,6 @@
 const path = require("path");
-const valueAsPromise = p => new Promise(resolve => resolve(p));
+const valueAsPromise = value => new Promise(resolve => resolve(value));
+const rejection = err => new Promise((resolve, reject) => reject(err));
 
 class FakeFsp {
 	constructor(files = {}){
@@ -14,8 +15,13 @@ class FakeFsp {
 		return valueAsPromise(Object.keys(this.files));
 	}
 
-	readFile(filename){
+	async readFile(filename){
 		filename = path.basename(filename);
+		if(this.files[filename] === undefined){
+			let err = new Error("File not found");
+			err.code = "ENOENT";
+			return rejection(err);
+		}
 		return valueAsPromise(this.files[filename]);
 	}
 

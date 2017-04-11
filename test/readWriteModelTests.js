@@ -5,7 +5,6 @@ const FakeFsp = require("./FakeFsp");
 const defineStore = require("../source/defineStore");
 
 const MemberList = require("../demo/memberList.js")
-const AllHistoricalMemberList = require("../demo/allHistoricalMemberList.js")
 
 suite("defineStore", function () {
 	let fsp;
@@ -19,14 +18,13 @@ suite("defineStore", function () {
 	
 	suite("defineReadWriteModel", function () {
 
-		test("with no files", function (done) {
+		test("with no files", async function () {
 			const createMembersModelCallback = (dispatch, reh, rsh) => new MemberList(dispatch, reh, rsh);
 			let currentMembers = store.defineReadWriteModel("members", createMembersModelCallback);
 
-			currentMembers.withReadWriteModel(model => {
+			await currentMembers.withReadWriteModel(model => {
 				assert.equal(0, model.listMembers().length);
 			})
-			done();
 		});
 
 		test("with one log file containing one event", async function () {
@@ -134,128 +132,37 @@ suite("defineStore", function () {
 			await currentMembers.withReadWriteModel(model => {
 				assert.equal(2, model.listMembers().length);
 			});
+		});
+
+		test("with missing log files should fail", function (done) {
+			fsp.files = {
+				"2.log": `
+					{
+						"events": [{
+							"eventname": "newMemberRegistered",
+							"event": {
+								"member": {
+									"name": "Oskar Jensen",
+									"address": {
+										"street": "Store Ringvei 100"
+									},
+									"membershipLevel": "silver"
+								}
+							}
+						}]
+					}`
+			};
+
+			const createMembersModelCallback = (dispatch, reh, rsh) => new MemberList(dispatch, reh, rsh);
+			let currentMembers = store.defineReadWriteModel("members", createMembersModelCallback);
+
+			currentMembers.withReadWriteModel(() => {})
+				.then(
+					() => done("Missing exception"),
+					err => err && err.code === "ENOENT" ? done() : done("Wron exception: " + err.code)
+				);
 		});
 
 	});
 	
-
-
-	suite("defineReadModel", function () {
-
-		test("with no files", async function () {
-			const createHistoricalMembersModelCallback = (dispatch, reh, rsh) => new AllHistoricalMemberList(dispatch, reh, rsh);
-			let allHistoricalMembers = store.defineReadModel("historical", createHistoricalMembersModelCallback);
-
-			await allHistoricalMembers.withReadModel(model => {
-				assert.equal(0, model.listMembers().length);
-			});
-		});
-
-		test("with one log file containing one event", async function () {
-			fsp.files = {
-				"1.log": `
-					{
-						"events": [{
-							"eventname": "newMemberRegistered",
-							"event": {
-								"member": {
-									"name": "Nina Hansen",
-									"address": {
-										"street": "Kirkeveien 271"
-									},
-									"membershipLevel": "gold"
-								}
-							}
-						}]
-					}`
-			};
-
-			const createHistoricalMembersModelCallback = (dispatch, reh, rsh) => new AllHistoricalMemberList(dispatch, reh, rsh);
-			let allHistoricalMembers = store.defineReadModel("historical", createHistoricalMembersModelCallback);
-
-			await allHistoricalMembers.withReadModel(model => {
-				assert.equal(1, model.listMembers().length);
-			});
-		});
-
-		test("with one log file containing multiple events", async function () {
-			fsp.files = {
-				"1.log": `
-					{
-						"events": [{
-							"eventname": "newMemberRegistered",
-							"event": {
-								"member": {
-									"name": "Nina Hansen",
-									"address": {
-										"street": "Kirkeveien 271"
-									},
-									"membershipLevel": "gold"
-								}
-							}
-						}, {
-							"eventname": "newMemberRegistered",
-							"event": {
-								"member": {
-									"name": "Oskar Jensen",
-									"address": {
-										"street": "Store Ringvei 100"
-									},
-									"membershipLevel": "silver"
-								}
-							}
-						}]
-					}`
-			};
-
-			const createHistoricalMembersModelCallback = (dispatch, reh, rsh) => new AllHistoricalMemberList(dispatch, reh, rsh);
-			let allHistoricalMembers = store.defineReadModel("historical", createHistoricalMembersModelCallback);
-
-			await allHistoricalMembers.withReadModel(model => {
-				assert.equal(2, model.listMembers().length);
-			});
-		});
-
-		test("with two log files", async function () {
-			fsp.files = {
-				"1.log": `
-					{
-						"events": [{
-							"eventname": "newMemberRegistered",
-							"event": {
-								"member": {
-									"name": "Nina Hansen",
-									"address": {
-										"street": "Kirkeveien 271"
-									},
-									"membershipLevel": "gold"
-								}
-							}
-						}]
-					}`,
-				"2.log": `
-					{
-						"events": [{
-							"eventname": "newMemberRegistered",
-							"event": {
-								"member": {
-									"name": "Oskar Jensen",
-									"address": {
-										"street": "Store Ringvei 100"
-									},
-									"membershipLevel": "silver"
-								}
-							}
-						}]
-					}`
-			};
-
-			const createMembersModelCallback = (dispatch, reh, rsh) => new MemberList(dispatch, reh, rsh);
-			let currentMembers = store.defineReadWriteModel("members", createMembersModelCallback);
-
-			await currentMembers.withReadWriteModel(model => {
-				assert.equal(2, model.listMembers().length);
-			});
-		});
-	});
 });

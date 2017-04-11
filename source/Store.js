@@ -20,7 +20,7 @@ class Store {
 
 	getLatestFileNo(files, ext) {
 		return files
-			.map(files => path.parse(files))
+			.map(file => path.parse(file))
 			.filter(fi => fi.ext == ext && !isNaN(fi.name))
 			.map(fi => parseInt(fi.name, 10))
 			.reduce((max, num) => num > max ? num : max, 0);
@@ -56,7 +56,7 @@ class Store {
 		if (this._snapshothandlers === undefined) throw new Error(`Can't restore snapshot. Missing snapshothandler for "${this.modelname}".`);
 
 		let snapshotfile = path.resolve(this.folder, snapshotNo + `.${this.modelname}-snapshot`);
-		console.log("Reading snapshot file:", snapshotfile);
+		// console.log("Reading snapshot file:", snapshotfile);
 
 		let file = await this._fsp.readFile(snapshotfile);
 		let snapshotContents = JSON.parse(file.toString());
@@ -67,7 +67,7 @@ class Store {
 	async replay(fromLogNo, toLogNo, stopReplayPredicates) {
 		for (let logNo = fromLogNo; logNo <= toLogNo; logNo++) {
 			let logfile = path.resolve(this.folder, logNo + ".log");
-			console.log("Reading log file:", logfile);
+			// console.log("Reading log file:", logfile);
 
 			let file = await this._fsp.readFile(logfile);
 			let logfileContents = JSON.parse(file.toString());
@@ -106,19 +106,15 @@ class Store {
 	}
 
 	async save() {
-		try {
-			if (this.eventlog && this.eventlog.length) {
-				let metadata = this._metadataCallback();
+		if (this.eventlog && this.eventlog.length) {
+			let metadata = this._metadataCallback();
 
-				let logfile = path.resolve(this.folder, ++this._latestLogOrSnapshotNo + ".log");
-				await this._fsp.appendFile(logfile, JSON.stringify({ metadata, events: this.eventlog}), {
-					flag: "wx"
-				});
+			let logfile = path.resolve(this.folder, ++this._latestLogOrSnapshotNo + ".log");
+			await this._fsp.appendFile(logfile, JSON.stringify({ metadata, events: this.eventlog}), {
+				flag: "wx"
+			});
 
-				this.eventlog = [];
-			}
-		} catch (err) {
-			console.error(err);
+			this.eventlog = [];
 		}
 	}
 
