@@ -1,5 +1,6 @@
 const Store = require("./Store");
-const fsp = require("fs-promise");
+const fsp = require("./AwaitableFs");
+// const fsp = require("fs-promise");
 
 async function defineStore(folder, options = {}) {
 	async function ensureFolder(folder) {

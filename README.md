@@ -60,8 +60,6 @@ Usage of `contactlist` with the eventstore:
 ```javascript
 // demo.js
 const defineStore = require("@aeinbu/eventstore");
-const assert = require("assert");
-const path = require("path");
 const Contactlist = require("./ContactList");
 
 (async funtion(){
@@ -85,7 +83,7 @@ const Contactlist = require("./ContactList");
 })();
 ```
 
-_See the `tests/` folder for a more complete example, including support for snapshots_
+_See the `tests/` folder for a more complete example, including support for snapshots, multiple models, including read-only models_
 
 ## Documentation
 

@@ -90,8 +90,8 @@ class Store {
 		let eventhandler = this._eventhandlers[eventhandlername];
 
 		// TODO: should a RW model have ALL commandhandlers?
-		// if (eventhandler === undefined) {
-		// 	throw new Error(`Cannot handle event. Can't find "${eventhandlername}" eventhandler.`);
+		// if (!options.requireAllEventsToBeHandled || eventhandler !== undefined) {
+		// 	throw new Error(`Cannot handle event while all events are required to be handled. Can't find "${eventhandlername}" eventhandler. Consider setting options.requireAllEventsToBeHandled = false.`);
 		// }
 
 		eventhandler && eventhandler(event);
