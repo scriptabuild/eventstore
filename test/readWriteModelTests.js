@@ -33,7 +33,7 @@ suite("defineStore", function () {
 					{
 						"events": [{
 							"eventname": "newMemberRegistered",
-							"event": {
+							"eventdata": {
 								"member": {
 									"name": "Nina Hansen",
 									"address": {
@@ -60,7 +60,7 @@ suite("defineStore", function () {
 					{
 						"events": [{
 							"eventname": "newMemberRegistered",
-							"event": {
+							"eventdata": {
 								"member": {
 									"name": "Nina Hansen",
 									"address": {
@@ -71,7 +71,7 @@ suite("defineStore", function () {
 							}
 						}, {
 							"eventname": "newMemberRegistered",
-							"event": {
+							"eventdata": {
 								"member": {
 									"name": "Oskar Jensen",
 									"address": {
@@ -98,7 +98,7 @@ suite("defineStore", function () {
 					{
 						"events": [{
 							"eventname": "newMemberRegistered",
-							"event": {
+							"eventdata": {
 								"member": {
 									"name": "Nina Hansen",
 									"address": {
@@ -113,7 +113,7 @@ suite("defineStore", function () {
 					{
 						"events": [{
 							"eventname": "newMemberRegistered",
-							"event": {
+							"eventdata": {
 								"member": {
 									"name": "Oskar Jensen",
 									"address": {
@@ -140,7 +140,7 @@ suite("defineStore", function () {
 					{
 						"events": [{
 							"eventname": "newMemberRegistered",
-							"event": {
+							"eventdata": {
 								"member": {
 									"name": "Oskar Jensen",
 									"address": {
