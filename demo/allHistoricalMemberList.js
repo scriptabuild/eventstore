@@ -10,21 +10,21 @@ function AllHistoricalMemberList(dispatch, configureStore) {
 			members = contents;
 		},
 		eventhandlers: {
-			onNewMemberRegistered(event) {
-				if (members[event.member.name]) {
-					throw new Error(`onNewMemberRegistered failed. ${event.member.name} is allready a member.`)
+			onNewMemberRegistered(eventdata) {
+				if (members[eventdata.member.name]) {
+					throw new Error(`onNewMemberRegistered failed. ${eventdata.member.name} is allready a member.`)
 				}
-				members[event.member.name] = {
-					address: event.member.address,
-					membershipLevel: event.member.membershipLevel,
+				members[eventdata.member.name] = {
+					address: eventdata.member.address,
+					membershipLevel: eventdata.member.membershipLevel,
 					isMember: true
 				};
 			},
-			onMembershipEnded(event) {
-				if (!members[event.name]) {
-					throw new Error(`onMembershipEnded failed. ${event.name} is not a member.`)
+			onMembershipEnded(eventdata) {
+				if (!members[eventdata.name]) {
+					throw new Error(`onMembershipEnded failed. ${eventdata.name} is not a member.`)
 				}
-				members[event.name].isMember = false;
+				members[eventdata.name].isMember = false;
 			}
 		}
 	});

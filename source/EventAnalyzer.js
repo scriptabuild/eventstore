@@ -9,22 +9,16 @@
 // TODO: registerFallbackEventhandler
 function EventAnalyzer(dispatch, configureStore){
 	let eventTypes = {
-		"<eventname>": [{
-			"<firstdate>": "...",
-			"<version>": "...",
-			count: 0,
-			params: ["name", "address", ]
-		}]
+		// "<eventname>": [{
+		// 	"<firstdate>": "...",
+		// 	"<version>": "...",
+		// 	count: 0,
+		// 	params: ["name", "address", ]
+		// }]
 	};
 
 
-	// registerFallbackEventHandler(function(){
-	// 	// catch-all method...
-	// 	// TODO: This is where we create the eventTypes model
-	// });
-
 	let storeConfig = {
-		backingModel: [],	// optional
 		createSnapshotData(){
 			return eventTypes;
 		},
@@ -34,12 +28,17 @@ function EventAnalyzer(dispatch, configureStore){
 		eventhandlers:{
 			// No pre-known eventhandlers, since we're analyzing a log of unknown events.
 		},
-		fallbackEventHandler(event){
-			// do something with event...
+		fallbackEventHandler(eventname, eventdata){
+			if(!eventTypes[eventname]){
+				eventTypes[eventname] = {};
+			}
+
+			eventTypes[eventname].params = {};
+			// TODO: get structure incl dept and type
+
 		},
 	}
 	configureStore(storeConfig);
-	const eventTypes = p.backingModel;
 
 
 

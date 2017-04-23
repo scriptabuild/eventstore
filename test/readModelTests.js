@@ -7,13 +7,13 @@ const defineStore = require("../source/defineStore");
 const AllHistoricalMemberList = require("../demo/allHistoricalMemberList.js")
 
 suite("defineStore", function () {
-	let fsp;
+	let fs;
 	let store;
 
 	setup(async function () {
-		fsp = new FakeFsp();
+		fs = new FakeFsp();
 
-		store = await defineStore("not-a-folder", {fsp});
+		store = await defineStore("not-a-folder", {fs});
 	});
 	
 	suite("defineReadModel", function () {
@@ -28,7 +28,7 @@ suite("defineStore", function () {
 		});
 
 		test("with one log file containing one event", async function () {
-			fsp.files = {
+			fs.files = {
 				"1.log": `
 					{
 						"events": [{
@@ -55,7 +55,7 @@ suite("defineStore", function () {
 		});
 
 		test("with one log file containing multiple events", async function () {
-			fsp.files = {
+			fs.files = {
 				"1.log": `
 					{
 						"events": [{
@@ -93,7 +93,7 @@ suite("defineStore", function () {
 		});
 
 		test("with two log files", async function () {
-			fsp.files = {
+			fs.files = {
 				"1.log": `
 					{
 						"events": [{

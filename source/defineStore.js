@@ -1,23 +1,22 @@
 const Store = require("./Store");
-const fsp = require("./AwaitableFs");
-// const fsp = require("fs-promise");
+const fs = require("./AwaitableFs");
 
 async function defineStore(folder, options = {}) {
 	async function ensureFolder(folder) {
 		try {
-			await options.fsp.mkdir(folder);
+			await options.fs.mkdir(folder);
 		} catch (err) {
 			if (err.code != 'EEXIST') throw err;
 		}
 	}
 
 	// options = {
-	// 	fsp,
+	// 	fs,
 	// 	metadataCallback: () => {},
 	// 	...options
 	// }
 
-	options.fsp = options.fsp || fsp;
+	options.fs = options.fs || fs;
 	options.metadataCallback = options.metadataCallback || (() => {});
 	await ensureFolder(folder);
 

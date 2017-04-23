@@ -1,4 +1,3 @@
-// const fsp = require("fs-promise");
 const path = require("path");
 
 class Store {
@@ -9,11 +8,13 @@ class Store {
 
 		this.instance = undefined;
 
+		this._createSnapshotData = undefined;
+		this._restoreFromSnapshot = undefined;
 		this._eventhandlers = undefined;
 		this._fallbackEventhandler = undefined;
-		this._snapshothandlers = undefined;
+
 		this._metadataCallback = options.metadataCallback;
-		this._fsp = options.fsp;
+		this._fs = options.fs;
 
 		this._latestLogOrSnapshotNo = undefined;
 		this.eventlog = [];
@@ -34,7 +35,7 @@ class Store {
 	async init() {
 		if (!this.instance) this.instance = this.createModelCallback(this.dispatch.bind(this), this.configureStore.bind(this));
 
-		let files = await this._fsp.readdir(this.folder);
+		let files = await this._fs.readdir(this.folder);
 		let latestSnapshotNo = this.getLatestFileNo(files, `.${this.modelname}-snapshot`);
 		let latestLogNo = this.getLatestFileNo(files, ".log");
 		this._latestLogOrSnapshotNo = Math.max(latestSnapshotNo, latestLogNo)
@@ -45,26 +46,24 @@ class Store {
 		await this.replay(latestSnapshotNo + 1, latestLogNo);
 	}
 
-	configureStore(config){
-		this._snapshothandlers = {
-			createSnapshotData:() => config.createSnapshotData(),
-			restoreFromSnapshot: snapshotContents => config.restoreFromSnapshot(snapshotContents),
-		}
+	configureStore(config) {
+		this._createSnapshotData = () => config.createSnapshotData();
+		this._restoreFromSnapshot = snapshotContents => config.restoreFromSnapshot(snapshotContents);
 
-		this._eventhandlers = config.eventhandlers;
+		this._eventhandlers = config.eventhandlers || {};
 
 		this._fallbackEventhandler = config.fallbackEventhandler || (() => undefined);
 	}
 
 	async restoreSnapshot(snapshotNo) {
-		if (this._snapshothandlers === undefined) throw new Error(`Can't restore snapshot. Missing snapshothandler for "${this.modelname}".`);
+		if (this._restoreFromSnapshot === undefined) throw new Error(`Can't restore snapshot. Missing snapshothandler for "${this.modelname}".`);
 
 		let snapshotfile = path.resolve(this.folder, snapshotNo + `.${this.modelname}-snapshot`);
 		// console.log("Reading snapshot file:", snapshotfile);
 
-		let file = await this._fsp.readFile(snapshotfile);
+		let file = await this._fs.readFile(snapshotfile);
 		let snapshotContents = JSON.parse(file.toString());
-		this._snapshothandlers.restoreFromSnapshot(snapshotContents.snapshot);
+		this._restoreFromSnapshot(snapshotContents.snapshot);
 		// return {metadata: snapshotContents.metadata, customMetadata: snapshotContents.customMetadata}; // would this be usefull to anyone?
 	}
 
@@ -73,40 +72,39 @@ class Store {
 			let logfile = path.resolve(this.folder, logNo + ".log");
 			// console.log("Reading log file:", logfile);
 
-			let file = await this._fsp.readFile(logfile);
+			let file = await this._fs.readFile(logfile);
 			let logfileContents = JSON.parse(file.toString());
-			if(stopReplayPredicates && stopReplayPredicates.BeforeApply && stopReplayPredicates.BeforeApply(file, logfileContents, this.instance)){
+			if (stopReplayPredicates && stopReplayPredicates.BeforeApply && stopReplayPredicates.BeforeApply(file, logfileContents, this.instance)) {
 				break;
 			}
 			let events = logfileContents.events;
-			events.forEach(eventEntry => {
-				this.handleEvent(eventEntry.eventname, eventEntry.event);
+			events.forEach(event => {
+				this.handleEvent(event.eventname, event.eventdata);
 			});
 
-			if(stopReplayPredicates && stopReplayPredicates.AfterApply && stopReplayPredicates.AfterApply(file, logfileContents, this.instance)){
+			if (stopReplayPredicates && stopReplayPredicates.AfterApply && stopReplayPredicates.AfterApply(file, logfileContents, this.instance)) {
 				break;
 			}
 		}
 	}
 
-	handleEvent(eventname, event) {
+	handleEvent(eventname, eventdata) {
 		let eventhandlername = "on" + this.camelToPascalCase(eventname);
-		let eventhandler = this._eventhandlers[eventhandlername] || this._fallbackEventhandler;
+		let eventhandler = this._eventhandlers[eventhandlername];
 
-		// TODO: should a RW model have ALL commandhandlers?
-		// if (!options.requireAllEventsToBeHandled || eventhandler !== undefined) {
-		// 	throw new Error(`Cannot handle event while all events are required to be handled. Can't find "${eventhandlername}" eventhandler. Consider setting options.requireAllEventsToBeHandled = false.`);
-		// }
-
-		eventhandler(event);
+		if (eventhandler) {
+			eventhandler(eventdata);
+		} else {
+			this._fallbackEventhandler(eventname, eventdata);
+		}
 	}
 
-	dispatch(eventname, event) {
+	dispatch(eventname, eventdata) {
 		this.eventlog.push({
 			eventname,
-			event
+			eventdata
 		});
-		this.handleEvent(eventname, event);
+		this.handleEvent(eventname, eventdata);
 	}
 
 	async save() {
@@ -114,7 +112,10 @@ class Store {
 			let metadata = this._metadataCallback();
 
 			let logfile = path.resolve(this.folder, ++this._latestLogOrSnapshotNo + ".log");
-			await this._fsp.appendFile(logfile, JSON.stringify({ metadata, events: this.eventlog}), {
+			await this._fs.appendFile(logfile, JSON.stringify({
+				metadata,
+				events: this.eventlog
+			}), {
 				flag: "wx"
 			});
 
@@ -127,9 +128,13 @@ class Store {
 
 		let metadata = this._metadataCallback();
 
-		let state = { metadata, snapshotMetadata, snapshot: this._snapshothandlers.createSnapshotData() };
+		let state = {
+			metadata,
+			snapshotMetadata,
+			snapshot: this._createSnapshotData()
+		};
 		let snapshotfile = path.resolve(this.folder, this._latestLogOrSnapshotNo + `.${this.modelname}-snapshot`);
-		await this._fsp.appendFile(snapshotfile, JSON.stringify(state), {
+		await this._fs.appendFile(snapshotfile, JSON.stringify(state), {
 			flag: "w"
 		});
 	}
