@@ -22,18 +22,18 @@ function ContactList(dispatch, configureStore){
 	// These are the eventhandlers, that manipulate the data.
 	configureStore({
 		eventhandlers:{
-			onContactAdded(event){
-				if(!contacts[event.contact.name])
+			onContactAdded(eventdata){
+				if(!contacts[eventdata.contact.name])
 				{
-					contacts[event.contact.name] = event.contact;
+					contacts[eventdata.contact.name] = eventdata.contact;
 					return;
 				}
 				throw new Error("Contact already exists");
 			},
-			onContactRemoved(event){
-				if(contacts[event.contactname])
+			onContactRemoved(eventdata){
+				if(contacts[eventdata.contactname])
 				{
-					delete contacts[event.contactname];
+					delete contacts[eventdata.contactname];
 					return;
 				}
 				throw new Error("Contact doesnt exist");			
