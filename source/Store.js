@@ -53,7 +53,7 @@ class Store {
 
 		this._eventhandlers = config.eventhandlers;
 
-		this._eventhandlerFallback = config.fallbackEventhandler || (() => undefined);
+		this._fallbackEventhandler = config.fallbackEventhandler || (() => undefined);
 	}
 
 	async restoreSnapshot(snapshotNo) {
