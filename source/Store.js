@@ -10,6 +10,7 @@ class Store {
 		this.instance = undefined;
 
 		this._eventhandlers = undefined;
+		this._fallbackEventhandler = undefined;
 		this._snapshothandlers = undefined;
 		this._metadataCallback = options.metadataCallback;
 		this._fsp = options.fsp;
@@ -31,7 +32,7 @@ class Store {
 	}
 
 	async init() {
-		if (!this.instance) this.instance = this.createModelCallback(this.dispatch.bind(this), this.registerEventhandlers.bind(this), this.registerSnapshothandlers.bind(this));
+		if (!this.instance) this.instance = this.createModelCallback(this.dispatch.bind(this), this.configureStore.bind(this));
 
 		let files = await this._fsp.readdir(this.folder);
 		let latestSnapshotNo = this.getLatestFileNo(files, `.${this.modelname}-snapshot`);
@@ -44,12 +45,15 @@ class Store {
 		await this.replay(latestSnapshotNo + 1, latestLogNo);
 	}
 
-	registerEventhandlers(newEventhandlers) {
-		this._eventhandlers = newEventhandlers
-	}
+	configureStore(config){
+		this._snapshothandlers = {
+			createSnapshotData:() => config.createSnapshotData(),
+			restoreFromSnapshot: snapshotContents => config.restoreFromSnapshot(snapshotContents),
+		}
 
-	registerSnapshothandlers(newSnapshothandlers) {
-		this._snapshothandlers = newSnapshothandlers
+		this._eventhandlers = config.eventhandlers;
+
+		this._eventhandlerFallback = config.fallbackEventhandler || (() => undefined);
 	}
 
 	async restoreSnapshot(snapshotNo) {
@@ -87,14 +91,14 @@ class Store {
 
 	handleEvent(eventname, event) {
 		let eventhandlername = "on" + this.camelToPascalCase(eventname);
-		let eventhandler = this._eventhandlers[eventhandlername];
+		let eventhandler = this._eventhandlers[eventhandlername] || this._fallbackEventhandler;
 
 		// TODO: should a RW model have ALL commandhandlers?
 		// if (!options.requireAllEventsToBeHandled || eventhandler !== undefined) {
 		// 	throw new Error(`Cannot handle event while all events are required to be handled. Can't find "${eventhandlername}" eventhandler. Consider setting options.requireAllEventsToBeHandled = false.`);
 		// }
 
-		eventhandler && eventhandler(event);
+		eventhandler(event);
 	}
 
 	dispatch(eventname, event) {

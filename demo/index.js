@@ -1,4 +1,3 @@
-// const assert = require("assert");
 const path = require("path");
 const defineStore = require("../source/defineStore.js");
 const MemberList = require("./memberList");
@@ -12,13 +11,13 @@ const folder = path.resolve(__dirname, "../temp");
 
 	let store = await defineStore(folder);
 
-	const createMembersModelCallback = (dispatch, reh, rsh) => new MemberList(dispatch, reh, rsh);
+	const createMembersModelCallback = (dispatch, configureStore) => new MemberList(dispatch, configureStore);
 	let currentMembers = store.defineReadWriteModel("members", createMembersModelCallback);
 
-	const createHistoricalMembersModelCallback = (dispatch, reh, rsh) => new AllHistoricalMemberList(dispatch, reh, rsh);
+	const createHistoricalMembersModelCallback = (dispatch, configureStore) => new AllHistoricalMemberList(dispatch, configureStore);
 	let allHistoricalMembers = store.defineReadModel("historical", createHistoricalMembersModelCallback);
 
-	const createResidensHistoryForMembersModelCallback = (dispatch, reh, rsh) => new ResidensHistoryForMembers(dispatch, reh, rsh);
+	const createResidensHistoryForMembersModelCallback = (dispatch, configureStore) => new ResidensHistoryForMembers(dispatch, configureStore);
 	let residensHistoryForMembers = store.defineReadModel("residens-history", createResidensHistoryForMembersModelCallback);
 
 

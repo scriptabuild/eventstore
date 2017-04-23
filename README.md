@@ -15,27 +15,29 @@ Example of an object to be stored with this eventstore:
 
 ```javascript
 // contactlist.js
-function ContactList(dispatch, registerEventhandlers){
+function ContactList(dispatch, configureStore){
 
 	let contacts = {};  // This is where the actual data is stored
 
 	// These are the eventhandlers, that manipulate the data.
-	registerEventhandlers({
-		onContactAdded(event){
-			if(!contacts[event.contact.name])
-			{
-				contacts[event.contact.name] = event.contact;
-				return;
+	configureStore({
+		eventhandlers:{
+			onContactAdded(event){
+				if(!contacts[event.contact.name])
+				{
+					contacts[event.contact.name] = event.contact;
+					return;
+				}
+				throw new Error("Contact already exists");
+			},
+			onContactRemoved(event){
+				if(contacts[event.contactname])
+				{
+					delete contacts[event.contactname];
+					return;
+				}
+				throw new Error("Contact doesnt exist");			
 			}
-			throw new Error("Contact already exists");
-		},
-		onContactRemoved(event){
-			if(contacts[event.contactname])
-			{
-				delete contacts[event.contactname];
-				return;
-			}
-			throw new Error("Contact doesnt exist");			
 		}
 	});
 
@@ -64,7 +66,7 @@ const Contactlist = require("./ContactList");
 
 (async funtion(){
 	const folder = "path/to/store";
-	const createContactlistFn = (dispatch, reh, rsh) => new Contactlist(dispatch, reh);
+	const createContactlistFn = (dispatch, configureStore) => new Contactlist(dispatch, configureStore);
 	let store = await defineStore(folder);
 	let rw = store.defineReadWriteModel("rw", createContactlistFn);
 
