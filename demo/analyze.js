@@ -14,10 +14,11 @@ const folder = path.resolve(__dirname, "../temp");
 
 
 
-	await analyzerModel.snapshot();
+	// await analyzerModel.snapshot();
 	await analyzerModel.withReadModel((model) => {
-		model.listEventtypes().forEach(eventtype => console.log(`${eventtype.name} - ${JSON.stringify(eventtype)}`));		
+		// model.listEventTypes().forEach(eventtype => console.log(`${eventtype.name} - ${JSON.stringify(eventtype)}`));		
 
+		console.log("***", model.listEventTypes());
 	});
 
 

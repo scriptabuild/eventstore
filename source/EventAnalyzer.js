@@ -16,9 +16,8 @@ function EventAnalyzer(dispatch, configureStore){
 		// 	params: ["name", "address", ]
 		// }]
 	};
-
-
-	let storeConfig = {
+ 
+	configureStore({
 		createSnapshotData(){
 			return eventTypes;
 		},
@@ -28,22 +27,24 @@ function EventAnalyzer(dispatch, configureStore){
 		eventhandlers:{
 			// No pre-known eventhandlers, since we're analyzing a log of unknown events.
 		},
-		fallbackEventHandler(eventname, eventdata){
+		fallbackEventhandler(eventname, eventdata){
 			if(!eventTypes[eventname]){
 				eventTypes[eventname] = {};
 			}
 
+			// TODO:
+			// 1. create structure description object (names and types, incl describing contents of arrays and objects)
+			//    - add version info if any
+			// 2. compare stored with new. If different -> add new (include firstdate)
 			eventTypes[eventname].params = {};
-			// TODO: get structure incl dept and type
 
 		},
-	}
-	configureStore(storeConfig);
+	});
 
 
 
 	this.listEventTypes = function(){
-		return this.eventTypes
+		return eventTypes
 	}
 }
 
