@@ -1,6 +1,6 @@
 const path = require("path");
 const defineStore = require("../source/defineStore.js");
-const EventAnalyzer = require("../source/eventAnalyzer");
+const LogSchemaTool = require("../source/LogSchemaTool");
 
 const folder = path.resolve(__dirname, "../temp");
 // TODO: remove folder before running tests
@@ -9,19 +9,23 @@ const folder = path.resolve(__dirname, "../temp");
 
 	let store = await defineStore(folder);
 
-	const createEventAnalyzerCallback = (dispatch, reh, rsh) => new EventAnalyzer(dispatch, reh, rsh);
-	let analyzerModel = store.defineReadModel("analyzer", createEventAnalyzerCallback);
+	const createLogSchemaToolCallback = (dispatch, reh, rsh) => new LogSchemaTool(dispatch, reh, rsh);
+	let logSchemaTool = store.defineReadModel("log-schema", createLogSchemaToolCallback);
 
 
 
-	// await analyzerModel.snapshot();
-	await analyzerModel.withReadModel((model) => {
+	await logSchemaTool.snapshot();
+	await logSchemaTool.withReadModel((model) => {
+
 		let eventTypes = model.listEventTypes();
-		Object.keys(eventTypes)
-			.map(eventname => ({name: eventname, count: eventTypes[eventname].count, description: eventTypes[eventname].description}))
-			.forEach(eventType => {
-				console.log(`${eventType.name} - ${eventType.count} event(s) - ${JSON.stringify(eventType.description)}`);
+		Object.entries(eventTypes)
+			.forEach(([eventname, versions]) => {
+				console.log(`${eventname}`);
+				versions.forEach(version => {
+					console.log(`    ${version.count} events like ${JSON.stringify(version.description)}`);
+				});
 			});
+
 	});
 
 
