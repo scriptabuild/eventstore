@@ -7,7 +7,7 @@
 //
 
 // TODO: registerFallbackEventhandler
-function EventAnalyzer(dispatch, configureStore){
+function EventAnalyzer(dispatch, configureStore) {
 	let eventTypes = {
 		// "<eventname>": [{
 		// 	"<firstdate>": "...",
@@ -16,34 +16,43 @@ function EventAnalyzer(dispatch, configureStore){
 		// 	params: ["name", "address", ]
 		// }]
 	};
- 
+
 	configureStore({
-		createSnapshotData(){
+		createSnapshotData() {
 			return eventTypes;
 		},
-		restoreFromSnapshot(snapshotContents){
+		restoreFromSnapshot(snapshotContents) {
 			eventTypes = snapshotContents;
 		},
-		eventhandlers:{
+		eventhandlers: {
 			// No pre-known eventhandlers, since we're analyzing a log of unknown events.
 		},
-		fallbackEventhandler(eventname, eventdata){
-			if(!eventTypes[eventname]){
-				eventTypes[eventname] = {};
+		fallbackEventhandler(eventname, eventdata) {
+			if (!eventTypes[eventname]) {
+				eventTypes[eventname] = {
+					count: 0
+				};
 			}
 
 			// TODO:
 			// 1. create structure description object (names and types, incl describing contents of arrays and objects)
 			//    - add version info if any
 			// 2. compare stored with new. If different -> add new (include firstdate)
-			eventTypes[eventname].params = {};
-
-		},
+			eventTypes[eventname].description = describe(eventdata);
+			eventTypes[eventname].count++;
+		}
 	});
 
+	function describe(obj) {
+		let description = {};
+		Object.keys(obj).forEach(prop => {
+			description[prop] = typeof obj[prop] === "object" ? describe(obj[prop]) : typeof obj[prop];
+		});
+		return description;
+	}
 
 
-	this.listEventTypes = function(){
+	this.listEventTypes = function () {
 		return eventTypes
 	}
 }
