@@ -17,9 +17,11 @@ const folder = path.resolve(__dirname, "../temp");
 	// await analyzerModel.snapshot();
 	await analyzerModel.withReadModel((model) => {
 		let eventTypes = model.listEventTypes();
-		Object.keys(eventTypes).map(eventType => ({name: eventType, count: eventTypes[eventType].count, description: eventTypes[eventType].description})).forEach(eventType => {
-			console.log(`${eventType.name} - ${eventType.count} event(s) - ${JSON.stringify(eventType.description)}`);
-		});
+		Object.keys(eventTypes)
+			.map(eventname => ({name: eventname, count: eventTypes[eventname].count, description: eventTypes[eventname].description}))
+			.forEach(eventType => {
+				console.log(`${eventType.name} - ${eventType.count} event(s) - ${JSON.stringify(eventType.description)}`);
+			});
 	});
 
 
