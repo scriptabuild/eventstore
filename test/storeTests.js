@@ -1,6 +1,6 @@
 const {	suite, test } = require("mocha");
 const assert = require("assert");
-const FakeFsp = require("./FakeFsp");
+const FakeFs = require("./FakeFs");
 
 const Store = require("../source/Store");
 
