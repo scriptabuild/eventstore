@@ -38,12 +38,22 @@ class Store {
 		let files = await this._fs.readdir(this.folder);
 		let latestSnapshotNo = this.getLatestFileNo(files, `.${this.modelname}-snapshot`);
 		let latestLogNo = this.getLatestFileNo(files, ".log");
+		let startFromNo = (this._latestLogOrSnapshotNo || 0) + 1;
 		this._latestLogOrSnapshotNo = Math.max(latestSnapshotNo, latestLogNo)
 
-		if (latestSnapshotNo) {
+		if (latestSnapshotNo > startFromNo) {
 			await this.restoreSnapshot(latestSnapshotNo);
+			await this.replay(latestSnapshotNo + 1, latestLogNo);
+		} else {
+			await this.replay(startFromNo, latestLogNo);
 		}
-		await this.replay(latestSnapshotNo + 1, latestLogNo);
+
+
+
+		// if (latestSnapshotNo) {
+		// 	await this.restoreSnapshot(latestSnapshotNo);
+		// }
+		// await this.replay(latestSnapshotNo + 1, latestLogNo);
 	}
 
 	configureStore(config) {
@@ -124,7 +134,8 @@ class Store {
 	}
 
 	async snapshot(snapshotMetadata) {
-		if (!this.instance) await this.init();
+		// if (!this.instance)
+		await this.init();
 
 		let metadata = this._metadataCallback();
 

@@ -57,7 +57,9 @@ const folder = path.resolve(__dirname, "../temp");
 
 
 	await currentMembers.withReadWriteModel((memberModel, readyToCommit) => {
-		memberModel.correctAddress( "Kim Jamesson", { street: "Trondheimsveien 435" });
+		memberModel.correctAddress("Kim Jamesson", {
+			street: "Trondheimsveien 435"
+		});
 		readyToCommit();
 	});
 
@@ -71,16 +73,15 @@ const folder = path.resolve(__dirname, "../temp");
 
 
 	await currentMembers.withReadWriteModel((memberModel, readyToCommit) => {
-		memberModel.memberHasMoved("Kim Jamesson", { street: "Bærumsveien 301" });
+		memberModel.memberHasMoved("Kim Jamesson", {
+			street: "Bærumsveien 301"
+		});
 		readyToCommit();
 	});
 
 
 
 	await currentMembers.snapshot();
-
-
-
 	await currentMembers.withReadWriteModel((membersModel, readyToCommit) => {
 		membersModel.registerNewMember({
 			name: "Pernille Bråthen",
@@ -109,25 +110,45 @@ const folder = path.resolve(__dirname, "../temp");
 	});
 
 	console.log("---");
-	
+
 	await allHistoricalMembers.snapshot();
 	await allHistoricalMembers.withReadModel((historicalModel) => {
-		historicalModel.listMembers().forEach(contact => console.log(`${contact.name} - ${contact.isMember}`));		
+		historicalModel.listMembers().forEach(contact => console.log(`${contact.name} - ${contact.isMember}`));
 	});
 
 	console.log("---");
 
 	await residensHistoryForMembers.snapshot();
 	await residensHistoryForMembers.withReadModel((residensModel) => {
-		residensModel.listMembers().forEach(contact => console.log(`${contact.name} - ${JSON.stringify(contact.residenses)}`));		
-
+		residensModel.listMembers().forEach(contact => console.log(`${contact.name} - ${JSON.stringify(contact.residenses)}`));
 	});
 
 
+	console.log("--- Test total 100K extra events in 1K snapshots of 100 events each ---")
 
+	console.log("*** before 1-1000 loop", new Date().toISOString());
+	for (let j = 0; j < 10000; j++) {
+		await currentMembers.withReadWriteModel((membersModel, readyToCommit) => {
+			for (let i = 0; i < 10; i++) {
+				membersModel.registerNewMember({
+					name: `Test${i} Testesen${j}`,
+					address: {
+						street: "Kirkeveien 271"
+					},
+					membershipLevel: "gold"
+				});
+			}
+			readyToCommit();
+		});
+	}
+	console.log("*** after 1-1000 loop", new Date().toISOString());
 
-
-
+	await residensHistoryForMembers.snapshot();
+	console.log("*** after snapshot of readmodel", new Date().toISOString());
+	await residensHistoryForMembers.withReadModel((residensModel) => {
+		console.log("Number of rows", residensModel.listMembers().length);
+	});
+	console.log("*** after read model", new Date().toISOString());
 
 	// TODO: create same stores twice to test concurrency
 	// TODO: create another store to test replaying of logs

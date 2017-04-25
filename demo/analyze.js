@@ -14,7 +14,7 @@ const folder = path.resolve(__dirname, "../temp");
 
 
 
-	await logSchemaTool.snapshot();
+	// await logSchemaTool.snapshot();
 	await logSchemaTool.withReadModel((model) => {
 
 		let eventTypes = model.listEventTypes();
