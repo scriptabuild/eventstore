@@ -1,6 +1,6 @@
 const {	suite, setup, test } = require("mocha");
 const assert = require("assert");
-const FakeFsp = require("./FakeFsp");
+const FakeFs = require("./FakeFs");
 
 const defineStore = require("../source/defineStore");
 
@@ -11,7 +11,7 @@ suite("defineStore", function () {
 	let store;
 
 	setup(async function () {
-		fs = new FakeFsp();
+		fs = new FakeFs();
 
 		store = await defineStore("not-a-folder", {fs});
 	});

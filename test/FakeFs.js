@@ -2,7 +2,7 @@ const path = require("path");
 const valueAsPromise = value => new Promise(resolve => resolve(value));
 const rejection = err => new Promise((resolve, reject) => reject(err));
 
-class FakeFsp {
+class FakeFs {
 	constructor(files = {}){
 		this.files = files;
 	}
@@ -31,4 +31,4 @@ class FakeFsp {
 	}
 }
 
-module.exports = FakeFsp;
+module.exports = FakeFs;

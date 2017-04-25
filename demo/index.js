@@ -124,9 +124,9 @@ const folder = path.resolve(__dirname, "../temp");
 	});
 
 
-	console.log("--- Test total 100K extra events in 1K snapshots of 100 events each ---")
+	console.log("--- Test total 100K extra events in 10K snapshots of 10 events each ---")
 
-	console.log("*** before 1-1000 loop", new Date().toISOString());
+	console.log("*** before loop", new Date().toISOString());
 	for (let j = 0; j < 10000; j++) {
 		await currentMembers.withReadWriteModel((membersModel, readyToCommit) => {
 			for (let i = 0; i < 10; i++) {
@@ -141,7 +141,7 @@ const folder = path.resolve(__dirname, "../temp");
 			readyToCommit();
 		});
 	}
-	console.log("*** after 1-1000 loop", new Date().toISOString());
+	console.log("*** after loop", new Date().toISOString());
 
 	await residensHistoryForMembers.snapshot();
 	console.log("*** after snapshot of readmodel", new Date().toISOString());
