@@ -131,7 +131,7 @@ const log = console.log;
 	});
 
 
-	console.log("--- Test total 100K extra events in 10K snapshots of 10 events each ---")
+	console.log("--- Test total 100K extra events in 10K snapshots of 15 events each ---")
 
 	let stopwatch = Stopwatch.start();
 	console.log("*** before loop", stopwatch.elapsed());
@@ -146,6 +146,9 @@ const log = console.log;
 					membershipLevel: "gold"
 				});
 			}
+			for (let i = 3; i < 8; i++) {			
+				membersModel.endMembership(`Test${i} Testesen${j}`)
+			}
 			readyToCommit();
 		});
 	}
@@ -153,7 +156,7 @@ const log = console.log;
 	console.log("*** after loop", stopwatch.elapsed(true));
 
 	await residensHistoryForMembers.snapshot();
-	console.log("*** after snapshot of readmodel", stopwatch.elapsed());
+	console.log("*** after snapshot of readmodel", stopwatch.elapsed(true));
 	await residensHistoryForMembers.withReadModel((residensModel) => {
 		console.log("Number of rows", residensModel.listMembers().length);
 	});
