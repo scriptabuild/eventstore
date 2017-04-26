@@ -11,7 +11,7 @@ async function defineStore(folder, options = {}) {
 	}
 
 	options.fs = options.fs || fs;
-	options.console = options.console || (() => {});
+	options.console = options.console || {log(){}};
 	options.metadataCallback = options.metadataCallback || (() => {});
 	await ensureFolder(folder);
 

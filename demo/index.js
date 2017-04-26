@@ -1,17 +1,20 @@
 const fs = require("fs");
 const path = require("path");
 const defineStore = require("../source/defineStore.js");
-const awaitable = require("./source/awaitable");
+const awaitable = require("../source/awaitable");
 const Stopwatch = require("../source/stopwatch");
 const MemberList = require("./memberList");
 const AllHistoricalMemberList = require("./allHistoricalMemberList");
 const ResidensHistoryForMembers = require("./residensHistoryForMembers")
 
+const log = console.log;
 (async function () {
 	const folder = path.resolve(__dirname, "../temp");
-	
-	await awaitable(cb => fs.rmdir(folder, cb));
-	// TODO: remove folder before running this demo code
+
+	// Delete all logs and snapshots
+	(await awaitable(cb => fs.readdir(folder, cb))).forEach( async(filename) => {
+		await awaitable(cb => fs.unlink(path.resolve(folder, filename), cb));
+	});
 
 	let store = await defineStore(folder);
 
@@ -107,7 +110,7 @@ const ResidensHistoryForMembers = require("./residensHistoryForMembers")
 
 
 	await currentMembers.withReadWriteModel((membersModel, readyToCommit) => {
-		membersModel.listMembers().forEach(contact => console.log(contact.name));
+		membersModel.listMembers().forEach(contact => log(contact.name));
 
 		let ok = false;
 		if (ok) readyToCommit();
@@ -117,14 +120,14 @@ const ResidensHistoryForMembers = require("./residensHistoryForMembers")
 
 	await allHistoricalMembers.snapshot();
 	await allHistoricalMembers.withReadModel((historicalModel) => {
-		historicalModel.listMembers().forEach(contact => console.log(`${contact.name} - ${contact.isMember}`));
+		historicalModel.listMembers().forEach(contact => log(`${contact.name} - ${contact.isMember}`));
 	});
 
 	console.log("---");
 
 	await residensHistoryForMembers.snapshot();
 	await residensHistoryForMembers.withReadModel((residensModel) => {
-		residensModel.listMembers().forEach(contact => console.log(`${contact.name} - ${JSON.stringify(contact.residenses)}`));
+		residensModel.listMembers().forEach(contact => log(`${contact.name} - ${JSON.stringify(contact.residenses)}`));
 	});
 
 
