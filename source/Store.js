@@ -78,12 +78,14 @@ class Store {
 
 			let file = await this._fs.readFile(logfile);
 			let logfileContents = JSON.parse(file.toString());
+			
 			if (stopReplayPredicates && stopReplayPredicates.BeforeApply && stopReplayPredicates.BeforeApply(file, logfileContents, this.instance)) {
 				break;
 			}
+
 			let events = logfileContents.events;
 			events.forEach(event => {
-				this.handleEvent(event.eventname, event.eventdata);
+				this.handleEvent(event.eventname, event.eventdata, logfileContents.metadata);
 			});
 
 			if (stopReplayPredicates && stopReplayPredicates.AfterApply && stopReplayPredicates.AfterApply(file, logfileContents, this.instance)) {
@@ -92,14 +94,14 @@ class Store {
 		}
 	}
 
-	handleEvent(eventname, eventdata) {
+	handleEvent(eventname, eventdata, metadata) {
 		let eventhandlername = "on" + this.camelToPascalCase(eventname);
 		let eventhandler = this._eventhandlers[eventhandlername];
 
 		if (eventhandler) {
-			eventhandler(eventdata);
+			eventhandler(eventdata, metadata);
 		} else {
-			this._fallbackEventhandler(eventname, eventdata);
+			this._fallbackEventhandler(eventname, eventdata, metadata);
 		}
 	}
 

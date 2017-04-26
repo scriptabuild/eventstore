@@ -1,8 +1,8 @@
 function MemberList(dispatch, configureStore) {
 
 	let members = {};
-	let log = console.log;
-	// let log = () => {};
+	// let log = console.log;
+	let log = () => {};
 
 	configureStore({
 		createSnapshotData() {
