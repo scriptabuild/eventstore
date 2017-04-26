@@ -4,6 +4,7 @@ const MemberList = require("./memberList");
 const AllHistoricalMemberList = require("./allHistoricalMemberList");
 const ResidensHistoryForMembers = require("./residensHistoryForMembers")
 
+const Stopwatch = require("../source/stopwatch");
 const folder = path.resolve(__dirname, "../temp");
 // TODO: remove folder before running tests
 
@@ -126,7 +127,8 @@ const folder = path.resolve(__dirname, "../temp");
 
 	console.log("--- Test total 100K extra events in 10K snapshots of 10 events each ---")
 
-	console.log("*** before loop", new Date().toISOString());
+	let stopwatch = Stopwatch.start();
+	console.log("*** before loop", stopwatch.elapsed());
 	for (let j = 0; j < 10000; j++) {
 		await currentMembers.withReadWriteModel((membersModel, readyToCommit) => {
 			for (let i = 0; i < 10; i++) {
@@ -141,14 +143,15 @@ const folder = path.resolve(__dirname, "../temp");
 			readyToCommit();
 		});
 	}
-	console.log("*** after loop", new Date().toISOString());
+
+	console.log("*** after loop", stopwatch.elapsed());
 
 	await residensHistoryForMembers.snapshot();
-	console.log("*** after snapshot of readmodel", new Date().toISOString());
+	console.log("*** after snapshot of readmodel", stopwatch.elapsed());
 	await residensHistoryForMembers.withReadModel((residensModel) => {
 		console.log("Number of rows", residensModel.listMembers().length);
 	});
-	console.log("*** after read model", new Date().toISOString());
+	console.log("*** after read model", stopwatch.elapsed());
 
 	// TODO: create same stores twice to test concurrency
 	// TODO: create another store to test replaying of logs
