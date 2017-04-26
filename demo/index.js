@@ -1,14 +1,17 @@
+const fs = require("fs");
 const path = require("path");
 const defineStore = require("../source/defineStore.js");
+const awaitable = require("./source/awaitable");
+const Stopwatch = require("../source/stopwatch");
 const MemberList = require("./memberList");
 const AllHistoricalMemberList = require("./allHistoricalMemberList");
 const ResidensHistoryForMembers = require("./residensHistoryForMembers")
 
-const Stopwatch = require("../source/stopwatch");
-const folder = path.resolve(__dirname, "../temp");
-// TODO: remove folder before running tests
-
 (async function () {
+	const folder = path.resolve(__dirname, "../temp");
+	
+	await awaitable(cb => fs.rmdir(folder, cb));
+	// TODO: remove folder before running this demo code
 
 	let store = await defineStore(folder);
 
@@ -144,14 +147,14 @@ const folder = path.resolve(__dirname, "../temp");
 		});
 	}
 
-	console.log("*** after loop", stopwatch.elapsed());
+	console.log("*** after loop", stopwatch.elapsed(true));
 
 	await residensHistoryForMembers.snapshot();
 	console.log("*** after snapshot of readmodel", stopwatch.elapsed());
 	await residensHistoryForMembers.withReadModel((residensModel) => {
 		console.log("Number of rows", residensModel.listMembers().length);
 	});
-	console.log("*** after read model", stopwatch.elapsed());
+	console.log("*** after read model", stopwatch.elapsed(true));
 
 	// TODO: create same stores twice to test concurrency
 	// TODO: create another store to test replaying of logs

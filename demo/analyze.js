@@ -9,7 +9,7 @@ const folder = path.resolve(__dirname, "../temp");
 
 	let store = await defineStore(folder);
 
-	const createLogSchemaToolCallback = (dispatch, reh, rsh) => new LogSchemaTool(dispatch, reh, rsh);
+	const createLogSchemaToolCallback = (dispatch, configureStore) => new LogSchemaTool(dispatch, configureStore);
 	let logSchemaTool = store.defineReadModel("log-schema", createLogSchemaToolCallback);
 
 

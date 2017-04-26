@@ -15,6 +15,7 @@ class Store {
 
 		this._metadataCallback = options.metadataCallback;
 		this._fs = options.fs;
+		this._console = options.console;
 
 		this._latestLogOrSnapshotNo = undefined;
 		this.eventlog = [];
@@ -47,13 +48,6 @@ class Store {
 		} else {
 			await this.replay(startFromNo, latestLogNo);
 		}
-
-
-
-		// if (latestSnapshotNo) {
-		// 	await this.restoreSnapshot(latestSnapshotNo);
-		// }
-		// await this.replay(latestSnapshotNo + 1, latestLogNo);
 	}
 
 	configureStore(config) {
@@ -69,7 +63,7 @@ class Store {
 		if (this._restoreFromSnapshot === undefined) throw new Error(`Can't restore snapshot. Missing snapshothandler for "${this.modelname}".`);
 
 		let snapshotfile = path.resolve(this.folder, snapshotNo + `.${this.modelname}-snapshot`);
-		// console.log("Reading snapshot file:", snapshotfile);
+		this._console.log("Reading snapshot file:", snapshotfile);
 
 		let file = await this._fs.readFile(snapshotfile);
 		let snapshotContents = JSON.parse(file.toString());
@@ -80,7 +74,7 @@ class Store {
 	async replay(fromLogNo, toLogNo, stopReplayPredicates) {
 		for (let logNo = fromLogNo; logNo <= toLogNo; logNo++) {
 			let logfile = path.resolve(this.folder, logNo + ".log");
-			// console.log("Reading log file:", logfile);
+			this._console.log("Reading log file:", logfile);
 
 			let file = await this._fs.readFile(logfile);
 			let logfileContents = JSON.parse(file.toString());

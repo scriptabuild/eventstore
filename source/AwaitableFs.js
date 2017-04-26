@@ -1,3 +1,9 @@
+//
+// AwaitableFs wraps a subset of nodejs fs library into functions that
+// return a promise (ie. can be await'ed)
+//
+
+
 const fs = require("fs");
 const awaitable = require("./awaitable");
 

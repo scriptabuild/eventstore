@@ -1,5 +1,6 @@
 //
-// Model for replaying event to find what event types/names/params/payloads in a log
+// Tool to determine the logged events schema
+// This tool is made like a readOnlyModel for replaying event to find what event types/names/params/payloads in a log
 // Should record version info
 // - first (and last?) occurrence date
 // - when params/payload change shape
