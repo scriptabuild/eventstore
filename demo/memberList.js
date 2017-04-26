@@ -1,6 +1,8 @@
 function MemberList(dispatch, configureStore) {
 
 	let members = {};
+	let log = console.log;
+	// let log = () => {};
 
 	configureStore({
 		createSnapshotData() {
@@ -45,14 +47,14 @@ function MemberList(dispatch, configureStore) {
 		dispatch("newMemberRegistered", {
 			member
 		});
-		// console.log("MAIL -> welcome to new member");
+		log("MAIL -> welcome to new member");
 	}
 
 	this.endMembership = function (name) {
 		dispatch("membershipEnded", {
 			name
 		});
-		console.log("MAIL -> goodbye to member");
+		log("MAIL -> goodbye to member");
 	}
 
 	this.correctAddress = function (name, address) {
