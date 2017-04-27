@@ -3,11 +3,10 @@
 // return a promise (ie. can be await'ed)
 //
 
-
 const fs = require("fs");
 const awaitable = require("./awaitable");
 
-let AwaitableFs = {
+const AwaitableFs = {
 	async mkdir(path, mode = 0o777){
 		return awaitable(cb => fs.mkdir(path, mode, cb));
 	},

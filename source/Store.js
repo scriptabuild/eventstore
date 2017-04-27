@@ -2,7 +2,7 @@ const path = require("path");
 const camelToPascalCase = require("./camelToPascalCase");
 
 
-class Store {
+module.exports = class Store {
 	constructor(folder, modelname, createModelCallback, options) {
 		this.folder = folder;
 		this.modelname = modelname;
@@ -66,7 +66,6 @@ class Store {
 		let file = await this._fs.readFile(snapshotfile);
 		let snapshotContents = JSON.parse(file.toString());
 		this._restoreFromSnapshot(snapshotContents.snapshot);
-		// return {metadata: snapshotContents.metadata, customMetadata: snapshotContents.customMetadata}; // would this be usefull to anyone?
 	}
 
 	async replay(fromLogNo, toLogNo, stopReplayPredicates) {
@@ -144,5 +143,3 @@ class Store {
 		});
 	}
 }
-
-module.exports = Store;

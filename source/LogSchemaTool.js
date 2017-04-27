@@ -22,38 +22,18 @@ function LogSchemaTool(dispatch, configureStore) {
 		},
 		fallbackEventhandler(eventname, eventdata, metadata) {
 			if (!eventTypes[eventname]) {
-				eventTypes[eventname] = {};	// versions: {description: {...}, count: 1}
+				eventTypes[eventname] = {};
 			}
 
 			let description = describe(eventdata);
 
-			// let ix = eventTypes[eventname]
-			// 	.map(version => JSON.stringify(version.description))
-			// 	.indexOf(JSON.stringify(description));
-
 			let key = JSON.stringify(description);
-			let d = eventTypes[eventname][key];
-			if(!d){
+			let version = eventTypes[eventname][key];
+			if(!version){
 				eventTypes[eventname][key] = {count: 1, metadata, description};
 			} else {
-				d.count++;
+				version.count++;
 			}
-
-			// if (!eventTypes[eventname]) {
-			// 	eventTypes[eventname] = [];	// versions: {description: {...}, count: 1}
-			// }
-
-			// let description = describe(eventdata);
-
-			// let ix = eventTypes[eventname]
-			// 	.map(version => JSON.stringify(version.description))
-			// 	.indexOf(JSON.stringify(description));
-
-			// if(ix === -1){
-			// 	eventTypes[eventname].push({count: 1, description});
-			// } else {
-			// 	eventTypes[eventname][ix].count++;
-			// }
 		}
 	});
 
@@ -69,8 +49,8 @@ function LogSchemaTool(dispatch, configureStore) {
 	}
 
 
-	this.getLogSchema = function () {
 
+	this.getLogSchema = function () {
 		return Object.entries(eventTypes)
 			.map(([eventname, versions]) => ({
 				eventname,
@@ -80,7 +60,6 @@ function LogSchemaTool(dispatch, configureStore) {
 					metadata: version.metadata
 				}))
 			}));
-
 	}
 }
 
