@@ -19,15 +19,22 @@ const folder = path.resolve(__dirname, "../temp");
 	await logSchemaTool.withReadModel((model) => {
 		console.log(`Log Schema built in ${stopwatch.elapsed()} milliseconds`);
 
-		let eventTypes = model.listEventTypes();
-		Object.entries(eventTypes)
-			.forEach(([eventname, versions]) => {
-				console.log(`${eventname}`);
-				versions.forEach(version => {
-					console.log(`    ${version.count} events like ${JSON.stringify(version.description)}`);
-				});
-			});
+		// let eventTypes = model.getLogSchema();
+		// Object.entries(eventTypes)
+		// 	.forEach(([eventname, versions]) => {
+		// 		console.log(`${eventname}`);
+		// 		Object.keys(versions).map(version => versions[version]).forEach(version => {
+		// 			console.log(`    ${version.count} ${version.count == 1 ? "instance" : "instances"} of ${JSON.stringify(version.description)} (First occurrence ${version.metadata.version || version.metadata.time || JSON.stringify(version.metadata.time)})`);
+		// 		});
+		// 	});
 
+		model.getLogSchema().forEach(eventTypeInformation => {
+			console.log(eventTypeInformation.eventname);
+			eventTypeInformation.versions.forEach(version => {
+				let firstOccurrenceDescription = version.metadata.schemaVersion || version.metadata.version || version.metadata.time || JSON.stringify(version.metadata);
+				console.log(`   ${version.count} ${version.count == 1 ? "instance" : "instances"} of ${JSON.stringify(version.description)} since ${firstOccurrenceDescription}`);
+			});
+		})
 	});
 
 

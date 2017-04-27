@@ -20,22 +20,40 @@ function LogSchemaTool(dispatch, configureStore) {
 		eventhandlers: {
 			// No pre-known eventhandlers, since we're analyzing a log of unknown events.
 		},
-		fallbackEventhandler(eventname, eventdata) {
+		fallbackEventhandler(eventname, eventdata, metadata) {
 			if (!eventTypes[eventname]) {
-				eventTypes[eventname] = [];	// versions: {description: {...}, count: 1}
+				eventTypes[eventname] = {};	// versions: {description: {...}, count: 1}
 			}
 
 			let description = describe(eventdata);
 
-			let ix = eventTypes[eventname]
-				.map(version => JSON.stringify(version.description))
-				.indexOf(JSON.stringify(description));
+			// let ix = eventTypes[eventname]
+			// 	.map(version => JSON.stringify(version.description))
+			// 	.indexOf(JSON.stringify(description));
 
-			if(ix === -1){
-				eventTypes[eventname].push({count: 1, description});
+			let key = JSON.stringify(description);
+			let d = eventTypes[eventname][key];
+			if(!d){
+				eventTypes[eventname][key] = {count: 1, metadata, description};
 			} else {
-				eventTypes[eventname][ix].count++;				
+				d.count++;
 			}
+
+			// if (!eventTypes[eventname]) {
+			// 	eventTypes[eventname] = [];	// versions: {description: {...}, count: 1}
+			// }
+
+			// let description = describe(eventdata);
+
+			// let ix = eventTypes[eventname]
+			// 	.map(version => JSON.stringify(version.description))
+			// 	.indexOf(JSON.stringify(description));
+
+			// if(ix === -1){
+			// 	eventTypes[eventname].push({count: 1, description});
+			// } else {
+			// 	eventTypes[eventname][ix].count++;
+			// }
 		}
 	});
 
@@ -51,8 +69,18 @@ function LogSchemaTool(dispatch, configureStore) {
 	}
 
 
-	this.listEventTypes = function () {
-		return eventTypes
+	this.getLogSchema = function () {
+
+		return Object.entries(eventTypes)
+			.map(([eventname, versions]) => ({
+				eventname,
+				versions: Object.keys(versions).map(version => versions[version]).map(version => ({
+					count: version.count,
+					description: version.description,
+					metadata: version.metadata
+				}))
+			}));
+
 	}
 }
 
