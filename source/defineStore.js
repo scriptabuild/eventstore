@@ -12,7 +12,7 @@ async function defineStore(folder, options = {}) {
 
 	options.fs = options.fs || fs;
 	options.console = options.console || {log(){}};
-	options.metadataCallback = options.metadataCallback || (() => {});
+	options.metadataCallback = options.metadataCallback || (() => ({time: new Date().toISOString()}));
 	await ensureFolder(folder);
 
 	return {
