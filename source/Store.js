@@ -1,4 +1,6 @@
 const path = require("path");
+const camelToPascalCase = require("./camelToPascalCase");
+
 
 class Store {
 	constructor(folder, modelname, createModelCallback, options) {
@@ -27,10 +29,6 @@ class Store {
 			.filter(fi => fi.ext == ext && !isNaN(fi.name))
 			.map(fi => parseInt(fi.name, 10))
 			.reduce((max, num) => num > max ? num : max, 0);
-	}
-
-	camelToPascalCase(camelcaseString) {
-		return camelcaseString[0].toUpperCase() + camelcaseString.substring(1);
 	}
 
 	async init() {
@@ -95,7 +93,7 @@ class Store {
 	}
 
 	handleEvent(eventname, eventdata, metadata) {
-		let eventhandlername = "on" + this.camelToPascalCase(eventname);
+		let eventhandlername = "on" + camelToPascalCase(eventname);
 		let eventhandler = this._eventhandlers[eventhandlername];
 
 		if (eventhandler) {
