@@ -30,9 +30,10 @@ function LogSchemaTool(dispatch, configureStore) {
 			let key = JSON.stringify(description);
 			let version = eventTypes[eventname][key];
 			if(!version){
-				eventTypes[eventname][key] = {count: 1, metadata, description};
+				eventTypes[eventname][key] = {count: 1, first: metadata, description, last: metadata};
 			} else {
 				version.count++;
+				version.last = metadata;
 			}
 		}
 	});
@@ -57,7 +58,8 @@ function LogSchemaTool(dispatch, configureStore) {
 				versions: Object.keys(versions).map(version => versions[version]).map(version => ({
 					count: version.count,
 					description: version.description,
-					metadata: version.metadata
+					first: version.first,
+					last: version.last
 				}))
 			}));
 	}

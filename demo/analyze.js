@@ -31,8 +31,9 @@ const folder = path.resolve(__dirname, "../temp");
 		model.getLogSchema().forEach(eventTypeInformation => {
 			console.log(eventTypeInformation.eventname);
 			eventTypeInformation.versions.forEach(version => {
-				let firstOccurrenceDescription = version.metadata.schemaVersion || version.metadata.version || version.metadata.time || JSON.stringify(version.metadata);
-				console.log(`   ${version.count} ${version.count == 1 ? "instance" : "instances"} of ${JSON.stringify(version.description)} since ${firstOccurrenceDescription}`);
+				let firstOccurrenceDescription = version.first.schemaVersion || version.first.version || version.first.time || JSON.stringify(version.first);
+				let lastOccurrenceDescription = version.last.schemaVersion || version.last.version || version.last.time || JSON.stringify(version.last);
+				console.log(`   ${version.count} ${version.count == 1 ? "instance" : "instances"} of ${JSON.stringify(version.description)} (from ${firstOccurrenceDescription} to ${lastOccurrenceDescription})`);
 			});
 		})
 	});
