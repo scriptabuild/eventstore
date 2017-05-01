@@ -15,9 +15,13 @@ model.push(eventdata.item)
 ### Keep only the first occurrence of an item
 - Only add, not replace
 ``` javascript
-// check if item exists
-// add if it doesnt exists in the collection
-// example for array elements
+// find the elements position inthe array (if any)
+// do nothing if item exists
+// add item to array if it doesnt exists in the collection
+let ix = array.indexOf(item);	// when item is a primitive type you can use .indexOf to find the index of an element
+if(ix === -1) {
+	array.push(item);
+}
 ```
 
 ### Keep only the latest occurrence of an item
@@ -25,17 +29,26 @@ model.push(eventdata.item)
 - Same as add or replace
 - Modify
 ``` javascript
-// for arrays:
-// iterate through the array to find the item (foreach, find, indexOf etc.)
+// find the elements position inthe array (if any)
 // if found: replace at the found index
 // if not found: push to end of array
+let ix = array.indexOf(item);	// when item is a primitive type you can use .indexOf to find the index of an element
+if(ix !== -1) {
+	array[ix] = item;
+} else {
+	array.push(item);
+}
+
 ```
 
 ### Remove an item from an array
 ``` javascript
-// for array elements:
-// iterate through the array to find the item (foreach, find, indexOf etc.)
-// if found: replace at the found index
+// find the elements position inthe array (if any)
+// if found: remove item from array
+let ix = array.indexOf(item);	// when item is a primitive type you can use .indexOf to find the index of an element
+if(ix !== -1) {
+	array.splice(ix, 1, ...array.slice(ix + 1));
+}
 ```
 
 
