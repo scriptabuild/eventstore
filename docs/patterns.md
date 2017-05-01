@@ -76,6 +76,5 @@ delete key;
 // if found: replace at the found index
 ```
 
----
-
-5. any custom javascript code
+## Run any custom javascript code
+- The model is just plain javascript, so modify the above examples at will to run arbitrary code

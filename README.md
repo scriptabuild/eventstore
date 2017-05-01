@@ -86,13 +86,3 @@ const Contactlist = require("./ContactList");
 ```
 
 _See the `tests/` folder for a more complete example, including support for snapshots, multiple models, including read-only models_
-
-## Documentation
-
-- `let storeBase = defineStore(folder)` - Sets up a folder as a database. Is the base for creating models on that folder.
-
-- `storeBase.defineReadModel(action)` - 
-
-- `storeBase.defineWriteModel(action)` - 
-
-- `storeBase.defineReadWriteModel(action, commitCallback)` - 
