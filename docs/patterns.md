@@ -1,53 +1,61 @@
 # Patterns for creating a model from the eventlog
-The model is created using javascript.
+With @aeinbu/eventstore, the model is created using javascript.
 This document lists some "how-to" patterns to help create a model from events.
 
 ## Working with arrays
-- lists
-- same patterns apply when working with `Set`
 
 ### Add an item to an array
-- Keep all occurrences of an item
+When you want to keep all occurrences of items, and store them in an unkeyed collection (ie. array),
+just push or shift them onto the array.
+
 ``` javascript
-model.push(eventdata.item)
+array.push(eventdata.item);
 ```
+``` javascript
+array.shift(eventdata.item);
+```
+
+### Locate an item in the array
+You have a few choices to find an item or an index in an array.
+
+For finding the position (or index), the easiest ways are to use `let index = array.indexOf(item)` or `let index = array.findIndex(compareCallback)`.
+If you need to retrieve the actual element in an array, use `let itemFromArray = array.find(compareCallback)`.
+
+You'll see these same approaches used in the patterns below.
 
 ### Keep only the first occurrence of an item
-- Only add, not replace
+When you want to keep only the first occurrence of an item, (ie. ignoring repeats), you'll need to
+find if the item is an element of the the array. If it doesn't, you can add the item.
+
 ``` javascript
-// find the elements position inthe array (if any)
-// do nothing if item exists
-// add item to array if it doesnt exists in the collection
-let ix = array.indexOf(item);	// when item is a primitive type you can use .indexOf to find the index of an element
-if(ix === -1) {
+let index = array.indexOf(item);	// when item is a primitive type you can use .indexOf to find the index of an element
+if(index === -1) {
 	array.push(item);
 }
 ```
 
-### Keep only the latest occurrence of an item
-- Always replace the item in the model with content from the event
-- Same as add or replace
-- Modify
 ``` javascript
-// find the elements position inthe array (if any)
-// if found: replace at the found index
-// if not found: push to end of array
-let ix = array.indexOf(item);	// when item is a primitive type you can use .indexOf to find the index of an element
-if(ix !== -1) {
-	array[ix] = item;
-} else {
+let index = array.findIndex(item => item.serialnumber = model.serialnumber);	// when item is a complex, you're in charge of writing the comparer to use with .findIndex.
+if(index === -1) {
 	array.push(item);
 }
-
 ```
 
 ### Remove an item from an array
+When you want to remove an occurrence of an item from the array, you'll need to find the items position (index) in
+the array. Use the position (index) and remove the element at that position.
+
 ``` javascript
-// find the elements position inthe array (if any)
-// if found: remove item from array
-let ix = array.indexOf(item);	// when item is a primitive type you can use .indexOf to find the index of an element
-if(ix !== -1) {
-	array.splice(ix, 1, ...array.slice(ix + 1));
+let index = array.indexOf(item);	// when item is a primitive type you can use .indexOf to find the index of an element
+if(index !== -1) {
+	array.splice(inde, 1, ...array.slice(ix + 1));
+}
+```
+
+``` javascript
+let index = array.findIndex(item => item.serialnumber = model.serialnumber);	// when item is a complex, you're in charge of writing the comparer to use with .findIndex.
+if(index !== -1) {
+	array.splice(index, 1, ...array.slice(ix + 1));
 }
 ```
 
@@ -117,6 +125,9 @@ delete key;
 ``` javascript
 // ???
 ```
+
+### Sets, Maps, WeakMapd
+
 
 ## Run any custom javascript code
 - The model is just plain javascript, so modify the above examples at will to run arbitrary code
