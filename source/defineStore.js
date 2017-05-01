@@ -53,7 +53,8 @@ async function defineStore(folder, options = {}) {
 					while (retryCount < maxRetries) {
 						if (!store.instance) await store.init();
 
-						action(store.instance, () => { isReadyToCommitt = true; }); // the second param is the readyToCommit callback function
+						let readyToCommitCallback = () => { isReadyToCommitt = true; };
+						await action(store.instance, readyToCommitCallback);
 
 						if (isReadyToCommitt) {
 							try {
