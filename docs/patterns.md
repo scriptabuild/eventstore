@@ -18,10 +18,10 @@ When you want to keep all occurrences of items, and store them in an unkeyed col
 just push or shift them onto the array.
 
 ``` javascript
-model.push(eventdata.item);
+model.push(eventdata.item);		// adds it at the end of the array
 ```
 ``` javascript
-model.shift(eventdata.item);
+model.shift(eventdata.item);	// adds it at the beginning of the array
 ```
 
 ### Locate an item in the array
