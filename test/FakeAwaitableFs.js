@@ -2,7 +2,7 @@ const path = require("path");
 const valueAsPromise = value => new Promise(resolve => resolve(value));
 const rejection = err => new Promise((resolve, reject) => reject(err));
 
-class FakeFs {
+module.exports = class FakeAwaitableFs {
 	constructor(files = {}){
 		this.files = files;
 	}
@@ -30,5 +30,3 @@ class FakeFs {
 		return valueAsPromise(this.files[filename] = data);
 	}
 }
-
-module.exports = FakeFs;

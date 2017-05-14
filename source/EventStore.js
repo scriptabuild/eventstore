@@ -8,9 +8,9 @@ const awaitableFs = require("./awaitableFs");
 // let evs = new EventStore("folder", options);
 // evs.replayEventStream(event => 'what to do with event?');
 // evs.replayEventStream(event => 'what to do with event?', stopReplayPredicates);
-// evs.logEvent(eventObj);
-// evs.logEvents((store, markAsComplete) => {
-// 	store.logEvent(eventObj);
+// evs.log(eventObj);
+// evs.logBlock((log, markAsComplete) => {
+// 	log(eventObj);
 // 	markAsComplete();
 // });
 // // end of example
@@ -43,12 +43,12 @@ module.exports = class EventStore {
 		return await this._fs.readdir(folder);
 	}
 
-	async replayEventStream(handleEvent = () => {}, fileNos = {}, stopReplayPredicates = {}){
+	async replayEventStream(handleEvent = () => {}, fileRange = {}, stopReplayPredicates = {}){
 		let stopBeforeApply = stopReplayPredicates.stopBeforeApply || (() => true);
 		let stopAfterApply = stopReplayPredicates.stopAfterApply || (() => true);
 
-		let fromFileNo = fileNos.fromFileNo || 0;
-		let toFileNo = fileNos.toFileNo || await this.getLatestlogFileNo();
+		let fromFileNo = fileRange.fromFileNo || 0;
+		let toFileNo = fileRange.toFileNo || await this.getLatestlogFileNo();
 
 		for (let fileNo = fromFileNo || 0; fileNo <= toFileNo; fileNo++) {
 			let fileName = path.resolve(this.folder, fileNo + ".log");
@@ -73,14 +73,14 @@ module.exports = class EventStore {
 		}
 	}
 
-	async logEvent(eventObj, fileNo = undefined){
-		return this.logEvents((log, markAsComplete) => {
+	async log(eventObj, fileNo = undefined){
+		return this.logBlock((log, markAsComplete) => {
 			log(eventObj);
 			markAsComplete();
 		}, fileNo);
 	}
 
-	async logEvents(action, fileNo = undefined){
+	async logBlock(action, fileNo = undefined){
 		let events = [];
 		let log = (event) => {
 			events.push(event);
@@ -98,7 +98,7 @@ module.exports = class EventStore {
 		}
 	}
 
-	async save(events, fileNo) {
+	async save(events, fileNo = undefined) {
 		if (events && events.length) {
 			let headers = this._createHeaders();
 

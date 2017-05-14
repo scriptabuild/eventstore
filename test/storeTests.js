@@ -1,12 +1,13 @@
 const {	suite, test } = require("mocha");
 const assert = require("assert");
-const FakeFs = require("./FakeFs");
+const FakeAwaitableFs = require("./FakeAwaitableFs");
+const camelToPascalCase = require("../source/camelToPascalCase");
 
 const Store = require("../source/Store");
 
 suite("new Store()", function () {
 
-	let fsp = new FakeFsp();
+	let fsp = new FakeAwaitableFs();
 	let store = new Store("not-a-folder", "model-name", () => {}, {fsp});
 
 	suite("getLatestFileNo", function () {
@@ -48,7 +49,7 @@ suite("new Store()", function () {
 	suite("camelToPascalCase", function () {
 
 		test("'someString' to 'SomeString'", async function () {
-			let result = store.camelToPascalCase("someString");
+			let result = camelToPascalCase("someString");
 
 			assert.equal(result, "SomeString");
 		});
