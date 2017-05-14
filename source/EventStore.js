@@ -23,7 +23,7 @@ module.exports = class EventStore {
 
 		this._createHeaders = options.createHeaders || (() => ({time: new Date().toISOString()}));
 		this._fs = options.fs || awaitableFs;
-		this._console = options.console;
+		this._console = options.console || {log(){}};
 	}
 
 	getLatestFileNo(files, ext) {
@@ -47,10 +47,10 @@ module.exports = class EventStore {
 		let stopBeforeApply = stopReplayPredicates.stopBeforeApply || (() => true);
 		let stopAfterApply = stopReplayPredicates.stopAfterApply || (() => true);
 
-		let fromFileNo = fileRange.fromFileNo || 0;
-		let toFileNo = fileRange.toFileNo || await this.getLatestlogFileNo();
+		let fromFileNo = fileRange.fromFileNo || 1;
+		let toFileNo = fileRange.toFileNo || await this.getLatestLogFileNo();
 
-		for (let fileNo = fromFileNo || 0; fileNo <= toFileNo; fileNo++) {
+		for (let fileNo = fromFileNo; fileNo <= toFileNo; fileNo++) {
 			let fileName = path.resolve(this.folder, fileNo + ".log");
 			this._console.log("Reading log file:", fileName);
 
