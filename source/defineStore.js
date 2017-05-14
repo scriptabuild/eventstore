@@ -40,6 +40,10 @@ async function defineStore(folder, options = {}) {
 		// 	};
 		// },
 
+		// replayLogs(){
+		//		// TODO: Make sure that we dont use a snapshot when replaying the log
+		// },
+
 		defineReadWriteModel(modelname, createModelCallback) {
 			let store = new Store(folder, modelname, createModelCallback, options);
 			return {

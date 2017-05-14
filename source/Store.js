@@ -35,6 +35,8 @@ module.exports = class Store {
 		if (!this.instance) this.instance = this.createModelCallback(this.dispatch.bind(this), this.configureStore.bind(this));
 
 		let files = await this._fs.readdir(this.folder);
+
+		// TODO: Check wether or not snapshots are enabled for the current model
 		let latestSnapshotNo = this.getLatestFileNo(files, `.${this.modelname}-snapshot`);
 		let latestLogNo = this.getLatestFileNo(files, ".log");
 		let startFromNo = (this._latestLogOrSnapshotNo || 0) + 1;
