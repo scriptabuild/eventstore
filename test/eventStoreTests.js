@@ -123,7 +123,7 @@ suite("new EventStore(folder, options)", function () {
 
 
 
-	suite(".replayEventStream(handleEvent, fileRange, stopReplayPredicates)", function () {
+	suite(".replayEventStream(handleEvent)", function () {
 
 		test("replay one event from one file", async function () {
 			fs.files = {
@@ -195,6 +195,113 @@ suite("new EventStore(folder, options)", function () {
 			await eventStore.replayEventStream((event, headers) => {
 				fulfilledCount++;
 			});
+			assert.equal(fulfilledCount, 2);
+		});
+
+		test("get correct header when replaying one event from one file", async function () {
+			fs.files = {
+				"1.log": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:59:59.999Z"
+						},
+						"events": [{
+							"name": "first event"
+						}]
+					}`
+			};
+
+			let fulfilled = false;
+			await eventStore.replayEventStream((event, headers) => {
+				assert.equal(headers.time, "2016-12-31T23:59:59.999Z");
+				fulfilled = true;
+			});
+			assert.ok(fulfilled, "Async function wasn't called");
+		});
+
+	});
+
+
+
+	///////
+
+	suite(".replayEventStream(handleEvent, fileRange, stopReplayPredicates)", function () {
+
+		setup(async function () {
+			fs.files = {
+				"1.log": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:00:00.000Z"
+						},
+						"events": [{
+							"name": "first event"
+						}]
+					}`,
+				"2.log": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:10:00.000Z"
+						},
+						"events": [{
+							"name": "second event"
+						}]
+					}`,
+				"3.log": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:20:00.000Z"
+						},
+						"events": [{
+							"name": "third event"
+						}]
+					}`,
+				"4.log": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:30:00.000Z"
+						},
+						"events": [{
+							"name": "fourth event"
+						}]
+					}`
+			};
+		});
+
+		test("correctly plays back a range of files when setting only fromFileNo", async function () {
+			let fileRange = {
+				fromFileNo: 2
+			}
+
+			let fulfilledCount = 0;
+			await eventStore.replayEventStream((event, headers) => {
+				fulfilledCount++;
+			}, fileRange);
+			assert.equal(fulfilledCount, 3);
+		});
+
+		test("correctly plays back a range of files when setting only toFileNo", async function () {
+			let fileRange = {
+				toFileNo: 2
+			}
+
+			let fulfilledCount = 0;
+			await eventStore.replayEventStream((event, headers) => {
+				fulfilledCount++;
+			}, fileRange);
+			assert.equal(fulfilledCount, 2);
+		});
+
+		test("correctly plays back a range of files when setting both fromFileNo and toFileNo", async function () {
+			let fileRange = {
+				fromFileNo: 2,
+				toFileNo: 3
+			}
+
+			let fulfilledCount = 0;
+			await eventStore.replayEventStream((event, headers) => {
+				fulfilledCount++;
+			}, fileRange);
 			assert.equal(fulfilledCount, 2);
 		});
 
