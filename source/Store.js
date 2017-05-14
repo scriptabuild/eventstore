@@ -15,7 +15,7 @@ module.exports = class Store {
 		this._eventhandlers = undefined;
 		this._fallbackEventhandler = undefined;
 
-		this._metadataCallback = options.metadataCallback;
+		this._createHeaders = options.createHeaders;
 		this._fs = options.fs;
 		this._console = options.console;
 
@@ -82,7 +82,7 @@ module.exports = class Store {
 
 			let events = logfileContents.events;
 			events.forEach(event => {
-				this.handleEvent(event.eventname, event.eventdata, logfileContents.metadata);
+				this.handleEvent(event.eventname, event.eventdata, logfileContents.headers);
 			});
 
 			if (stopReplayPredicates && stopReplayPredicates.AfterApply && stopReplayPredicates.AfterApply(file, logfileContents, this.instance)) {
@@ -91,14 +91,14 @@ module.exports = class Store {
 		}
 	}
 
-	handleEvent(eventname, eventdata, metadata) {
+	handleEvent(eventname, eventdata, headers) {
 		let eventhandlername = "on" + camelToPascalCase(eventname);
 		let eventhandler = this._eventhandlers[eventhandlername];
 
 		if (eventhandler) {
-			eventhandler(eventdata, metadata);
+			eventhandler(eventdata, headers);
 		} else {
-			this._fallbackEventhandler(eventname, eventdata, metadata);
+			this._fallbackEventhandler(eventname, eventdata, headers);
 		}
 	}
 
@@ -112,11 +112,11 @@ module.exports = class Store {
 
 	async save() {
 		if (this.eventlog && this.eventlog.length) {
-			let metadata = this._metadataCallback();
+			let headers = this._createHeaders();
 
 			let logfile = path.resolve(this.folder, ++this._latestLogOrSnapshotNo + ".log");
 			await this._fs.appendFile(logfile, JSON.stringify({
-				metadata,
+				headers,
 				events: this.eventlog
 			}), {
 				flag: "wx"
@@ -130,13 +130,14 @@ module.exports = class Store {
 		// if (!this.instance)
 		await this.init();
 
-		let metadata = this._metadataCallback();
+		let headers = this._createHeaders();
 
 		let state = {
-			metadata,
+			headers,
 			snapshotMetadata,
 			snapshot: this._createSnapshotData()
 		};
+
 		let snapshotfile = path.resolve(this.folder, this._latestLogOrSnapshotNo + `.${this.modelname}-snapshot`);
 		await this._fs.appendFile(snapshotfile, JSON.stringify(state), {
 			flag: "w"

@@ -12,9 +12,14 @@ const log = console.log;
 	const folder = path.resolve(__dirname, "../temp");
 
 	// Delete all logs and snapshots
-	(await awaitable(cb => fs.readdir(folder, cb))).forEach( async(filename) => {
-		await awaitable(cb => fs.unlink(path.resolve(folder, filename), cb));
-	});
+	try{
+		(await awaitable(cb => fs.readdir(folder, cb))).forEach( async(filename) => {
+			await awaitable(cb => fs.unlink(path.resolve(folder, filename), cb));
+		});
+	}
+	catch(err){
+		// Do nothing, the logs are already deleted...
+	}
 
 	let store = await defineStore(folder);
 

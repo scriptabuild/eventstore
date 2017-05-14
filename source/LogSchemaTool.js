@@ -20,7 +20,7 @@ function LogSchemaTool(dispatch, configureStore) {
 		eventhandlers: {
 			// No pre-known eventhandlers, since we're analyzing a log of unknown events.
 		},
-		fallbackEventhandler(eventname, eventdata, metadata) {
+		fallbackEventhandler(eventname, eventdata, headers) {
 			if (!eventTypes[eventname]) {
 				eventTypes[eventname] = {};
 			}
@@ -30,10 +30,10 @@ function LogSchemaTool(dispatch, configureStore) {
 			let key = JSON.stringify(description);
 			let version = eventTypes[eventname][key];
 			if(!version){
-				eventTypes[eventname][key] = {count: 1, first: metadata, description, last: metadata};
+				eventTypes[eventname][key] = {count: 1, first: headers, description, last: headers};
 			} else {
 				version.count++;
-				version.last = metadata;
+				version.last = headers;
 			}
 		}
 	});
