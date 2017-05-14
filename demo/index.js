@@ -93,7 +93,7 @@ const log = console.log;
 
 
 
-	await currentMembers.snapshot();
+	// await currentMembers.snapshot();
 	await currentMembers.withReadWriteModel((membersModel, readyToCommit) => {
 		membersModel.registerNewMember({
 			name: "Pernille Bråthen",
@@ -123,24 +123,24 @@ const log = console.log;
 
 	console.log("---");
 
-	await allHistoricalMembers.snapshot();
+	// await allHistoricalMembers.snapshot();
 	await allHistoricalMembers.withReadModel((historicalModel) => {
 		historicalModel.listMembers().forEach(contact => log(`${contact.name} - ${contact.isMember}`));
 	});
 
 	console.log("---");
 
-	await residensHistoryForMembers.snapshot();
+	// await residensHistoryForMembers.snapshot();
 	await residensHistoryForMembers.withReadModel((residensModel) => {
 		residensModel.listMembers().forEach(contact => log(`${contact.name} - ${JSON.stringify(contact.residenses)}`));
 	});
 
 
-	console.log("--- Test total 100K extra events in 10K snapshots of 15 events each ---")
+	console.log("--- Test total 10K extra events in 1K batches/transactions of 15 events each ---")
 
 	let stopwatch = Stopwatch.start();
 	console.log("*** before loop", stopwatch.elapsed());
-	for (let j = 0; j < 10000; j++) {
+	for (let j = 0; j < 1000; j++) {
 		await currentMembers.withReadWriteModel((membersModel, readyToCommit) => {
 			for (let i = 0; i < 10; i++) {
 				membersModel.registerNewMember({
@@ -160,8 +160,8 @@ const log = console.log;
 
 	console.log("*** after loop", stopwatch.elapsed(true));
 
-	await residensHistoryForMembers.snapshot();
-	console.log("*** after snapshot of readmodel", stopwatch.elapsed(true));
+	// await residensHistoryForMembers.snapshot();
+	// console.log("*** after snapshot of readmodel", stopwatch.elapsed(true));
 	await residensHistoryForMembers.withReadModel((residensModel) => {
 		console.log("Number of rows", residensModel.listMembers().length);
 	});

@@ -24,7 +24,8 @@ async function defineStore(folder, options = {}) {
 					// return await store.snapshot(snapshotMetadata);	
 				},
 				async withReadModel(action) {
-					if (!store.instance) await store.init();
+					// if (!store.instance)
+					await store.init();
 					action(store.instance);
 				}
 			}
