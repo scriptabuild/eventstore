@@ -21,7 +21,7 @@ async function defineStore(folder, options = {}) {
 			let store = new Store(folder, modelname, createModelCallback, options);
 			return {
 				async snapshot(snapshotMetadata) {
-					return await store.snapshot(snapshotMetadata);	
+					// return await store.snapshot(snapshotMetadata);	
 				},
 				async withReadModel(action) {
 					if (!store.instance) await store.init();
@@ -48,7 +48,7 @@ async function defineStore(folder, options = {}) {
 			let store = new Store(folder, modelname, createModelCallback, options);
 			return {
 				async snapshot(snapshotMetadata) {
-					return await store.snapshot(snapshotMetadata);
+					// return await store.snapshot(snapshotMetadata);
 				},
 				async withReadWriteModel(action, maxRetries = 5) {
 					let isReadyToCommitt = false;

@@ -10,8 +10,8 @@ module.exports = class Store {
 
 		this.instance = undefined;
 
-		this._createSnapshotData = undefined;
-		this._restoreFromSnapshot = undefined;
+		// this._createSnapshotData = undefined;
+		// this._restoreFromSnapshot = undefined;
 		this._eventhandlers = undefined;
 		this._fallbackEventhandler = undefined;
 
@@ -36,39 +36,38 @@ module.exports = class Store {
 
 		let files = await this._fs.readdir(this.folder);
 
-		// TODO: Check wether or not snapshots are enabled for the current model
-		let latestSnapshotNo = this.getLatestFileNo(files, `.${this.modelname}-snapshot`);
+		let latestSnapshotNo = 0;	//this.getLatestFileNo(files, `.${this.modelname}-snapshot`);
 		let latestLogNo = this.getLatestFileNo(files, ".log");
 		let startFromNo = (this._latestLogOrSnapshotNo || 0) + 1;
 		this._latestLogOrSnapshotNo = Math.max(latestSnapshotNo, latestLogNo)
-
-		if (latestSnapshotNo > startFromNo) {
-			await this.restoreSnapshot(latestSnapshotNo);
-			await this.replay(latestSnapshotNo + 1, latestLogNo);
-		} else {
+		
+		// if (latestSnapshotNo > startFromNo) {
+		// 	await this.restoreSnapshot(latestSnapshotNo);
+		// 	await this.replay(latestSnapshotNo + 1, latestLogNo);
+		// } else {
 			await this.replay(startFromNo, latestLogNo);
-		}
+		// }
 	}
 
 	configureStore(config) {
-		this._createSnapshotData = () => config.createSnapshotData();
-		this._restoreFromSnapshot = snapshotContents => config.restoreFromSnapshot(snapshotContents);
+		// this._createSnapshotData = () => config.createSnapshotData();
+		// this._restoreFromSnapshot = snapshotContents => config.restoreFromSnapshot(snapshotContents);
 
 		this._eventhandlers = config.eventhandlers || {};
 
 		this._fallbackEventhandler = config.fallbackEventhandler || (() => undefined);
 	}
 
-	async restoreSnapshot(snapshotNo) {
-		if (this._restoreFromSnapshot === undefined) throw new Error(`Can't restore snapshot. Missing snapshothandler for "${this.modelname}".`);
+	// async restoreSnapshot(snapshotNo) {
+	// 	if (this._restoreFromSnapshot === undefined) throw new Error(`Can't restore snapshot. Missing snapshothandler for "${this.modelname}".`);
 
-		let snapshotfile = path.resolve(this.folder, snapshotNo + `.${this.modelname}-snapshot`);
-		this._console.log("Reading snapshot file:", snapshotfile);
+	// 	let snapshotfile = path.resolve(this.folder, snapshotNo + `.${this.modelname}-snapshot`);
+	// 	this._console.log("Reading snapshot file:", snapshotfile);
 
-		let file = await this._fs.readFile(snapshotfile);
-		let snapshotContents = JSON.parse(file.toString());
-		this._restoreFromSnapshot(snapshotContents.snapshot);
-	}
+	// 	let file = await this._fs.readFile(snapshotfile);
+	// 	let snapshotContents = JSON.parse(file.toString());
+	// 	this._restoreFromSnapshot(snapshotContents.snapshot);
+	// }
 
 	async replay(fromLogNo, toLogNo, stopReplayPredicates) {
 		for (let logNo = fromLogNo; logNo <= toLogNo; logNo++) {
@@ -128,21 +127,21 @@ module.exports = class Store {
 		}
 	}
 
-	async snapshot(snapshotMetadata) {
-		// if (!this.instance)
-		await this.init();
+	// async snapshot(snapshotMetadata) {
+	// 	// if (!this.instance)
+	// 	await this.init();
 
-		let headers = this._createHeaders();
+	// 	let headers = this._createHeaders();
 
-		let state = {
-			headers,
-			snapshotMetadata,
-			snapshot: this._createSnapshotData()
-		};
+	// 	let state = {
+	// 		headers,
+	// 		snapshotMetadata,
+	// 		snapshot: this._createSnapshotData()
+	// 	};
 
-		let snapshotfile = path.resolve(this.folder, this._latestLogOrSnapshotNo + `.${this.modelname}-snapshot`);
-		await this._fs.appendFile(snapshotfile, JSON.stringify(state), {
-			flag: "w"
-		});
-	}
+	// 	let snapshotfile = path.resolve(this.folder, this._latestLogOrSnapshotNo + `.${this.modelname}-snapshot`);
+	// 	await this._fs.appendFile(snapshotfile, JSON.stringify(state), {
+	// 		flag: "w"
+	// 	});
+	// }
 }
