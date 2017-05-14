@@ -4,7 +4,7 @@ const assert = require("assert");
 const EventStore = require("../source/EventStore");
 const FakeAwaitableFs = require("./FakeAwaitableFs");
 
-suite("new EventStore(...)", function () {
+suite("new EventStore(folder, options)", function () {
 
 	let fs;
 	let eventStore;
@@ -16,7 +16,7 @@ suite("new EventStore(...)", function () {
 
 
 
-	suite(".log(...)", function () {
+	suite(".log(eventObj, fileNo)", function () {
 
 		test("creates \"1.log\" file for first invokation", async function () {
 			await eventStore.log({name: "first event"});
@@ -62,7 +62,7 @@ suite("new EventStore(...)", function () {
 
 
 
-	suite(".logBlock((log, markAsComplete) => { ... })", function () {
+	suite(".logBlock(action, fileNo)", function () {
 
 		test("doesn't create any file when batch hasn't reported markAsComplete()", async function () {
 			await eventStore.logBlock(log => {
@@ -123,9 +123,79 @@ suite("new EventStore(...)", function () {
 
 
 
-	suite(".replayEventStream((event, headers) => { ... })", function () {
+	suite(".replayEventStream(handleEvent, fileRange, stopReplayPredicates)", function () {
 
-		test("...", async function () {
+		test("replay one event from one file", async function () {
+			fs.files = {
+				"1.log": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:59:59.999Z"
+						},
+						"events": [{
+							"name": "first event"
+						}]
+					}`
+			};
+
+			let fulfilled = false;
+			await eventStore.replayEventStream((event, headers) => {
+				assert.equal(event.name, "first event");
+				fulfilled = true;
+			});
+			assert.ok(fulfilled, "Async function wasn't called");
+		});
+
+		test("replay two events from one file", async function () {
+			fs.files = {
+				"1.log": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:59:59.999Z"
+						},
+						"events": [{
+							"name": "first event"
+						},{
+							"name": "second event"
+						}]
+					}`
+			};
+
+			let fulfilledCount = 0;
+			await eventStore.replayEventStream((event, headers) => {
+				fulfilledCount++;
+			});
+			assert.equal(fulfilledCount, 2);
+		});
+
+		test("replay two events from two files", async function () {
+			fs.files = {
+				"1.log": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:59:59.995Z"
+						},
+						"events": [{
+							"name": "first event"
+						}]
+					}`,
+				"2.log": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:59:59.999Z"
+						},
+						"events": [{
+							"name": "second event"
+						}]
+					}`
+
+			};
+
+			let fulfilledCount = 0;
+			await eventStore.replayEventStream((event, headers) => {
+				fulfilledCount++;
+			});
+			assert.equal(fulfilledCount, 2);
 		});
 
 	});

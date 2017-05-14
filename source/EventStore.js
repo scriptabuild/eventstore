@@ -44,8 +44,8 @@ module.exports = class EventStore {
 	}
 
 	async replayEventStream(handleEvent = () => {}, fileRange = {}, stopReplayPredicates = {}){
-		let stopBeforeApply = stopReplayPredicates.stopBeforeApply || (() => true);
-		let stopAfterApply = stopReplayPredicates.stopAfterApply || (() => true);
+		let stopBeforeApply = stopReplayPredicates.stopBeforeApply || (() => false);
+		let stopAfterApply = stopReplayPredicates.stopAfterApply || (() => false);
 
 		let fromFileNo = fileRange.fromFileNo || 1;
 		let toFileNo = fileRange.toFileNo || await this.getLatestLogFileNo();
