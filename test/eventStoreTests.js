@@ -223,8 +223,6 @@ suite("new EventStore(folder, options)", function () {
 
 
 
-	///////
-
 	suite(".replayEventStream(handleEvent, fileRange, stopReplayPredicates)", function () {
 
 		setup(async function () {
