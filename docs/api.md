@@ -104,7 +104,7 @@ await evs.logBlock((log, markAsComplete) => {
 |parameters| |
 |-|-|
 |`handleEvent`|Function that receives a `(event)` object|
-|`fileRange`|Optional. Object with `fromFile` and `toFile` for specifying a range of logfiles to replay. This is usefull when speeding up the restore of a model by using snapshots.|
+|`fileRange`|Optional. Object with `from` and `to` for specifying a range of logfiles to replay. This is usefull when speeding up the restore of a model by using snapshots.|
 |stopReplayPredicates|Optional. Object with function for `beforeApply` and `afterApply` predicates for stopping the replay|
 
 ``` javascript
@@ -119,7 +119,7 @@ await evs.replayEventStream((event, headers) => {
 ``` javascript
 // example with fileRange and stopReplayPredicates parameters
 let evs = new EventStore("somefolder");
-let fileRange = {fromFile: 4, toFile: 10};
+let fileRange = {from: 4, to: 10};
 let stopReplayPredicates = {
 	stopeBeforeApply(contents, fileNo, filename){
 		// custom code to stop replaying the log before applying

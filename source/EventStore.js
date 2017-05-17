@@ -3,20 +3,6 @@ const awaitableFs = require("./awaitableFs");
 
 
 
-// // example of how to use...
-// let options = { console, fs, createHeaders};
-// let evs = new EventStore("folder", options);
-// evs.replayEventStream(event => 'what to do with event?');
-// evs.replayEventStream(event => 'what to do with event?', stopReplayPredicates);
-// evs.log(eventObj);
-// evs.logBlock((log, markAsComplete) => {
-// 	log(eventObj);
-// 	markAsComplete();
-// });
-// // end of example
-
-
-
 module.exports = class EventStore {
 	constructor(folder, options) {
 		this.folder = folder;
@@ -39,6 +25,11 @@ module.exports = class EventStore {
 		return this.getLatestFileNo(allFiles, ".log");
 	}
 
+	async getLatestSnapshotFileNo(snapshotname){
+		let allFiles = await this.getAllFilenames();
+		return this.getLatestFileNo(allFiles, `.${snapshotname}-snapshot`);
+	}
+
 	async getAllFilenames(folder){
 		return await this._fs.readdir(folder);
 	}
@@ -47,10 +38,10 @@ module.exports = class EventStore {
 		let stopBeforeApply = stopReplayPredicates.stopBeforeApply || (() => false);
 		let stopAfterApply = stopReplayPredicates.stopAfterApply || (() => false);
 
-		let fromFileNo = fileRange.fromFileNo || 1;
-		let toFileNo = fileRange.toFileNo || await this.getLatestLogFileNo();
+		let from = fileRange.from || 1;
+		let to = fileRange.to || await this.getLatestLogFileNo();
 
-		for (let fileNo = fromFileNo; fileNo <= toFileNo; fileNo++) {
+		for (let fileNo = from; fileNo <= to; fileNo++) {
 			let fileName = path.resolve(this.folder, fileNo + ".log");
 			this._console.log("Reading log file:", fileName);
 
