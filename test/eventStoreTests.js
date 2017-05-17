@@ -21,6 +21,7 @@ suite("new EventStore(folder, options)", function () {
 		test("creates \"1.log\" file for first invokation", async function () {
 			await eventStore.log({name: "first event"});
 
+			assert.equal(Object.keys(fs.files).length, 1);
 			assert.ok(fs.files["1.log"]);
 		});
 
@@ -188,7 +189,6 @@ suite("new EventStore(folder, options)", function () {
 							"name": "second event"
 						}]
 					}`
-
 			};
 
 			let fulfilledCount = 0;
@@ -266,9 +266,9 @@ suite("new EventStore(folder, options)", function () {
 			};
 		});
 
-		test("replays a range of files when setting only fromFileNo", async function () {
+		test("replays a range of files when setting only from-fileNo", async function () {
 			let fileRange = {
-				fromFileNo: 2
+				from: 2
 			}
 
 			let fulfilledCount = 0;
@@ -278,9 +278,9 @@ suite("new EventStore(folder, options)", function () {
 			assert.equal(fulfilledCount, 3);
 		});
 
-		test("replays a range of files when setting only toFileNo", async function () {
+		test("replays a range of files when setting only to-fileNo", async function () {
 			let fileRange = {
-				toFileNo: 2
+				to: 2
 			}
 
 			let fulfilledCount = 0;
@@ -290,10 +290,10 @@ suite("new EventStore(folder, options)", function () {
 			assert.equal(fulfilledCount, 2);
 		});
 
-		test("replays a range of files when setting both fromFileNo and toFileNo", async function () {
+		test("replays a range of files when setting both from and to-fileNos", async function () {
 			let fileRange = {
-				fromFileNo: 2,
-				toFileNo: 3
+				from: 2,
+				to: 3
 			}
 
 			let fulfilledCount = 0;
@@ -305,5 +305,4 @@ suite("new EventStore(folder, options)", function () {
 
 	});
 });
-
 
