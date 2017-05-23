@@ -106,4 +106,12 @@ module.exports = class EventStore {
 		// console.log("***", contents);
 		return contents.snapshot;
 	}
+
+	async saveSnapshot(snapshot, modelName, fileNo){
+		let headers = this._createHeaders();
+
+		let snapshotFilename = path.resolve(this.folder, `${fileNo}.${modelName}-snapshot`);
+		await this._fs.appendFile(snapshotFilename, JSON.stringify({headers, snapshot}), {flag: "wx"});
+	}
+
 }

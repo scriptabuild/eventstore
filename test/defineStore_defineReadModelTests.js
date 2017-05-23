@@ -30,8 +30,8 @@ suite("defineStore(folder, options)", function () {
 			}
 		}
 		// ,
-		// fallbackEventHandler(eventname, eventdata, headers){
-		// 	console.log("*** defualt eventhandler", eventname, eventdata, headers)
+		// fallbackEventHandler: model => (eventname, eventdata, headers){
+		// 	console.log("*** default eventhandler", eventname, eventdata, headers);
 		// }
 	}
 
@@ -183,13 +183,17 @@ suite("defineStore(folder, options)", function () {
 							"time": "2016-12-31T23:59:59.999Z"
 						},
 						"events": [{
-							"name": "first event"
+							"name": "memberAdded",
+							"data": {
+								"firstname": "peter",
+								"lastname": "pan"
+							}
 						}]
 					}`
 				};
 
 				await readModel.snapshot();
-				assert.ok(fs.files["1.some-snapshot"]);
+				assert.ok(fs.files["1.some-model-snapshot"]);
 			});
 
 			test("create snapshot from two log files", async function () {
@@ -200,7 +204,11 @@ suite("defineStore(folder, options)", function () {
 							"time": "2016-12-31T23:59:59.990Z"
 						},
 						"events": [{
-							"name": "first event"
+							"name": "memberAdded",
+							"data": {
+								"firstname": "arjan",
+								"lastname": "einbu"
+							}
 						}]
 					}`,
 					"2.log": `
@@ -209,7 +217,11 @@ suite("defineStore(folder, options)", function () {
 							"time": "2016-12-31T23:59:59.999Z"
 						},
 						"events": [{
-							"name": "second event"
+							"name": "memberAdded",
+							"data": {
+								"firstname": "marit",
+								"lastname": "winge"
+							}
 						}]
 					}`
 				};
@@ -222,7 +234,15 @@ suite("defineStore(folder, options)", function () {
 				fs.files = {
 					"1.some-model-snapshot": `
 					{
-						...
+						"headers": {
+							"time": "2016-12-31T23:59:59.000Z"
+						},
+						"snapshot":{
+							"members": [
+								{"firstname": "arjan", "lastname": "einbu"},
+								{"firstname": "marit", "lastname": "winge"}
+							]
+						}
 					}`,
 					"2.log": `
 					{
@@ -230,7 +250,11 @@ suite("defineStore(folder, options)", function () {
 							"time": "2016-12-31T23:59:59.999Z"
 						},
 						"events": [{
-							"name": "second event"
+							"name": "memberAdded",
+							"data": {
+								"firstname": "peter",
+								"lastname": "pan"
+							}
 						}]
 					}`
 				};

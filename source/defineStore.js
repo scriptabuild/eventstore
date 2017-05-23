@@ -21,11 +21,29 @@ module.exports = async function defineStore(folder, options = {}) {
 
 	let _eventStore = new EventStore(folder, options);
 
-	async function saveSnapshot(snapshot, modelName, fileNo){
-		let headers = options.createHeaders();
+	async function buildModel(readModelDefinition, latestSnapshotNo, latestLogFileNo){
+		let range = {
+			from: latestSnapshotNo + 1,
+			to: latestLogFileNo
+		};
 
-		let logfile = path.resolve(this.folder, `${++fileNo}.${modelName}-snapshot`);
-		await this._fs.appendFile(logfile, JSON.stringify({headers, snapshot}), {flag: "wx"});
+		let model;
+		if(latestSnapshotNo){
+			model = await _eventStore.restoreSnapshot(latestSnapshotNo, readModelDefinition.snapshotName);
+		}
+		else if(typeof readModelDefinition.initializeModel === "function"){
+			model = readModelDefinition.initializeModel();
+		}
+		else {
+			model = {};
+		}
+
+		await _eventStore.replayEventStream((event, headers) => {
+			let eventhandler = readModelDefinition.eventHandlers["on" + camelToPascalCase(event.name)] || readModelDefinition.fallbackEventHandler || (() => () => {});
+			return eventhandler(model)(event.data, headers);
+		}, range);
+
+		return model;
 	}
 
 	return {
@@ -42,38 +60,25 @@ module.exports = async function defineStore(folder, options = {}) {
 		},
 
 		defineReadModel(readModelDefinition) {
-			// let store = new Store(folder, modelname, createModelCallback, options);
 			return {
 				async snapshot() {
 					if(readModelDefinition.areSnapshotsEnabled){
-						await this.withReadModel(async model => {
-							let snapshot = readModelDefinition.createSnapshot(model)
-							await saveSnapshot(snapshot, readModelDefinition.snapshotName);
-						});
+
+						let allFiles = await _eventStore.getAllFilenames();
+						let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${readModelDefinition.snapshotName}-snapshot`) || 0;						
+						let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
+						let model = await buildModel(readModelDefinition, latestSnapshotNo, latestLogFileNo);
+
+						let snapshot = readModelDefinition.createSnapshot(model)
+						await _eventStore.saveSnapshot(snapshot, readModelDefinition.snapshotName, latestLogFileNo);
 					}
 				},
 				async withReadModel(action) {
-					let latestSnapshotNo = await _eventStore.getLatestSnapshotFileNo(readModelDefinition.snapshotName) || 0;
-					let range = {
-						from: latestSnapshotNo + 1,
-						to: await _eventStore.getLatestLogFileNo()
-					};
 
-					let model;
-					if(latestSnapshotNo){
-						model = await _eventStore.restoreSnapshot(latestSnapshotNo, readModelDefinition.snapshotName);
-					}
-					else if(typeof readModelDefinition.initializeModel === "function"){
-						model = readModelDefinition.initializeModel();
-					}
-					else {
-						model = {};
-					}
-
-					await _eventStore.replayEventStream((event, headers) => {
-						let eventhandler = readModelDefinition.eventHandlers["on" + camelToPascalCase(event.name)] || readModelDefinition.fallbackEventHandler || (() => () => {});
-						return eventhandler(model)(event.data, headers);
-					}, range);
+					let allFiles = await _eventStore.getAllFilenames();
+					let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${readModelDefinition.snapshotName}-snapshot`) || 0;						
+					let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
+					let model = await buildModel(readModelDefinition, latestSnapshotNo, latestLogFileNo);
 
 					await action(model);
 				}
