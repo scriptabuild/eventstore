@@ -304,5 +304,88 @@ suite("new EventStore(folder, options)", function () {
 		});
 
 	});
+
+
+
+	suite("Filename and number utilities", function () {
+
+		setup(async function () {
+			fs.files = {
+				"1.log": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:00:00.000Z"
+						},
+						"events": [{
+							"name": "first event"
+						}]
+					}`,
+				"2.log": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:10:00.000Z"
+						},
+						"events": [{
+							"name": "second event"
+						}]
+					}`,
+				"2.some-snapshot": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:11:00.000Z"
+						},
+						"snapshot": {"something": "somevalue"}
+					}`,
+				"2.some-other-snapshot": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:12:00.000Z"
+						},
+						"snapshot": {"something": "somevalue"}
+					}`,
+				"3.log": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:20:00.000Z"
+						},
+						"events": [{
+							"name": "third event"
+						}]
+					}`,
+				"3.some-snapshot": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:21:00.000Z"
+						},
+						"snapshot": {"something": "somevalue"}
+					}`,
+				"4.log": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:30:00.000Z"
+						},
+						"events": [{
+							"name": "fourth event"
+						}]
+					}`
+			};
+		});
+
+		test(".getLatestLogFileNo()", async function () {
+			let latestFileNo = await eventStore.getLatestLogFileNo();
+			assert.equal(latestFileNo, 4);
+		});
+
+		test(".getLatestSnapshotFileNo(snapshotname) looking for '.some-snapshot' files", async function () {
+			let latestFileNo = await eventStore.getLatestSnapshotFileNo("some");
+			assert.equal(latestFileNo, 3);
+		});
+
+		test(".getLatestSnapshotFileNo(snapshotname) looking for '.some-other-snapshot' files", async function () {
+			let latestFileNo = await eventStore.getLatestSnapshotFileNo("some-other");
+			assert.equal(latestFileNo, 2);
+		});
+
+	});
 });
 

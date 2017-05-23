@@ -1,6 +1,7 @@
 const EventStore = require("./EventStore");
 // const SnapshotStore = require("./SnapshotStore");
 const path = require("path");
+const camelToPascalCase = require("./camelToPascalCase");
 // const fs = require("./AwaitableFs");
 
 module.exports = async function defineStore(folder, options = {}) {
@@ -44,17 +45,36 @@ module.exports = async function defineStore(folder, options = {}) {
 			// let store = new Store(folder, modelname, createModelCallback, options);
 			return {
 				async snapshot() {
-					if(readModelDefinition.snapshotsAreEnabled){
-					await this.withReadModel(async model => {
-						let snapshot = readModelDefinition.createSnapshot(model)
-						await saveSnapshot(snapshot, readModelDefinition.snapshotName);
-					});
-
+					if(readModelDefinition.areSnapshotsEnabled){
+						await this.withReadModel(async model => {
+							let snapshot = readModelDefinition.createSnapshot(model)
+							await saveSnapshot(snapshot, readModelDefinition.snapshotName);
+						});
 					}
 				},
 				async withReadModel(action) {
-					let model = readModelDefinition.initModel();
-					await _eventStore.replayEventStream(readModelDefinition.handleEvents)
+					let latestSnapshotNo = await _eventStore.getLatestSnapshotFileNo(readModelDefinition.snapshotName) || 0;
+					let range = {
+						from: latestSnapshotNo + 1,
+						to: await _eventStore.getLatestLogFileNo()
+					};
+
+					let model;
+					if(latestSnapshotNo){
+						_eventStore.restoreSnapshot(latestSnapshotNo, readModelDefinition.snapshotName);
+					}
+					else if(typeof readModelDefinition.initializeModel === "function"){
+						model = readModelDefinition.initializeModel();
+					}
+					else {
+						model = {};
+					}
+
+					await _eventStore.replayEventStream((event, headers) => {
+						let eventhandler = readModelDefinition.eventHandlers["on" + camelToPascalCase(event.name)] || readModelDefinition.fallbackEventHandler || (() => {});
+						return eventhandler(model)(event.data, headers);
+					}, range);
+
 					await action(model);
 				}
 			}
