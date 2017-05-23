@@ -2,7 +2,7 @@ const EventStore = require("./EventStore");
 // const SnapshotStore = require("./SnapshotStore");
 const path = require("path");
 const camelToPascalCase = require("./camelToPascalCase");
-// const fs = require("./AwaitableFs");
+//const fs = require("./AwaitableFs");
 
 module.exports = async function defineStore(folder, options = {}) {
 	// async function ensureFolder(folder) {
@@ -116,6 +116,7 @@ module.exports = async function defineStore(folder, options = {}) {
 		// 		}
 		// 	}
 		// }
+
 	};
 }
 
