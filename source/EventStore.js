@@ -20,21 +20,21 @@ module.exports = class EventStore {
 			.reduce((max, num) => num > max ? num : max, 0);
 	}
 
-	async getLatestLogFileNo(){
+	async getLatestLogFileNo() {
 		let allFiles = await this.getAllFilenames();
 		return this.getLatestFileNo(allFiles, ".log");
 	}
 
-	async getLatestSnapshotFileNo(snapshotname){
+	async getLatestSnapshotFileNo(snapshotName) {
 		let allFiles = await this.getAllFilenames();
-		return this.getLatestFileNo(allFiles, `.${snapshotname}-snapshot`);
+		return this.getLatestFileNo(allFiles, `.${snapshotName}-snapshot`);
 	}
 
-	async getAllFilenames(folder){
+	async getAllFilenames(folder) {
 		return await this._fs.readdir(folder);
 	}
 
-	async replayEventStream(handleEvent = () => {}, fileRange = {}, stopReplayPredicates = {}){
+	async replayEventStream(handleEvent = () => {}, fileRange = {}, stopReplayPredicates = {}) {
 		let stopBeforeApply = stopReplayPredicates.stopBeforeApply || (() => false);
 		let stopAfterApply = stopReplayPredicates.stopAfterApply || (() => false);
 
@@ -42,13 +42,13 @@ module.exports = class EventStore {
 		let to = fileRange.to || await this.getLatestLogFileNo();
 
 		for (let fileNo = from; fileNo <= to; fileNo++) {
-			let fileName = path.resolve(this.folder, fileNo + ".log");
-			this._console.log("Reading log file:", fileName);
+			let filename = path.resolve(this.folder, fileNo + ".log");
+			this._console.log("Reading log file:", filename);
 
-			let fileObj = await this._fs.readFile(fileName);
+			let fileObj = await this._fs.readFile(filename);
 			let contents = JSON.parse(fileObj.toString());
 			
-			if (stopBeforeApply(contents, fileNo, fileName)) {
+			if (stopBeforeApply(contents, fileNo, filename)) {
 				break;
 			}
 
@@ -58,20 +58,20 @@ module.exports = class EventStore {
 				handleEvent(event, headers);
 			});
 
-			if (stopAfterApply(contents, fileNo, fileName)) {
+			if (stopAfterApply(contents, fileNo, filename)) {
 				break;
 			}
 		}
 	}
 
-	async log(eventObj, fileNo = undefined){
+	async log(eventObj, fileNo = undefined) {
 		return this.logBlock((log, markAsComplete) => {
 			log(eventObj);
 			markAsComplete();
 		}, fileNo);
 	}
 
-	async logBlock(action, fileNo = undefined){
+	async logBlock(action, fileNo = undefined) {
 		let events = [];
 		let log = (event) => {
 			events.push(event);
@@ -83,7 +83,7 @@ module.exports = class EventStore {
 		
 		await action(log, markAsComplete);
 
-		if(isComplete){
+		if(isComplete) {
 			fileNo = fileNo || await this.getLatestLogFileNo();
 			await this.save(events, fileNo);
 		}
@@ -96,5 +96,14 @@ module.exports = class EventStore {
 			let logfile = path.resolve(this.folder, ++fileNo + ".log");
 			await this._fs.appendFile(logfile, JSON.stringify({headers, events}), {flag: "wx"});
 		}
+	}
+
+	async restoreSnapshot(snapshotFileNo, snapshotName){
+		// console.log("***", snapshotFileNo, snapshotName);
+		let filename = `${snapshotFileNo}.${snapshotName}-snapshot`;
+		let fileObj = await this._fs.readFile(filename);
+		let contents = JSON.parse(fileObj.toString());
+		// console.log("***", contents);
+		return contents.snapshot;
 	}
 }

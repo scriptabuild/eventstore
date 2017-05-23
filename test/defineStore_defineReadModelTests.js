@@ -12,7 +12,7 @@ suite("defineStore(folder, options)", function () {
 	let readModel;
 	let readModelDefinition = {
 		areSnapshotsEnabled: true,
-		snapshotName: "some-snapshot",
+		snapshotName: "some-model",
 		createSnapshot(model){
 			return model;
 		},
@@ -31,7 +31,7 @@ suite("defineStore(folder, options)", function () {
 		}
 		// ,
 		// fallbackEventHandler(eventname, eventdata, headers){
-		// 	// console.log("*** defualt eventhandler", eventname, eventdata, headers)
+		// 	console.log("*** defualt eventhandler", eventname, eventdata, headers)
 		// }
 	}
 
@@ -105,7 +105,7 @@ suite("defineStore(folder, options)", function () {
 
 				let fulfilled = false;
 				await readModel.withReadModel(model =>{
-					// TODO: read from the readdmodel and ASSERT that some value is correct.
+					assert.deepEqual(model.members, [{firstname: "arjan", lastname: "einbu"}, {firstname: "marit", lastname: "winge"}]);
 					fulfilled = true;
 				});
 				assert.ok(fulfilled, "Async function wasn't called");
@@ -113,18 +113,22 @@ suite("defineStore(folder, options)", function () {
 
 			test("create readmodel from a snapshot file", async function () {
 				fs.files = {
-					"1.some-snapshot": `
+					"1.some-model-snapshot": `
 					{
-						"members": [
-							{"firstname": "arjan", "lastname": "einbu"},
-							{"firstname": "marit", "lastname": "winge"}
-						]
+						"headers": {
+							"time": "2016-12-31T23:59:59.000Z"
+						},
+						"snapshot":{
+							"members": [
+								{"firstname": "arjan", "lastname": "einbu"},
+								{"firstname": "marit", "lastname": "winge"}
+							]
+						}
 					}`
 				};
 
 				let fulfilled = false;
-				await readModel.withReadModel(model =>{
-					// TODO: read from the readdmodel and ASSERT that some value is correct.
+				await readModel.withReadModel(model => {
 					assert.deepEqual(model.members, [{firstname: "arjan", lastname: "einbu"}, {firstname: "marit", lastname: "winge"}]);
 					fulfilled = true;
 				});
@@ -133,9 +137,17 @@ suite("defineStore(folder, options)", function () {
 
 			test("create readmodel from a snapshot file and one log file", async function () {
 				fs.files = {
-					"1.some-snapshot": `
+					"1.some-model-snapshot": `
 					{
-						...
+						"headers": {
+							"time": "2016-12-31T23:59:59.000Z"
+						},
+						"snapshot":{
+							"members": [
+								{"firstname": "arjan", "lastname": "einbu"},
+								{"firstname": "marit", "lastname": "winge"}
+							]
+						}
 					}`,
 					"2.log": `
 					{
@@ -143,21 +155,25 @@ suite("defineStore(folder, options)", function () {
 							"time": "2016-12-31T23:59:59.999Z"
 						},
 						"events": [{
-							"name": "second event"
+							"name": "memberAdded",
+							"data": {
+								"firstname": "peter",
+								"lastname": "pan"
+							}
 						}]
 					}`
 				};
 
 				let fulfilled = false;
-				await readmodel.withReadModel(model =>{
-					// TODO: read from the readdmodel and ASSERT that some value is correct.
+				await readModel.withReadModel(model =>{
+					assert.deepEqual(model.members, [{firstname: "arjan", lastname: "einbu"}, {firstname: "marit", lastname: "winge"}, {firstname: "peter", lastname: "pan"}]);
 					fulfilled = true;
 				});
 				assert.ok(fulfilled, "Async function wasn't called");
 			});
 		});
 
-		suite(".snapshot(...)", function () {
+		suite(".snapshot(snapshotName)", function () {
 
 			test("create snapshot from one log file", async function () {
 				fs.files = {
@@ -172,7 +188,7 @@ suite("defineStore(folder, options)", function () {
 					}`
 				};
 
-				await readmodel.snapshot();
+				await readModel.snapshot();
 				assert.ok(fs.files["1.some-snapshot"]);
 			});
 
@@ -199,12 +215,12 @@ suite("defineStore(folder, options)", function () {
 				};
 
 				await readModel.snapshot();
-				assert.ok(fs.files["2.some-snapshot"]);
+				assert.ok(fs.files["2.some-model-snapshot"]);
 			});
 
 			test("create snapshot from a snapshot file and one log file", async function () {
 				fs.files = {
-					"1.some-snapshot": `
+					"1.some-model-snapshot": `
 					{
 						...
 					}`,
@@ -220,7 +236,7 @@ suite("defineStore(folder, options)", function () {
 				};
 
 				await readModel.snapshot();
-				assert.ok(fs.files["2.some-snapshot"]);
+				assert.ok(fs.files["2.some-model-snapshot"]);
 			});
 
 		});

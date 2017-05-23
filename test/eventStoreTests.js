@@ -376,12 +376,12 @@ suite("new EventStore(folder, options)", function () {
 			assert.equal(latestFileNo, 4);
 		});
 
-		test(".getLatestSnapshotFileNo(snapshotname) looking for '.some-snapshot' files", async function () {
+		test(".getLatestSnapshotFileNo(snapshotName) looking for '.some-snapshot' files", async function () {
 			let latestFileNo = await eventStore.getLatestSnapshotFileNo("some");
 			assert.equal(latestFileNo, 3);
 		});
 
-		test(".getLatestSnapshotFileNo(snapshotname) looking for '.some-other-snapshot' files", async function () {
+		test(".getLatestSnapshotFileNo(snapshotName) looking for '.some-other-snapshot' files", async function () {
 			let latestFileNo = await eventStore.getLatestSnapshotFileNo("some-other");
 			assert.equal(latestFileNo, 2);
 		});

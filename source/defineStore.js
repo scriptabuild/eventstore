@@ -61,7 +61,7 @@ module.exports = async function defineStore(folder, options = {}) {
 
 					let model;
 					if(latestSnapshotNo){
-						_eventStore.restoreSnapshot(latestSnapshotNo, readModelDefinition.snapshotName);
+						model = await _eventStore.restoreSnapshot(latestSnapshotNo, readModelDefinition.snapshotName);
 					}
 					else if(typeof readModelDefinition.initializeModel === "function"){
 						model = readModelDefinition.initializeModel();
@@ -71,7 +71,7 @@ module.exports = async function defineStore(folder, options = {}) {
 					}
 
 					await _eventStore.replayEventStream((event, headers) => {
-						let eventhandler = readModelDefinition.eventHandlers["on" + camelToPascalCase(event.name)] || readModelDefinition.fallbackEventHandler || (() => {});
+						let eventhandler = readModelDefinition.eventHandlers["on" + camelToPascalCase(event.name)] || readModelDefinition.fallbackEventHandler || (() => () => {});
 						return eventhandler(model)(event.data, headers);
 					}, range);
 
