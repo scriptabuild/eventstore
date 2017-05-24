@@ -307,6 +307,57 @@ suite("new EventStore(folder, options)", function () {
 
 
 
+	suite(".restoreSnapshot(snapshotFileNo, snapshotName)", function () {
+
+		setup(async function(){
+			fs.files = {
+				"1.some-snapshot": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:11:00.000Z"
+						},
+						"snapshot": {"something": "somevalue"}
+					}`
+			};
+		});
+
+		test("returns the snapshot from a file", async function(){
+			let model = await eventStore.restoreSnapshot(1, "some");
+			assert.deepEqual(model, {something: "somevalue"});
+		});
+
+	});
+
+
+
+	suite(".saveSnapshot(snapshot, snapshotName, fileNo)", function () {
+
+		test("creates the correct snapshot file", function(){
+			let model = {otherthing: "othervalue"};
+			eventStore.saveSnapshot(model, "some-other", 3);
+			assert.ok(fs.files["3.some-other-snapshot"]);
+		});
+
+		test("stores the headers in the file", function(){
+			let model = {otherthing: "othervalue"};
+			eventStore.saveSnapshot(model, "some-other", 3);
+
+			let stored = JSON.parse(fs.files["3.some-other-snapshot"]);
+			assert.ok(stored.headers);
+		});
+
+		test("stores the snapshot in the file", function(){
+			let model = {otherthing: "othervalue"};
+			eventStore.saveSnapshot(model, "some-other", 3);
+
+			let stored = JSON.parse(fs.files["3.some-other-snapshot"]);
+			assert.ok(stored.snapshot);
+		});
+
+	});
+	
+
+
 	suite("Filename and number utilities", function () {
 
 		setup(async function () {

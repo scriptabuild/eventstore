@@ -20,18 +20,37 @@ module.exports = class EventStore {
 			.reduce((max, num) => num > max ? num : max, 0);
 	}
 
-	async getLatestLogFileNo() {
-		let allFiles = await this.getAllFilenames();
-		return this.getLatestFileNo(allFiles, ".log");
+	async getAllFilenames(folder) {
+		return await this._fs.readdir(folder);
 	}
+
+	// snapshot stuff
 
 	async getLatestSnapshotFileNo(snapshotName) {
 		let allFiles = await this.getAllFilenames();
 		return this.getLatestFileNo(allFiles, `.${snapshotName}-snapshot`);
 	}
 
-	async getAllFilenames(folder) {
-		return await this._fs.readdir(folder);
+	async restoreSnapshot(snapshotFileNo, snapshotName){
+		let filename = `${snapshotFileNo}.${snapshotName}-snapshot`;
+		let fileObj = await this._fs.readFile(filename);
+		let contents = JSON.parse(fileObj.toString());
+		return contents.snapshot;
+	}
+
+	async saveSnapshot(snapshot, modelName, fileNo){
+		let headers = this._createHeaders();
+
+		let snapshotFilename = path.resolve(this.folder, `${fileNo}.${modelName}-snapshot`);
+		await this._fs.appendFile(snapshotFilename, JSON.stringify({headers, snapshot}), {flag: "wx"});
+	}
+
+
+	// eventlog stuff
+
+	async getLatestLogFileNo() {
+		let allFiles = await this.getAllFilenames();
+		return this.getLatestFileNo(allFiles, ".log");
 	}
 
 	async replayEventStream(handleEvent = () => {}, fileRange = {}, stopReplayPredicates = {}) {
@@ -85,31 +104,17 @@ module.exports = class EventStore {
 
 		if(isComplete) {
 			fileNo = fileNo || await this.getLatestLogFileNo();
-			await this.save(events, fileNo);
+			await this.saveEvents(events, fileNo);
 		}
 	}
 
-	async save(events, fileNo = undefined) {
+	async saveEvents(events, fileNo = undefined) {
 		if (events && events.length) {
 			let headers = this._createHeaders();
 
 			let logfile = path.resolve(this.folder, ++fileNo + ".log");
 			await this._fs.appendFile(logfile, JSON.stringify({headers, events}), {flag: "wx"});
 		}
-	}
-
-	async restoreSnapshot(snapshotFileNo, snapshotName){
-		let filename = `${snapshotFileNo}.${snapshotName}-snapshot`;
-		let fileObj = await this._fs.readFile(filename);
-		let contents = JSON.parse(fileObj.toString());
-		return contents.snapshot;
-	}
-
-	async saveSnapshot(snapshot, modelName, fileNo){
-		let headers = this._createHeaders();
-
-		let snapshotFilename = path.resolve(this.folder, `${fileNo}.${modelName}-snapshot`);
-		await this._fs.appendFile(snapshotFilename, JSON.stringify({headers, snapshot}), {flag: "wx"});
 	}
 
 }

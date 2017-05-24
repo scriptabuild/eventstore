@@ -1,8 +1,6 @@
 const EventStore = require("./EventStore");
-// const SnapshotStore = require("./SnapshotStore");
-const path = require("path");
 const camelToPascalCase = require("./camelToPascalCase");
-//const fs = require("./AwaitableFs");
+
 
 module.exports = async function defineStore(folder, options = {}) {
 	// async function ensureFolder(folder) {
@@ -13,15 +11,11 @@ module.exports = async function defineStore(folder, options = {}) {
 	// 	}
 	// }
 
-	// options.fs = options.fs || fs;
-	// options.console = options.console || {log(){}};
-	options.createHeaders = options.createHeaders || (() => ({time: new Date().toISOString()}));
-
 	// await ensureFolder(folder);
 
 	let _eventStore = new EventStore(folder, options);
 
-	async function buildModel(readModelDefinition, latestSnapshotNo, latestLogFileNo){
+	async function buildInstance(modelDefinition, latestSnapshotNo, latestLogFileNo){
 		let range = {
 			from: latestSnapshotNo + 1,
 			to: latestLogFileNo
@@ -29,17 +23,17 @@ module.exports = async function defineStore(folder, options = {}) {
 
 		let model;
 		if(latestSnapshotNo){
-			model = await _eventStore.restoreSnapshot(latestSnapshotNo, readModelDefinition.snapshotName);
+			model = await _eventStore.restoreSnapshot(latestSnapshotNo, modelDefinition.snapshotName);
 		}
-		else if(typeof readModelDefinition.initializeModel === "function"){
-			model = readModelDefinition.initializeModel();
+		else if(typeof modelDefinition.initializeModel === "function"){
+			model = modelDefinition.initializeModel();
 		}
 		else {
 			model = {};
 		}
 
 		await _eventStore.replayEventStream((event, headers) => {
-			let eventhandler = readModelDefinition.eventHandlers["on" + camelToPascalCase(event.name)] || readModelDefinition.fallbackEventHandler || (() => () => {});
+			let eventhandler = modelDefinition.eventHandlers["on" + camelToPascalCase(event.name)] || modelDefinition.fallbackEventHandler || (() => () => {});
 			return eventhandler(model)(event.data, headers);
 		}, range);
 
@@ -59,69 +53,61 @@ module.exports = async function defineStore(folder, options = {}) {
 			await _eventStore.replayEventStream(handleEvents);
 		},
 
-		defineReadModel(readModelDefinition) {
+		defineModel(modelDefinition) {
 			return {
 				async snapshot() {
-					if(readModelDefinition.areSnapshotsEnabled){
+					if(modelDefinition.areSnapshotsEnabled){
 
 						let allFiles = await _eventStore.getAllFilenames();
-						let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${readModelDefinition.snapshotName}-snapshot`) || 0;						
+						let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${modelDefinition.snapshotName}-snapshot`) || 0;
 						let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
-						let model = await buildModel(readModelDefinition, latestSnapshotNo, latestLogFileNo);
+						let model = await buildInstance(modelDefinition, latestSnapshotNo, latestLogFileNo);
 
-						let snapshot = readModelDefinition.createSnapshot(model)
-						await _eventStore.saveSnapshot(snapshot, readModelDefinition.snapshotName, latestLogFileNo);
+						let snapshot = modelDefinition.createSnapshot(model)
+						await _eventStore.saveSnapshot(snapshot, modelDefinition.snapshotName, latestLogFileNo);
 					}
+					return this;	// allows chaining functions
 				},
-				async withReadModel(action) {
+				async withReadInstance(action) {
 
 					let allFiles = await _eventStore.getAllFilenames();
-					let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${readModelDefinition.snapshotName}-snapshot`) || 0;						
+					let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${modelDefinition.snapshotName}-snapshot`) || 0;
 					let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
-					let model = await buildModel(readModelDefinition, latestSnapshotNo, latestLogFileNo);
+					let instance = await buildInstance(modelDefinition, latestSnapshotNo, latestLogFileNo);
 
-					await action(model);
+					await action(instance);
+					return this;	// allows chaining functions
+				},
+				async withReadWriteInstance(action, maxRetries = 5) {
+					let isReadyToCommit = false;
+
+					let retryCount = 0;
+					while (retryCount < maxRetries) {
+						let allFiles = await _eventStore.getAllFilenames();
+						let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${modelDefinition.snapshotName}-snapshot`) || 0;
+						let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
+						let instance = await buildInstance(modelDefinition, latestSnapshotNo, latestLogFileNo);
+
+						let readyToCommitCallback = () => { isReadyToCommit = true; };
+						await action(instance, readyToCommitCallback);
+
+						if (isReadyToCommit) {
+							try {
+								await _eventStore.saveEvents(events, ++latestLogFileNo);
+								return this;	// allows chaining functions
+							} catch (err) {
+								retryCount++;
+								continue;
+							}
+						} else {
+							return this;	// allows chaining functions
+						}
+
+					}
+					throw new Error("Failed the max number of retries. Aborting and rolling back action.");
 				}
 			}
-		},
+		}
 
-		// defineReadWriteModel(x) {
-		// 	// let store = new Store(folder, modelname, createModelCallback, options);
-		// 	return {
-		// 		async snapshot() {
-		// 			// return await store.snapshot(snapshotMetadata);
-		// 		},
-		// 		async withReadWriteModel(action, maxRetries = 5) {
-		// 			// let isReadyToCommitt = false;
-
-		// 			// let retryCount = 0;
-		// 			// while (retryCount < maxRetries) {
-		// 			// 	if (!store.instance) await store.init();
-
-		// 			// 	let readyToCommitCallback = () => { isReadyToCommitt = true; };
-		// 			// 	await action(store.instance, readyToCommitCallback);
-
-		// 			// 	if (isReadyToCommitt) {
-		// 			// 		try {
-		// 			// 			await store.save();
-		// 			// 			return this;
-		// 			// 		} catch (err) {
-		// 			// 			retryCount++;
-		// 			// 			continue;
-		// 			// 		}
-		// 			// 	} else {
-		// 			// 		// TODO: replace with store.reset()
-		// 			// 		store.instance = undefined;
-		// 			// 		store.eventlog = [];
-		// 			// 		return this;
-		// 			// 	}
-
-		// 			// }
-		// 			// throw new Error("Failed the max number of retries. Aborting and rolling back action.");
-		// 		}
-		// 	}
-		// }
-
-	};
+	}
 }
-
