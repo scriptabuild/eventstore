@@ -99,11 +99,9 @@ module.exports = class EventStore {
 	}
 
 	async restoreSnapshot(snapshotFileNo, snapshotName){
-		// console.log("***", snapshotFileNo, snapshotName);
 		let filename = `${snapshotFileNo}.${snapshotName}-snapshot`;
 		let fileObj = await this._fs.readFile(filename);
 		let contents = JSON.parse(fileObj.toString());
-		// console.log("***", contents);
 		return contents.snapshot;
 	}
 

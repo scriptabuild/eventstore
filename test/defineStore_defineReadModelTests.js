@@ -1,7 +1,6 @@
 const {suite, setup, test} = require("mocha");
 const assert = require("assert");
 
-// const EventStore = require("../source/EventStore");
 const defineStore = require("../source/defineStore");
 const FakeAwaitableFs = require("./FakeAwaitableFs");
 
@@ -10,7 +9,7 @@ suite("defineStore(folder, options)", function () {
 	let fs;
 	let store;
 	let readModel;
-	let readModelDefinition = {
+	let modelDefinition = {
 		areSnapshotsEnabled: true,
 		snapshotName: "some-model",
 		createSnapshot(model){
@@ -29,17 +28,13 @@ suite("defineStore(folder, options)", function () {
 				model.members.push(eventdata);
 			}
 		}
-		// ,
-		// fallbackEventHandler: model => (eventname, eventdata, headers){
-		// 	console.log("*** default eventhandler", eventname, eventdata, headers);
-		// }
 	}
 
 	setup(async function () {
 		fs = new FakeAwaitableFs();
 
 		store = await defineStore("not-a-folder", {fs});
-		readModel = store.defineReadModel(readModelDefinition);
+		readModel = store.defineReadModel(modelDefinition);
 	});
 
 
