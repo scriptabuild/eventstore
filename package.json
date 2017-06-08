@@ -23,6 +23,6 @@
   "homepage": "https://github.com/scriptabuild/eventstore#readme",
   "dependencies": {},
   "devDependencies": {
-    "mocha": "^3.2.0"
+    "mocha": "^3.4.2"
   }
 }

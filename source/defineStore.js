@@ -26,7 +26,7 @@ module.exports = async function defineStore(folder, options = {}) {
 			model = await _eventStore.restoreSnapshot(latestSnapshotNo, modelDefinition.snapshotName);
 		}
 		else if(typeof modelDefinition.initializeModel === "function"){
-			model = modelDefinition.initializeModel();
+			model = modelDefinition.initializeModel( /* dispatchFn */ );
 		}
 		else {
 			model = {};
