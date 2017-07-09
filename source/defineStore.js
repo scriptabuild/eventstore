@@ -15,30 +15,38 @@ module.exports = async function defineStore(folder, options = {}) {
 
 	let _eventStore = new EventStore(folder, options);
 
-	async function buildInstance(modelDefinition, latestSnapshotNo, latestLogFileNo){
+	async function buildStoreModel(modelDefinition, latestSnapshotNo, latestLogFileNo){
 		let range = {
 			from: latestSnapshotNo + 1,
 			to: latestLogFileNo
 		};
 
-		let model;
+		let snapshotData;
 		if(latestSnapshotNo){
-			model = await _eventStore.restoreSnapshot(latestSnapshotNo, modelDefinition.snapshotName);
+			let snapshotConfiguration = modelDefinition.snapshotConfiguration;
+			snapshotData = await _eventStore.restoreSnapshot(latestSnapshotNo, snapshotConfiguration.snapshotName);
 		}
-		else if(typeof modelDefinition.initializeModel === "function"){
-			model = modelDefinition.initializeModel( /* dispatchFn */ );
-		}
-		else {
-			model = {};
-		}
+		let storeModel = modelDefinition.createStoreModel(snapshotData);
 
 		await _eventStore.replayEventStream((event, headers) => {
-			let eventhandler = modelDefinition.eventHandlers["on" + camelToPascalCase(event.name)] || modelDefinition.fallbackEventHandler || (() => () => {});
-			return eventhandler(model)(event.data, headers);
+			let eventHandlers = modelDefinition.getEventHandlers(storeModel);
+			let eventhandler = eventHandlers["on" + camelToPascalCase(event.name)] || modelDefinition.fallbackEventHandler || (() => () => {});
+			// let eventhandler = modelDefinition.eventHandlers["on" + camelToPascalCase(event.name)] || modelDefinition.fallbackEventHandler || (() => () => {});
+			return eventhandler(event.data, headers);
 		}, range);
 
-		return model;
+		return storeModel;
 	}
+
+
+
+	async function buildDomainModel(modelDefinition, latestSnapshotNo, latestLogFileNo){
+		let storeModel = buildStoreModel(modelDefinition, latestSnapshotNo, latestLogFileNo);
+		let domainModel = modelDefinition.createDomainModel(dispatch, storeModel);
+		return domainModel;
+	}
+
+
 
 	return {
 		async log(eventObj) {
@@ -54,28 +62,29 @@ module.exports = async function defineStore(folder, options = {}) {
 		},
 
 		defineModel(modelDefinition) {
+			let snapshotConfiguration = modelDefinition.snapshotConfiguration;
+
 			return {
 				async snapshot() {
-					if(modelDefinition.areSnapshotsEnabled){
-
+					if(snapshotConfiguration){
 						let allFiles = await _eventStore.getAllFilenames();
-						let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${modelDefinition.snapshotName}-snapshot`) || 0;
+						let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${snapshotConfiguration.snapshotName}-snapshot`) || 0;
 						let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
-						let model = await buildInstance(modelDefinition, latestSnapshotNo, latestLogFileNo);
+						let storeModel = await buildStoreModel(modelDefinition, latestSnapshotNo, latestLogFileNo);
 
-						let snapshot = modelDefinition.createSnapshot(model)
-						await _eventStore.saveSnapshot(snapshot, modelDefinition.snapshotName, latestLogFileNo);
+						let snapshot = snapshotConfiguration.createSnapshotData(storeModel);
+						await _eventStore.saveSnapshot(snapshot, snapshotConfiguration.snapshotName, latestLogFileNo);
 					}
 					return this;	// allows chaining functions
 				},
 				async withReadInstance(action) {
 
 					let allFiles = await _eventStore.getAllFilenames();
-					let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${modelDefinition.snapshotName}-snapshot`) || 0;
+					let latestSnapshotNo = snapshotConfiguration ? _eventStore.getLatestFileNo(allFiles, `.${snapshotConfiguration.snapshotName}-snapshot`) || 0 : 0;
 					let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
-					let instance = await buildInstance(modelDefinition, latestSnapshotNo, latestLogFileNo);
+					let domainModel = await buildDomainModel(modelDefinition, latestSnapshotNo, latestLogFileNo);
 
-					await action(instance);
+					await action(domainModel);
 					return this;	// allows chaining functions
 				},
 				async withReadWriteInstance(action, maxRetries = 5) {
@@ -84,12 +93,12 @@ module.exports = async function defineStore(folder, options = {}) {
 					let retryCount = 0;
 					while (retryCount < maxRetries) {
 						let allFiles = await _eventStore.getAllFilenames();
-						let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${modelDefinition.snapshotName}-snapshot`) || 0;
+						let latestSnapshotNo = snapshotConfiguration ? _eventStore.getLatestFileNo(allFiles, `.${snapshotConfiguration.snapshotName}-snapshot`) || 0 : 0;
 						let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
-						let instance = await buildInstance(modelDefinition, latestSnapshotNo, latestLogFileNo);
+						let domainModel = await buildDomainModel(modelDefinition, latestSnapshotNo, latestLogFileNo);
 
 						let readyToCommitCallback = () => { isReadyToCommit = true; };
-						await action(instance, readyToCommitCallback);
+						await action(domainModel, readyToCommitCallback);
 
 						if (isReadyToCommit) {
 							try {
