@@ -29,23 +29,19 @@ function MemberListDomainModel(dispatch, storeModel) {
     }
 
     this.listMembers = function() {
+
+		// TODO: How to get "members" from storeModel? ("members" is private...)
+
         let members = storeModel.members;
-        return Object.keys(members).map(key => Object.assign({ name: key }, members[key]));
+        let ret = Object.keys(members).map(key => Object.assign({ name: key }, members[key]));
+        return ret;
     }
 }
 
 
 
 function MemberListStoreModel(snapshotData) {
-    let members = snapshotData || [];
-
-    // this.snapshotConfiguration = {
-    // 	areSnapshotsEnabled: true,
-    // 	snapshotName: "memberlist",
-    // 	createSnapshotData() {
-    // 		return members;
-    // 	}
-    // }
+    let members = snapshotData || {};	// This is where the model is materialized!
 
     this.createSnapshotData = () => members;
 
@@ -127,7 +123,7 @@ suite("defineStore(folder, options)", function() {
 							"name": "newMemberRegistered",
 							"data": {
 								"member":{
-									"name": "Arjan Einbu"
+									"name": "arjan einbu"
 								}
 							}
 						}]
@@ -136,7 +132,7 @@ suite("defineStore(folder, options)", function() {
 
                 let fulfilled = false;
                 await model.withReadInstance(instance => {
-                    assert.deepEqual(instance.members[0], { firstname: "arjan", lastname: "einbu" });
+                    assert.deepEqual(instance.listMembers()[0], { name: "arjan einbu" });
                     fulfilled = true;
                 });
                 assert.ok(fulfilled, "Async function wasn't called");
@@ -153,7 +149,7 @@ suite("defineStore(folder, options)", function() {
 							"name": "newMemberRegistered",
 							"data": {
 								"member":{
-									"name": "Arjan Einbu"
+									"name": "arjan einbu"
 								}
 							}
 						}]
@@ -167,7 +163,7 @@ suite("defineStore(folder, options)", function() {
 							"name": "newMemberRegistered",
 							"data": {
 								"member":{
-									"name": "Arjan Einbu"
+									"name": "marit winge"
 								}
 							}
 						}]
@@ -177,8 +173,8 @@ suite("defineStore(folder, options)", function() {
                 let fulfilled = false;
                 await model.withReadInstance(instance => {
                     assert.deepEqual(instance.members, [
-                        { firstname: "arjan", lastname: "einbu" },
-                        { firstname: "marit", lastname: "winge" }
+                        { name: "arjan einbu" },
+                        { name: "marit winge" }
                     ]);
                     fulfilled = true;
                 });
@@ -204,8 +200,8 @@ suite("defineStore(folder, options)", function() {
                 let fulfilled = false;
                 await model.withReadInstance(instance => {
                     assert.deepEqual(instance.members, [
-                        { firstname: "arjan", lastname: "einbu" },
-                        { firstname: "marit", lastname: "winge" }
+                        { name: "arjan einbu" },
+                        { name: "marit winge" }
                     ]);
                     fulfilled = true;
                 });
@@ -245,9 +241,9 @@ suite("defineStore(folder, options)", function() {
                 let fulfilled = false;
                 await model.withReadInstance(instance => {
                     assert.deepEqual(instance.members, [
-                        { firstname: "arjan", lastname: "einbu" },
-                        { firstname: "marit", lastname: "winge" },
-                        { firstname: "peter", lastname: "pan" }
+                        { name: "arjan einbu" },
+                        { name: "marit winge" },
+                        { name: "peter pan" }
                     ]);
                     fulfilled = true;
                 });
@@ -261,7 +257,7 @@ suite("defineStore(folder, options)", function() {
 
             test("create a .log file when transaction is marked as ready to commit", async function() {
                 await model.withReadWriteInstance((instance, readyToCommit) => {
-                    instance.addMember({ firstname: "arjan", lastname: "einbu" });
+                    instance.registerNewMember({ name: "arjan einbu" });
                     readyToCommit();
                 });
 
@@ -271,7 +267,7 @@ suite("defineStore(folder, options)", function() {
 
             test("dont create a .log file when transaction isn't marked as ready to commit", async function() {
                 await model.withReadWriteInstance((instance, readyToCommit) => {
-                    instance.addMember({ firstname: "arjan", lastname: "einbu" });
+                    instance.registerNewMember({ name: "arjan einbu" });
                     // don't mark as readyToCommit!
                 });
 
@@ -298,7 +294,7 @@ suite("defineStore(folder, options)", function() {
 						}]
 					}`;
 
-                    instance.addMember({ firstname: "arjan", lastname: "einbu" });
+                    instance.registerNewMember({ name: "arjan einbu" });
                     readyToCommit();
                 });
                 assert.ok(Object.keys(fs.files).length, 2);
@@ -317,7 +313,7 @@ suite("defineStore(folder, options)", function() {
 						}]
 					}`;
 
-                    instance.addMember({ firstname: "arjan", lastname: "einbu" });
+                    instance.registerNewMember({ name: "arjan einbu" });
                     readyToCommit();
                 }, 5);
 
