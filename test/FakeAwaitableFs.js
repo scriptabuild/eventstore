@@ -25,8 +25,13 @@ module.exports = class FakeAwaitableFs {
 		return valueAsPromise(this.files[filename]);
 	}
 
-	appendFile(filename, data){
+	appendFile(filename, data, options){
 		filename = path.basename(filename);
+		if(options.flag == "wx" && this.files[filename]){
+			let err = new Error("...");	//TODO: Insert the correct message and code here! -arjan 2017-09-11
+			err.code = "...";
+			return rejection(err);
+		}
 		return valueAsPromise(this.files[filename] = data);
 	}
 }
