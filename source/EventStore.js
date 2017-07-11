@@ -103,7 +103,7 @@ module.exports = class EventStore {
 		await action(log, markAsComplete);
 
 		if(isComplete) {
-			fileNo = fileNo || await this.getLatestLogFileNo();
+			fileNo = fileNo || (await this.getLatestLogFileNo() + 1);
 			await this.saveEvents(events, fileNo);
 		}
 	}
@@ -112,7 +112,7 @@ module.exports = class EventStore {
 		if (events && events.length) {
 			let headers = this._createHeaders();
 
-			let logfile = path.resolve(this.folder, ++fileNo + ".log");
+			let logfile = path.resolve(this.folder, fileNo + ".log");
 			await this._fs.appendFile(logfile, JSON.stringify({headers, events}), {flag: "wx"});
 		}
 	}

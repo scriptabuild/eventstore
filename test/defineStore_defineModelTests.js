@@ -5,10 +5,8 @@ const assert = require("assert");
 const defineStore = require("../source/defineStore");
 const FakeAwaitableFs = require("./FakeAwaitableFs");
 
-const log = console.log;
 
-
-
+const log = () => {}; //console.log;
 function MemberListDomainModel(dispatch, storeModel) {
     this.registerNewMember = function(member) {
         dispatch("newMemberRegistered", { member });
@@ -30,8 +28,6 @@ function MemberListDomainModel(dispatch, storeModel) {
 
     this.listMembers = function() {
 
-		// TODO: How to get "members" from storeModel? ("members" is private...)
-
         let members = storeModel.members;
         let ret = Object.keys(members).map(key => Object.assign({ name: key }, members[key]));
         return ret;
@@ -43,7 +39,7 @@ function MemberListDomainModel(dispatch, storeModel) {
 function MemberListStoreModel(snapshotData) {
     let members = snapshotData || {};	// This is where the model is materialized!
 
-    this.createSnapshotData = () => members;
+    this.createSnapshotData = () => members;	// This is the method used to serialize to a snapshot. This method is the inverse of the above assignment of snapshotData
 
     this.eventHandlers = {
         onNewMemberRegistered(eventdata) {
@@ -77,6 +73,8 @@ function MemberListStoreModel(snapshotData) {
             members[eventdata.name].address = eventdata.address;
         }
     }
+
+	Object.defineProperty(this, "members", { value: members, writable: false});
 }
 
 
@@ -123,7 +121,9 @@ suite("defineStore(folder, options)", function() {
 							"name": "newMemberRegistered",
 							"data": {
 								"member":{
-									"name": "arjan einbu"
+									"name": "arjan einbu",
+									"address": "rykkinn",
+									"membershipLevel": "silver"
 								}
 							}
 						}]
@@ -132,7 +132,7 @@ suite("defineStore(folder, options)", function() {
 
                 let fulfilled = false;
                 await model.withReadInstance(instance => {
-                    assert.deepEqual(instance.listMembers()[0], { name: "arjan einbu" });
+                    assert.deepEqual(instance.listMembers()[0], { name: "arjan einbu", address: "rykkinn", membershipLevel: "silver" });
                     fulfilled = true;
                 });
                 assert.ok(fulfilled, "Async function wasn't called");
@@ -149,7 +149,9 @@ suite("defineStore(folder, options)", function() {
 							"name": "newMemberRegistered",
 							"data": {
 								"member":{
-									"name": "arjan einbu"
+									"name": "arjan einbu",
+									"address": "rykkinn",
+									"membershipLevel": "silver"
 								}
 							}
 						}]
@@ -163,7 +165,9 @@ suite("defineStore(folder, options)", function() {
 							"name": "newMemberRegistered",
 							"data": {
 								"member":{
-									"name": "marit winge"
+									"name": "marit winge",
+									"address": "rykkinn",
+									"membershipLevel": "bronze"
 								}
 							}
 						}]
@@ -172,9 +176,9 @@ suite("defineStore(folder, options)", function() {
 
                 let fulfilled = false;
                 await model.withReadInstance(instance => {
-                    assert.deepEqual(instance.members, [
-                        { name: "arjan einbu" },
-                        { name: "marit winge" }
+                    assert.deepEqual(instance.listMembers(), [
+                        { name: "arjan einbu", address: "rykkinn", membershipLevel: "silver"},
+                        { name: "marit winge", address: "rykkinn", membershipLevel: "bronze" }
                     ]);
                     fulfilled = true;
                 });
@@ -189,19 +193,17 @@ suite("defineStore(folder, options)", function() {
 							"time": "2016-12-31T23:59:59.000Z"
 						},
 						"snapshot":{
-							"members": [
-								{"name": "arjan einbu"},
-								{"name": "marit winge"}
-							]
+							"arjan einbu": { "address": "rykkinn", "membershipLevel": "silver"},
+							"marit winge": { "address": "rykkinn", "membershipLevel": "bronze"}
 						}
 					}`
                 };
 
                 let fulfilled = false;
                 await model.withReadInstance(instance => {
-                    assert.deepEqual(instance.members, [
-                        { name: "arjan einbu" },
-                        { name: "marit winge" }
+                    assert.deepEqual(instance.listMembers(), [
+                        { name: "arjan einbu", "address": "rykkinn", "membershipLevel": "silver" },
+                        { name: "marit winge", "address": "rykkinn", "membershipLevel": "bronze" }
                     ]);
                     fulfilled = true;
                 });
@@ -215,11 +217,9 @@ suite("defineStore(folder, options)", function() {
 						"headers": {
 							"time": "2016-12-31T23:59:59.000Z"
 						},
-						"snapshot":{
-							"members": [
-								{"name": "arjan einbu"},
-								{"name": "marit winge"}
-							]
+						"snapshot": {
+							"arjan einbu": { "address": "rykkinn", "membershipLevel": "silver"},
+							"marit winge": { "address": "rykkinn", "membershipLevel": "bronze"}
 						}
 					}`,
                     "2.log": `
@@ -231,7 +231,8 @@ suite("defineStore(folder, options)", function() {
 							"name": "newMemberRegistered",
 							"data": {
 								"member":{
-									"name": "Arjan Einbu"
+									"name": "peter pan",
+									"address": "neverland"
 								}
 							}
 						}]
@@ -240,10 +241,10 @@ suite("defineStore(folder, options)", function() {
 
                 let fulfilled = false;
                 await model.withReadInstance(instance => {
-                    assert.deepEqual(instance.members, [
-                        { name: "arjan einbu" },
-                        { name: "marit winge" },
-                        { name: "peter pan" }
+                    assert.deepEqual(instance.listMembers(), [
+                        { name: "arjan einbu", address: "rykkinn", membershipLevel: "silver" },
+                        { name: "marit winge", address: "rykkinn", membershipLevel: "bronze" },
+                        { name: "peter pan", address: "neverland", membershipLevel: undefined }
                     ]);
                     fulfilled = true;
                 });
@@ -271,7 +272,7 @@ suite("defineStore(folder, options)", function() {
                     // don't mark as readyToCommit!
                 });
 
-                assert.ok(Object.keys(fs.files).length, 0);
+                assert.equal(Object.keys(fs.files).length, 0);
             });
 
             test("dont create a .log file when transaction has no events (even when transaction is marked as ready to commit", async function() {
@@ -280,7 +281,7 @@ suite("defineStore(folder, options)", function() {
                     readyToCommit();
                 });
 
-                assert.ok(Object.keys(fs.files).length, 0);
+                assert.equal(Object.keys(fs.files).length, 0);
             });
 
             test("retry and write .log with next fileno", async function() {
@@ -290,7 +291,8 @@ suite("defineStore(folder, options)", function() {
 					{
 						"headers": {"time": "2016-12-31T23:59:59.999Z"},
 						"events": [{
-							"name": "someEvent"
+							"name": "someEvent",
+							"data": {}
 						}]
 					}`;
 
@@ -301,25 +303,23 @@ suite("defineStore(folder, options)", function() {
                 assert.ok(fs.files["2.log"]);
             });
 
-            test("retry 5 times (until retry count is reached) and then fail transaction", async function() {
+            test("retry 5 times (until retry count is reached) and then fail transaction",  function(done) {
                 let count = 0;
-                await model.withReadWriteInstance((instance, readyToCommit) => {
+                model.withReadWriteInstance((instance, readyToCommit) => {
                     // this is simulating concurrent logging, continually forcing retries
                     fs.files[`${++count}.log`] = `
-					{
-						"headers": {"time": "2016-12-31T23:59:0${count}.999Z"},
-						"events": [{
-							"name": "someEvent"
-						}]
-					}`;
+                    {
+                        "headers": {"time": "2016-12-31T23:59:0${count}.999Z"},
+                        "events": [{
+                            "name": "someEvent"
+                        }]
+                    }`;
 
                     instance.registerNewMember({ name: "arjan einbu" });
                     readyToCommit();
-                }, 5);
-
-                //TODO: this should fail, throwing an exception!!!
-
-                assert.fail("NOT IMPLEMENTED YET!!!");
+                }, 5)
+                .then(() => { assert.fail("Should have thrown an exception, instead of going here!"); })
+                .catch(() => {done()});
             });
 
         });
