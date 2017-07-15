@@ -44,7 +44,7 @@ if(index === -1) {
 ```
 
 ``` javascript
-let index = model.findIndex(item => item.serialnumber = model.serialnumber);	// when item is a complex, you're in charge of writing the comparer to use with .findIndex.
+let index = model.findIndex(item => item.serialnumber = model.serialnumber);	// when item is a complex type, you're in charge of writing the comparer to use with .findIndex.
 if(index === -1) {
 	model.push(item);
 }
@@ -90,7 +90,7 @@ let model = {};
 When you want to keep all occurrences of items, and store them in a keyed collection (ie. object),
 just set the property with the key as name.
 
-`model.keyname` and `model["keyname"]` are equivalent, but the latter allows to use an expression retuning a string to represent the key.
+`model.keyname` and `model["keyname"]` are equivalent, but the latter allows to use a variable or an expression to return the keyname.
 
 ``` javascript
 // create the key with a name from the item
@@ -134,7 +134,7 @@ delete model[eventdata.keycomponent];
 - sample code to count occurrences
 - ??? sample code for ???
 ``` javascript
-// ???
+//TODO: ???
 ```
 
 ### Sets, Maps, WeakMap etc.

@@ -1,4 +1,4 @@
-# Intentional
+# @aeinbu/eventstore
 
 ## Pretext
 
@@ -45,20 +45,40 @@ Some of the new habits of working with the eventsource will be:
 - Will retry concurrent batches.
 - All events to the eventstore will end up having an order, so that replay always will give the same result0.
 
-Intentional offers repeateble read isolation level with the transaction/batch model. These transactions can be either commited or rolled back, and Intentional will handle concurrent writes by retrying the write a preset number of times (before otherwise failing the transaction/batch).
+@aeinbu/eventstore offers repeateble read isolation level with the transaction/batch model. These transactions can be either commited or rolled back, and @aeinbu/eventstore will handle concurrent writes by retrying the write a preset number of times (before otherwise failing the transaction/batch).
 
 
 ## What doesn't it do?
 
+//TODO:
+
 ## Built-in audit log trail
+
+//TODO:
 
 ## Replay
 
+//TODO:
+
 ## Transaction
+
+//TODO:
 
 ## Queries and multiple models
 
+//TODO:
+
+### `LogSchemaTool`
+
+`LogSchemaTool` looks at a set of logs to determine what events it holds. It will show number of occurrences, as well as the first and last appearances of that event.
+
+The `LogSchemaTool` is implemented as any other query model.
+
+This should be helpfull to determine when certain functionality was implemented, indicating when certain events would not have been recorded, thus showing what data potentially is missing.
+
 ## Snapshots
+
+//TODO:
 
 Multiple readmodels
 Historical models/future models
@@ -66,11 +86,14 @@ Historical models/future models
 ## Read models vs. ReadWrite models vs. writer vs. replay logs
 
 ## Compared to other storage strategies
+
+//TODO:
+
 Concurrency
 Transactions
 Speed
 
-RD BMS
+RDBMs
 Files
 Document DBs
 

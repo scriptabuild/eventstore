@@ -1,11 +1,10 @@
 
-# API Documentation
-
 # EventStore class
 
-This class represents the actual eventstore, and has two responsibilities:
+This class represents the actual underlying eventstore, and has three responsibilities:
 - writing events to the log
 - replaying the log
+- handling snapshots
 
 ## new EventStore(folder, options);
 |parameters| |
@@ -46,6 +45,30 @@ let options = {
 
 let evs = new EventStore("somefolder", options);
 ```
+
+## getLatestFileNo(files, ext)
+
+//TODO:
+
+## getAllFilenames(folder)
+
+//TODO:
+
+## getLatestSnapshotFileNo(snapshotName)
+
+//TODO:
+
+## restoreSnapshot(snapshotFileNo, snapshotName)
+
+//TODO:
+
+## saveSnapshot(snapshot, modelName, fileNo)
+
+//TODO:
+
+## getLatestLogFileNo()
+
+//TODO:
 
 ## async .log(eventObj [,fileNo])
 
@@ -137,4 +160,6 @@ await evs.replayEventStream((event, headers) => {
 }, fileRange, stopReplayPredicates)
 ```
 
+## saveEvents(events, fileNo)
 
+//TODO:
