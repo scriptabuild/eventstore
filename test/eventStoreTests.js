@@ -11,7 +11,7 @@ suite("new EventStore(folder, options)", function () {
 
 	setup(async function () {
 		fs = new FakeAwaitableFs();
-		eventStore = new EventStore("not-a-real-folder", {fs});
+		eventStore = new EventStore("/not-a-real-folder", {fs});
 	});
 
 
@@ -22,14 +22,14 @@ suite("new EventStore(folder, options)", function () {
 			await eventStore.log({name: "first event"});
 
 			assert.equal(Object.keys(fs.files).length, 1);
-			assert.ok(fs.files["1.log"]);
+			assert.ok(fs.files["/not-a-real-folder/1.log"]);
 		});
 
 		test("creates \"2.log\" file for second invokation", async function () {
 			await eventStore.log({name: "first event"});
 			await eventStore.log({name: "second event"});
 
-			assert.ok(fs.files["2.log"]);
+			assert.ok(fs.files["/not-a-real-folder/2.log"]);
 		});
 
 		test("creates exactly one file for one invocation", async function () {
@@ -48,14 +48,14 @@ suite("new EventStore(folder, options)", function () {
 		test("stores the event in file", async function () {
 			await eventStore.log({name: "test event"});
 
-			let logged = JSON.parse(fs.files["1.log"]);
+			let logged = JSON.parse(fs.files["/not-a-real-folder/1.log"]);
 			assert.equal(logged.events[0].name, "test event");
 		});
 
 		test("stores headers in file", async function () {
 			await eventStore.log({name: "test event"});
 
-			let logged = JSON.parse(fs.files["1.log"]);
+			let logged = JSON.parse(fs.files["/not-a-real-folder/1.log"]);
 			assert.ok(logged.headers);
 		});
 
@@ -91,7 +91,7 @@ suite("new EventStore(folder, options)", function () {
 				markAsComplete();
 			});
 
-			assert.ok(fs.files["1.log"]);
+			assert.ok(fs.files["/not-a-real-folder/1.log"]);
 		});
 
 		test("creates \"2.log\" file for second invokation", async function () {
@@ -106,7 +106,7 @@ suite("new EventStore(folder, options)", function () {
 				markAsComplete();
 			});
 
-			assert.ok(fs.files["2.log"]);
+			assert.ok(fs.files["/not-a-real-folder/2.log"]);
 		});
 
 		test("can store multiple events in a single file", async function () {
@@ -116,7 +116,7 @@ suite("new EventStore(folder, options)", function () {
 				markAsComplete();
 			});
 
-			let logged = JSON.parse(fs.files["1.log"]);
+			let logged = JSON.parse(fs.files["/not-a-real-folder/1.log"]);
 			assert.equal(logged.events.length, 2);
 		});
 
@@ -128,7 +128,7 @@ suite("new EventStore(folder, options)", function () {
 
 		test("replay one event from one file", async function () {
 			fs.files = {
-				"1.log": `
+				"/not-a-real-folder/1.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.999Z"
@@ -149,7 +149,7 @@ suite("new EventStore(folder, options)", function () {
 
 		test("replay two events from one file", async function () {
 			fs.files = {
-				"1.log": `
+				"/not-a-real-folder/1.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.999Z"
@@ -171,7 +171,7 @@ suite("new EventStore(folder, options)", function () {
 
 		test("replay two events from two files", async function () {
 			fs.files = {
-				"1.log": `
+				"/not-a-real-folder/1.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.995Z"
@@ -180,7 +180,7 @@ suite("new EventStore(folder, options)", function () {
 							"name": "first event"
 						}]
 					}`,
-				"2.log": `
+				"/not-a-real-folder/2.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.999Z"
@@ -200,7 +200,7 @@ suite("new EventStore(folder, options)", function () {
 
 		test("get correct header when replaying one event from one file", async function () {
 			fs.files = {
-				"1.log": `
+				"/not-a-real-folder/1.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.999Z"
@@ -227,7 +227,7 @@ suite("new EventStore(folder, options)", function () {
 
 		setup(async function () {
 			fs.files = {
-				"1.log": `
+				"/not-a-real-folder/1.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:00:00.000Z"
@@ -236,7 +236,7 @@ suite("new EventStore(folder, options)", function () {
 							"name": "first event"
 						}]
 					}`,
-				"2.log": `
+				"/not-a-real-folder/2.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:10:00.000Z"
@@ -245,7 +245,7 @@ suite("new EventStore(folder, options)", function () {
 							"name": "second event"
 						}]
 					}`,
-				"3.log": `
+				"/not-a-real-folder/3.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:20:00.000Z"
@@ -254,7 +254,7 @@ suite("new EventStore(folder, options)", function () {
 							"name": "third event"
 						}]
 					}`,
-				"4.log": `
+				"/not-a-real-folder/4.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:30:00.000Z"
@@ -311,7 +311,7 @@ suite("new EventStore(folder, options)", function () {
 
 		setup(async function(){
 			fs.files = {
-				"1.some-snapshot": `
+				"/not-a-real-folder/1.some-snapshot": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:11:00.000Z"
@@ -335,14 +335,14 @@ suite("new EventStore(folder, options)", function () {
 		test("creates the correct snapshot file", function(){
 			let model = {otherthing: "othervalue"};
 			eventStore.saveSnapshot(model, "some-other", 3);
-			assert.ok(fs.files["3.some-other-snapshot"]);
+			assert.ok(fs.files["/not-a-real-folder/3.some-other-snapshot"]);
 		});
 
 		test("stores the headers in the file", function(){
 			let model = {otherthing: "othervalue"};
 			eventStore.saveSnapshot(model, "some-other", 3);
 
-			let stored = JSON.parse(fs.files["3.some-other-snapshot"]);
+			let stored = JSON.parse(fs.files["/not-a-real-folder/3.some-other-snapshot"]);
 			assert.ok(stored.headers);
 		});
 
@@ -350,7 +350,7 @@ suite("new EventStore(folder, options)", function () {
 			let model = {otherthing: "othervalue"};
 			eventStore.saveSnapshot(model, "some-other", 3);
 
-			let stored = JSON.parse(fs.files["3.some-other-snapshot"]);
+			let stored = JSON.parse(fs.files["/not-a-real-folder/3.some-other-snapshot"]);
 			assert.ok(stored.snapshot);
 		});
 
@@ -362,7 +362,7 @@ suite("new EventStore(folder, options)", function () {
 
 		setup(async function () {
 			fs.files = {
-				"1.log": `
+				"/not-a-real-folder/1.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:00:00.000Z"
@@ -371,7 +371,7 @@ suite("new EventStore(folder, options)", function () {
 							"name": "first event"
 						}]
 					}`,
-				"2.log": `
+				"/not-a-real-folder/2.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:10:00.000Z"
@@ -380,21 +380,21 @@ suite("new EventStore(folder, options)", function () {
 							"name": "second event"
 						}]
 					}`,
-				"2.some-snapshot": `
+				"/not-a-real-folder/2.some-snapshot": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:11:00.000Z"
 						},
 						"snapshot": {"something": "somevalue"}
 					}`,
-				"2.some-other-snapshot": `
+				"/not-a-real-folder/2.some-other-snapshot": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:12:00.000Z"
 						},
 						"snapshot": {"something": "somevalue"}
 					}`,
-				"3.log": `
+				"/not-a-real-folder/3.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:20:00.000Z"
@@ -403,14 +403,14 @@ suite("new EventStore(folder, options)", function () {
 							"name": "third event"
 						}]
 					}`,
-				"3.some-snapshot": `
+				"/not-a-real-folder/3.some-snapshot": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:21:00.000Z"
 						},
 						"snapshot": {"something": "somevalue"}
 					}`,
-				"4.log": `
+				"/not-a-real-folder/4.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:30:00.000Z"

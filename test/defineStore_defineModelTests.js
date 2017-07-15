@@ -8,71 +8,71 @@ const FakeAwaitableFs = require("./FakeAwaitableFs");
 
 const log = () => {}; //console.log;
 function MemberListDomainModel(dispatch, storeModel) {
-    this.registerNewMember = function(member) {
-        dispatch("newMemberRegistered", { member });
-        log("MAIL -> welcome to new member");
-    }
+	this.registerNewMember = function(member) {
+		dispatch("newMemberRegistered", { member });
+		log("MAIL -> welcome to new member");
+	}
 
-    this.endMembership = function(name) {
-        dispatch("membershipEnded", { name });
-        log("MAIL -> goodbye to member");
-    }
+	this.endMembership = function(name) {
+		dispatch("membershipEnded", { name });
+		log("MAIL -> goodbye to member");
+	}
 
-    this.correctAddress = function(name, address) {
-        dispatch("addressCorrected", { name, address });
-    }
+	this.correctAddress = function(name, address) {
+		dispatch("addressCorrected", { name, address });
+	}
 
-    this.memberHasMoved = function(name, address) {
-        dispatch("memberHasMoved", { name, address });
-    }
+	this.memberHasMoved = function(name, address) {
+		dispatch("memberHasMoved", { name, address });
+	}
 
-    this.listMembers = function() {
+	this.listMembers = function() {
 
-        let members = storeModel.members;
-        let ret = Object.keys(members).map(key => Object.assign({ name: key }, members[key]));
-        return ret;
-    }
+		let members = storeModel.members;
+		let ret = Object.keys(members).map(key => Object.assign({ name: key }, members[key]));
+		return ret;
+	}
 }
 
 
 
 function MemberListStoreModel(snapshotData) {
-    let members = snapshotData || {};	// This is where the model is materialized!
+	let members = snapshotData || {};	// This is where the model is materialized!
 
-    this.createSnapshotData = () => members;	// This is the method used to serialize to a snapshot. This method is the inverse of the above assignment of snapshotData
+	this.createSnapshotData = () => members;	// This is the method used to serialize to a snapshot. This method is the inverse of the above assignment of snapshotData
 
-    this.eventHandlers = {
-        onNewMemberRegistered(eventdata) {
-            if (members[eventdata.member.name]) {
-                throw new Error(`onNewMemberRegistered failed. ${eventdata.member.name} is already a member.`)
-            }
-            members[eventdata.member.name] = {
-                address: eventdata.member.address,
-                membershipLevel: eventdata.member.membershipLevel
-            };
-        },
+	this.eventHandlers = {
+		onNewMemberRegistered(eventdata) {
+			if (members[eventdata.member.name]) {
+				throw new Error(`onNewMemberRegistered failed. ${eventdata.member.name} is already a member.`)
+			}
+			members[eventdata.member.name] = {
+				address: eventdata.member.address,
+				membershipLevel: eventdata.member.membershipLevel
+			};
+		},
 
-        onMembershipEnded(eventdata) {
-            if (!members[eventdata.name]) {
-                throw new Error(`onMembershipEnded failed. ${eventdata.name} is not a member.`)
-            }
-            delete members[eventdata.name];
-        },
+		onMembershipEnded(eventdata) {
+			if (!members[eventdata.name]) {
+				throw new Error(`onMembershipEnded failed. ${eventdata.name} is not a member.`)
+			}
+			delete members[eventdata.name];
+		},
 
-        onAddressCorrected(eventdata) {
-            if (!members[eventdata.name]) {
-                throw new Error(`onAddressCorrected failed. ${eventdata.name} is not a member.`)
-            }
-            members[eventdata.name].address = eventdata.address;
-        },
+		onAddressCorrected(eventdata) {
+			if (!members[eventdata.name]) {
+				throw new Error(`onAddressCorrected failed. ${eventdata.name} is not a member.`)
+			}
+			members[eventdata.name].address = eventdata.address;
+		},
 
-        onMemberHasMoved(eventdata) {
-            if (!members[eventdata.name]) {
-                throw new Error(`onMemberHasMoved failed. ${eventdata.name} is not a member.`)
-            }
-            members[eventdata.name].address = eventdata.address;
-        }
-    }
+		onMemberHasMoved(eventdata) {
+			if (!members[eventdata.name]) {
+				throw new Error(`onMemberHasMoved failed. ${eventdata.name} is not a member.`)
+			}
+			members[eventdata.name].address = eventdata.address;
+		}
+	}
 
 	Object.defineProperty(this, "members", { value: members, writable: false});
 }
@@ -80,39 +80,39 @@ function MemberListStoreModel(snapshotData) {
 
 
 let modelDefinition = {
-    snapshotConfiguration: {
-        snapshotName: "some-model",
-        createSnapshotData: storeModel => storeModel.createSnapshotData()
-    },
-    getEventHandlers: storeModel => storeModel.eventHandlers,
-    createStoreModel: snapshotData => new MemberListStoreModel(snapshotData),
-    createDomainModel: (dispatch, storeModel) => new MemberListDomainModel(dispatch, storeModel)
+	snapshotConfiguration: {
+		snapshotName: "some-model",
+		createSnapshotData: storeModel => storeModel.createSnapshotData()
+	},
+	getEventHandlers: storeModel => storeModel.eventHandlers,
+	createStoreModel: snapshotData => new MemberListStoreModel(snapshotData),
+	createDomainModel: (dispatch, storeModel) => new MemberListDomainModel(dispatch, storeModel)
 }
 
 
 
 suite("defineStore(folder, options)", function() {
 
-    let fs;
-    let store;
-    let model;
+	let fs;
+	let store;
+	let model;
 
-    setup(async function() {
-        fs = new FakeAwaitableFs();
+	setup(async function() {
+		fs = new FakeAwaitableFs();
 
-        store = await defineStore("not-a-folder", { fs });
-        model = store.defineModel(modelDefinition);
-    });
+		store = await defineStore("/not-a-real-folder", { fs });
+		model = store.defineModel(modelDefinition);
+	});
 
 
 
-    suite(".defineModel(modelDefinition)", function() {
+	suite(".defineModel(modelDefinition)", function() {
 
-        suite(".withReadInstance(action)", function() {
+		suite(".withReadInstance(action)", function() {
 
-            test("create read only instance from one log file", async function() {
-                fs.files = {
-                    "1.log": `
+			test("create read only instance from one log file", async function() {
+				fs.files = {
+					"/not-a-real-folder/1.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.999Z"
@@ -128,19 +128,19 @@ suite("defineStore(folder, options)", function() {
 							}
 						}]
 					}`
-                };
+				};
 
-                let fulfilled = false;
-                await model.withReadInstance(instance => {
-                    assert.deepEqual(instance.listMembers()[0], { name: "arjan einbu", address: "rykkinn", membershipLevel: "silver" });
-                    fulfilled = true;
-                });
-                assert.ok(fulfilled, "Async function wasn't called");
-            });
+				let fulfilled = false;
+				await model.withReadInstance(instance => {
+					assert.deepEqual(instance.listMembers()[0], { name: "arjan einbu", address: "rykkinn", membershipLevel: "silver" });
+					fulfilled = true;
+				});
+				assert.ok(fulfilled, "Async function wasn't called");
+			});
 
-            test("create read only instance from two log files", async function() {
-                fs.files = {
-                    "1.log": `
+			test("create read only instance from two log files", async function() {
+				fs.files = {
+					"/not-a-real-folder/1.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.990Z"
@@ -156,7 +156,7 @@ suite("defineStore(folder, options)", function() {
 							}
 						}]
 					}`,
-                    "2.log": `
+					"/not-a-real-folder/2.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.999Z"
@@ -172,22 +172,22 @@ suite("defineStore(folder, options)", function() {
 							}
 						}]
 					}`
-                };
+				};
 
-                let fulfilled = false;
-                await model.withReadInstance(instance => {
-                    assert.deepEqual(instance.listMembers(), [
-                        { name: "arjan einbu", address: "rykkinn", membershipLevel: "silver"},
-                        { name: "marit winge", address: "rykkinn", membershipLevel: "bronze" }
-                    ]);
-                    fulfilled = true;
-                });
-                assert.ok(fulfilled, "Async function wasn't called");
-            });
+				let fulfilled = false;
+				await model.withReadInstance(instance => {
+					assert.deepEqual(instance.listMembers(), [
+						{ name: "arjan einbu", address: "rykkinn", membershipLevel: "silver"},
+						{ name: "marit winge", address: "rykkinn", membershipLevel: "bronze" }
+					]);
+					fulfilled = true;
+				});
+				assert.ok(fulfilled, "Async function wasn't called");
+			});
 
-            test("create read only instance from a snapshot file", async function() {
-                fs.files = {
-                    "1.some-model-snapshot": `
+			test("create read only instance from a snapshot file", async function() {
+				fs.files = {
+					"/not-a-real-folder/1.some-model-snapshot": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.000Z"
@@ -197,22 +197,22 @@ suite("defineStore(folder, options)", function() {
 							"marit winge": { "address": "rykkinn", "membershipLevel": "bronze"}
 						}
 					}`
-                };
+				};
 
-                let fulfilled = false;
-                await model.withReadInstance(instance => {
-                    assert.deepEqual(instance.listMembers(), [
-                        { name: "arjan einbu", "address": "rykkinn", "membershipLevel": "silver" },
-                        { name: "marit winge", "address": "rykkinn", "membershipLevel": "bronze" }
-                    ]);
-                    fulfilled = true;
-                });
-                assert.ok(fulfilled, "Async function wasn't called");
-            });
+				let fulfilled = false;
+				await model.withReadInstance(instance => {
+					assert.deepEqual(instance.listMembers(), [
+						{ name: "arjan einbu", "address": "rykkinn", "membershipLevel": "silver" },
+						{ name: "marit winge", "address": "rykkinn", "membershipLevel": "bronze" }
+					]);
+					fulfilled = true;
+				});
+				assert.ok(fulfilled, "Async function wasn't called");
+			});
 
-            test("create readmodel from a snapshot file and one log file", async function() {
-                fs.files = {
-                    "1.some-model-snapshot": `
+			test("create readmodel from a snapshot file and one log file", async function() {
+				fs.files = {
+					"/not-a-real-folder/1.some-model-snapshot": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.000Z"
@@ -222,7 +222,7 @@ suite("defineStore(folder, options)", function() {
 							"marit winge": { "address": "rykkinn", "membershipLevel": "bronze"}
 						}
 					}`,
-                    "2.log": `
+					"/not-a-real-folder/2.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.999Z"
@@ -237,57 +237,57 @@ suite("defineStore(folder, options)", function() {
 							}
 						}]
 					}`
-                };
+				};
 
-                let fulfilled = false;
-                await model.withReadInstance(instance => {
-                    assert.deepEqual(instance.listMembers(), [
-                        { name: "arjan einbu", address: "rykkinn", membershipLevel: "silver" },
-                        { name: "marit winge", address: "rykkinn", membershipLevel: "bronze" },
-                        { name: "peter pan", address: "neverland", membershipLevel: undefined }
-                    ]);
-                    fulfilled = true;
-                });
-                assert.ok(fulfilled, "Async function wasn't called");
-            });
-        });
+				let fulfilled = false;
+				await model.withReadInstance(instance => {
+					assert.deepEqual(instance.listMembers(), [
+						{ name: "arjan einbu", address: "rykkinn", membershipLevel: "silver" },
+						{ name: "marit winge", address: "rykkinn", membershipLevel: "bronze" },
+						{ name: "peter pan", address: "neverland", membershipLevel: undefined }
+					]);
+					fulfilled = true;
+				});
+				assert.ok(fulfilled, "Async function wasn't called");
+			});
+		});
 
 
 
-        suite(".withReadWriteInstance(action)", async function() {
+		suite(".withReadWriteInstance(action)", async function() {
 
-            test("create a .log file when transaction is marked as ready to commit", async function() {
-                await model.withReadWriteInstance((instance, readyToCommit) => {
-                    instance.registerNewMember({ name: "arjan einbu" });
-                    readyToCommit();
-                });
+			test("create a .log file when transaction is marked as ready to commit", async function() {
+				await model.withReadWriteInstance((instance, readyToCommit) => {
+					instance.registerNewMember({ name: "arjan einbu" });
+					readyToCommit();
+				});
 
-                assert.ok(Object.keys(fs.files).length, 1);
-                assert.ok(fs.files["1.log"]);
-            });
+				assert.ok(Object.keys(fs.files).length, 1);
+				assert.ok(fs.files["/not-a-real-folder/1.log"]);
+			});
 
-            test("dont create a .log file when transaction isn't marked as ready to commit", async function() {
-                await model.withReadWriteInstance((instance, readyToCommit) => {
-                    instance.registerNewMember({ name: "arjan einbu" });
-                    // don't mark as readyToCommit!
-                });
+			test("dont create a .log file when transaction isn't marked as ready to commit", async function() {
+				await model.withReadWriteInstance((instance, readyToCommit) => {
+					instance.registerNewMember({ name: "arjan einbu" });
+					// don't mark as readyToCommit!
+				});
 
-                assert.equal(Object.keys(fs.files).length, 0);
-            });
+				assert.equal(Object.keys(fs.files).length, 0);
+			});
 
-            test("dont create a .log file when transaction has no events (even when transaction is marked as ready to commit", async function() {
-                await model.withReadWriteInstance((instance, readyToCommit) => {
-                    // do nothing!
-                    readyToCommit();
-                });
+			test("dont create a .log file when transaction has no events (even when transaction is marked as ready to commit", async function() {
+				await model.withReadWriteInstance((instance, readyToCommit) => {
+					// do nothing!
+					readyToCommit();
+				});
 
-                assert.equal(Object.keys(fs.files).length, 0);
-            });
+				assert.equal(Object.keys(fs.files).length, 0);
+			});
 
-            test("retry and write .log with next fileno", async function() {
-                await model.withReadWriteInstance((instance, readyToCommit) => {
-                    // this is simulating concurrent logging, forcing exactly one retry
-                    fs.files["1.log"] = `
+			test("retry and write .log with next fileno", async function() {
+				await model.withReadWriteInstance((instance, readyToCommit) => {
+					// this is simulating concurrent logging, forcing exactly one retry
+					fs.files["/not-a-real-folder/1.log"] = `
 					{
 						"headers": {"time": "2016-12-31T23:59:59.999Z"},
 						"events": [{
@@ -296,41 +296,41 @@ suite("defineStore(folder, options)", function() {
 						}]
 					}`;
 
-                    instance.registerNewMember({ name: "arjan einbu" });
-                    readyToCommit();
-                });
-                assert.ok(Object.keys(fs.files).length, 2);
-                assert.ok(fs.files["2.log"]);
-            });
+					instance.registerNewMember({ name: "arjan einbu" });
+					readyToCommit();
+				});
+				assert.ok(Object.keys(fs.files).length, 2);
+				assert.ok(fs.files["/not-a-real-folder/2.log"]);
+			});
 
-            test("retry 5 times (until retry count is reached) and then fail transaction",  function(done) {
-                let count = 0;
-                model.withReadWriteInstance((instance, readyToCommit) => {
-                    // this is simulating concurrent logging, continually forcing retries
-                    fs.files[`${++count}.log`] = `
-                    {
-                        "headers": {"time": "2016-12-31T23:59:0${count}.999Z"},
-                        "events": [{
-                            "name": "someEvent"
-                        }]
-                    }`;
+			test("retry 5 times (until retry count is reached) and then fail transaction",  function(done) {
+				let count = 0;
+				model.withReadWriteInstance((instance, readyToCommit) => {
+					// this is simulating concurrent logging, continually forcing retries
+					fs.files[`/not-a-real-folder/${++count}.log`] = `
+					{
+						"headers": {"time": "2016-12-31T23:59:0${count}.999Z"},
+						"events": [{
+							"name": "someEvent"
+						}]
+					}`;
 
-                    instance.registerNewMember({ name: "arjan einbu" });
-                    readyToCommit();
-                }, 5)
-                .then(() => { assert.fail("Should have thrown an exception, instead of going here!"); })
-                .catch(() => {done()});
-            });
+					instance.registerNewMember({ name: "arjan einbu" });
+					readyToCommit();
+				}, 5)
+				.then(() => { assert.fail("Should have thrown an exception, instead of going here!"); })
+				.catch(() => {done()});
+			});
 
-        });
+		});
 
 
 
-        suite(".snapshot(snapshotName)", function() {
+		suite(".snapshot(snapshotName)", function() {
 
-            test("create snapshot from one log file", async function() {
-                fs.files = {
-                    "1.log": `
+			test("create snapshot from one log file", async function() {
+				fs.files = {
+					"/not-a-real-folder/1.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.999Z"
@@ -344,15 +344,15 @@ suite("defineStore(folder, options)", function() {
 							}
 						}]
 					}`
-                };
+				};
 
-                await model.snapshot();
-                assert.ok(fs.files["1.some-model-snapshot"]);
-            });
+				await model.snapshot();
+				assert.ok(fs.files["/not-a-real-folder/1.some-model-snapshot"]);
+			});
 
-            test("create snapshot from two log files", async function() {
-                fs.files = {
-                    "1.log": `
+			test("create snapshot from two log files", async function() {
+				fs.files = {
+					"/not-a-real-folder/1.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.990Z"
@@ -366,7 +366,7 @@ suite("defineStore(folder, options)", function() {
 							}
 						}]
 					}`,
-                    "2.log": `
+					"/not-a-real-folder/2.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.999Z"
@@ -380,15 +380,15 @@ suite("defineStore(folder, options)", function() {
 							}
 						}]
 					}`
-                };
+				};
 
-                await model.snapshot();
-                assert.ok(fs.files["2.some-model-snapshot"]);
-            });
+				await model.snapshot();
+				assert.ok(fs.files["/not-a-real-folder/2.some-model-snapshot"]);
+			});
 
-            test("create snapshot from a snapshot file and one log file", async function() {
-                fs.files = {
-                    "1.some-model-snapshot": `
+			test("create snapshot from a snapshot file and one log file", async function() {
+				fs.files = {
+					"/not-a-real-folder/1.some-model-snapshot": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.000Z"
@@ -400,7 +400,7 @@ suite("defineStore(folder, options)", function() {
 							]
 						}
 					}`,
-                    "2.log": `
+					"/not-a-real-folder/2.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.999Z"
@@ -414,13 +414,13 @@ suite("defineStore(folder, options)", function() {
 							}
 						}]
 					}`
-                };
+				};
 
-                await model.snapshot();
-                assert.ok(fs.files["2.some-model-snapshot"]);
-            });
+				await model.snapshot();
+				assert.ok(fs.files["/not-a-real-folder/2.some-model-snapshot"]);
+			});
 
-        });
+		});
 
-    });
+	});
 });

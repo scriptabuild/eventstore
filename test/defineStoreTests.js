@@ -13,7 +13,7 @@ suite("defineStore(folder, options)", function () {
 	setup(async function () {
 		fs = new FakeAwaitableFs();
 
-		store = await defineStore("not-a-folder", {
+		store = await defineStore("/not-a-real-folder", {
 			fs
 		});
 	});
@@ -29,12 +29,12 @@ suite("defineStore(folder, options)", function () {
 			});
 
 			assert.equal(Object.keys(fs.files).length, 1);
-			assert.ok(fs.files["1.log"]);
+			assert.ok(fs.files["/not-a-real-folder/1.log"]);
 		});
 
 		test("Log event when files exist, creates another file in correct sequence", async function () {
 			fs.files = {
-				"1.log": `
+				"/not-a-real-folder/1.log": `
 				{"headers": {"time": "2016-12-31T23:59:59.999Z"},
 				"events": [{"name": "first event"}]
 			`
@@ -45,7 +45,7 @@ suite("defineStore(folder, options)", function () {
 			});
 
 			assert.equal(Object.keys(fs.files).length, 2);
-			assert.ok(fs.files["2.log"]);
+			assert.ok(fs.files["/not-a-real-folder/2.log"]);
 		});
 
 	});
@@ -67,12 +67,12 @@ suite("defineStore(folder, options)", function () {
 			});
 
 			assert.equal(Object.keys(fs.files).length, 1);
-			assert.ok(fs.files["1.log"]);
+			assert.ok(fs.files["/not-a-real-folder/1.log"]);
 		});
 
 		test("Second event batch, creates second file", async function () {
 			fs.files = {
-				"1.log": `
+				"/not-a-real-folder/1.log": `
 				{"headers": {"time": "2016-12-31T23:59:59.999Z"},
 				"events": [{"name": "first event"}, {"name": "second event"}]
 			`
@@ -89,7 +89,7 @@ suite("defineStore(folder, options)", function () {
 			});
 
 			assert.equal(Object.keys(fs.files).length, 2);
-			assert.ok(fs.files["2.log"]);
+			assert.ok(fs.files["/not-a-real-folder/2.log"]);
 		});
 
 	});
@@ -100,7 +100,7 @@ suite("defineStore(folder, options)", function () {
 
 		test("replay one event from one file", async function () {
 			fs.files = {
-				"1.log": `
+				"/not-a-real-folder/1.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.999Z"
@@ -121,7 +121,7 @@ suite("defineStore(folder, options)", function () {
 
 		test("Replay from two files", async function () {
 			fs.files = {
-				"1.log": `
+				"/not-a-real-folder/1.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.995Z"
@@ -130,7 +130,7 @@ suite("defineStore(folder, options)", function () {
 							"name": "first event"
 						}]
 					}`,
-				"2.log": `
+				"/not-a-real-folder/2.log": `
 					{
 						"headers": {
 							"time": "2016-12-31T23:59:59.999Z"

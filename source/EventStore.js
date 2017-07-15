@@ -27,12 +27,12 @@ module.exports = class EventStore {
 	// snapshot stuff
 
 	async getLatestSnapshotFileNo(snapshotName) {
-		let allFiles = await this.getAllFilenames();
+		let allFiles = await this.getAllFilenames(this.folder);
 		return this.getLatestFileNo(allFiles, `.${snapshotName}-snapshot`);
 	}
 
 	async restoreSnapshot(snapshotFileNo, snapshotName){
-		let filename = `${snapshotFileNo}.${snapshotName}-snapshot`;
+		let filename = path.resolve(this.folder, `${snapshotFileNo}.${snapshotName}-snapshot`);
 		let fileObj = await this._fs.readFile(filename);
 		let contents = JSON.parse(fileObj.toString());
 		return contents.snapshot;
@@ -49,7 +49,7 @@ module.exports = class EventStore {
 	// eventlog stuff
 
 	async getLatestLogFileNo() {
-		let allFiles = await this.getAllFilenames();
+		let allFiles = await this.getAllFilenames(this.folder);
 		return this.getLatestFileNo(allFiles, ".log");
 	}
 

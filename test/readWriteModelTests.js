@@ -13,7 +13,7 @@
 // 	setup(async function () {
 // 		fs = new FakeAwaitableFs();
 
-// 		store = await defineStore("not-a-folder", {fs});
+// 		store = await defineStore("not-a-real-folder", {fs});
 // 	});
 	
 // 	suite("defineReadWriteModel", function () {
