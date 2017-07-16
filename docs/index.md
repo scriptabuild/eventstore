@@ -93,7 +93,7 @@ If you create multiple models, you will get seperate snapshots for each model. (
 
 Historical models/future models (Is this from the M.Fowler article???)
 
-## `LogSchemaTool`
+## LogSchemaTool
 
 The `LogSchemaTool` is an analyzer tool for your event logs.
 It looks at a set of logs to determine what events it holds. It will show number of occurrences, the parameter names and types, as well as the first and last appearances of that event.
