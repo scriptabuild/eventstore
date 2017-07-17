@@ -19,8 +19,6 @@ currently are in.
 
 ## So, what is Eventsourcing?
 
-Eventsourcing is described quite well by in [this article by Martin Fowler](https://martinfowler.com/eaaDev/EventSourcing.html).
-
 Instead of storing and updating the store to always show a view of the data at
 some point in time, eventsourcing lets you keep all the changes made to to the data.
 
@@ -40,6 +38,8 @@ Some of the new habits of working with the eventsource will be:
 - Doing multiple replays.
 - Repeating a replay and stop where you want in that replay; Either by looking at header data (like the logged time) or the state of the model you're replaying to.
 
+[Martin Fowlers article on Eventsourcing](https://martinfowler.com/eaaDev/EventSourcing.html) examines more aspects of eventsourcing, and is worth the read.
+
 ## Main functionality of @aeinbu/eventsource
 
 - Transactional batches. A batch either runs to completion and is then committed and stored. If the batch fails or for other reasons is aborted, the state is rolled back to the state at the beginning of the batch operation. (Ie. a batch is either fully completed, or not recorded at all.)
@@ -47,7 +47,7 @@ Some of the new habits of working with the eventsource will be:
 - Will retry concurrent batches.
 - All events to the eventstore will end up having an order, so that replay always will give the same result.
 
-@aeinbu/eventstore offers repeateble read isolation level with the transaction/batch model. These transactions can be either commited or rolled back, and @aeinbu/eventstore will handle concurrent writes by retrying the write a preset number of times (before otherwise failing the transaction/batch).
+@aeinbu/eventstore offers repeatable read isolation level with the transaction/batch model. These transactions can be either commited or rolled back, and @aeinbu/eventstore will handle concurrent writes by retrying the write a preset number of times (before otherwise failing the transaction/batch).
 
 [Check out the tutorial to get started.](./tutorial.md)
 
@@ -64,9 +64,11 @@ For even further reading, you coud also go to [the important documentation for t
 
 ## Read/write models vs. Read models
 
-A read/write model allows you to work with existing data in an eventlog in a persisent way. Any changes made through the model are stored to the eventlog as an ordered and transactional item.
+A _read/write model_ allows you to work with existing data in an eventlog in a persisent way. Any changes made through the model are stored to the eventlog as an ordered and transactional item.
 
-A read model allows you to work with a model created by replaying the event logs. Any changes made to a read only model will be lost when the model is "closed".
+A _read model_ allows you to work with a model created by replaying the event logs. Any changes made to a read only model will be lost when the model is "closed".
+
+You can also have the concept of a _write only_ model. In this case, you don't actually need to build a model, so the simplest way to implement this is by just using the `log(eventName, eventData)` and `logBlock(action)` methods.
 
 ## Transactional
 
@@ -89,10 +91,6 @@ precomputed state of the model at a given time (ie. at a specific log no.) With 
 
 If you create multiple models, you will get seperate snapshots for each model. (Snapshots can't shared between models.)
 
-//TODO:
-
-Historical models/future models (Is this from the M.Fowler article???)
-
 ## LogSchemaTool
 
 The `LogSchemaTool` is an analyzer tool for your event logs.
@@ -104,14 +102,25 @@ The `LogSchemaTool` is implemented as any other query model.
 
 ## Compared to other storage strategies
 
-//TODO:
+//TODO: Discuss these features accross the different storage models
 
-Concurrency
-Transactions
-Speed
+### Simple to setup
 
-SQL Database or RDBMS (Relational DataBase Management System) like MS SQL Server, SqlLite, DB2, Oracle, Sybase, MySQL etc.
-Files and folders
-Document DBs
+__Eventstore__ requires you to include its NPM package in your code, and runs in process. There is no need to set up or run a server process.
 
-Simplicity
+Most document databases, relational databases or object database products will require the installation of a server process.
+
+Going directly to the filesystem is perhaps the simplest to set up, but you have no abstractions to handle concurrency nor transactions.
+
+### Simple to use
+### Concurrency and isolation
+### Transactions
+### Speed
+### Scalability
+
+- Eventstore
+- SQL Database or RDBMS (Relational DataBase Management System) like MS SQL Server, SqlLite, DB2, Oracle, Sybase, MySQL etc.
+- Files and folders
+- Document DBs
+- Object DBs?
+
