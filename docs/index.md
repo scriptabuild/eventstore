@@ -37,7 +37,7 @@ Some of the new habits of working with the eventsource will be:
 
 [Martin Fowlers article on Eventsourcing](https://martinfowler.com/eaaDev/EventSourcing.html) examines more aspects of eventsourcing, and is worth the read.
 
-## Main functionality of @aeinbu/eventsource
+## Main functionality of @aeinbu/eventstore
 - Transactional batches. A batch either runs to completion and is then committed and stored. If the batch fails or for other reasons is aborted, the state is rolled back to the state at the beginning of the batch operation. (Ie. a batch is either fully completed, or not recorded at all.)
 - Repeatable read isolation level.
 - Will retry concurrent batches.
