@@ -1,10 +1,8 @@
 
 ## Current status
-
 [![Build Status](https://travis-ci.org/scriptabuild/eventstore.svg?branch=master)](https://travis-ci.org/scriptabuild/eventstore)
 
 ## Pretext
-
 In the classical main-stream architecture the applications we design and build
 are often stateful. This means that we usually store a snapshot of the objects we deal
 with in our application in a data store. The snapshot represents the state of
@@ -18,7 +16,6 @@ are not really interested in what was before and how we got to the state we
 currently are in.
 
 ## So, what is Eventsourcing?
-
 Instead of storing and updating the store to always show a view of the data at
 some point in time, eventsourcing lets you keep all the changes made to to the data.
 
@@ -41,7 +38,6 @@ Some of the new habits of working with the eventsource will be:
 [Martin Fowlers article on Eventsourcing](https://martinfowler.com/eaaDev/EventSourcing.html) examines more aspects of eventsourcing, and is worth the read.
 
 ## Main functionality of @aeinbu/eventsource
-
 - Transactional batches. A batch either runs to completion and is then committed and stored. If the batch fails or for other reasons is aborted, the state is rolled back to the state at the beginning of the batch operation. (Ie. a batch is either fully completed, or not recorded at all.)
 - Repeatable read isolation level.
 - Will retry concurrent batches.
@@ -63,7 +59,6 @@ For even further reading, you coud also go to [the important documentation for t
 //TODO:
 
 ## Read/write models vs. Read models
-
 A _read/write model_ allows you to work with existing data in an eventlog in a persisent way. Any changes made through the model are stored to the eventlog as an ordered and transactional item.
 
 A _read model_ allows you to work with a model created by replaying the event logs. Any changes made to a read only model will be lost when the model is "closed".
@@ -75,24 +70,20 @@ You can also have the concept of a _write only_ model. In this case, you don't a
 //TODO:
 
 ## Queries and multiple models
-
 You can design multiple different models to use when working with your event log. These models can be thought of as similar to views or even queries in a SQL database. @aeinbu/eventstore is designed to work with multiple models over the same store. These different models will allow you to view your data in different ways, or even work with them.
 
 [Check out the super handy "Patterns for creating a model from the eventlog"](./patterns.md)
 
 ## Replaying the event log
-
 You can also replay all events in the event log to aggregate data without creating a model upfront.
 
 ## Snapshots
-
 One advantage of creating a model is the ability to create a snapshot. A snapshot is a 
 precomputed state of the model at a given time (ie. at a specific log no.) With this snapshot, you can easily skip the replaying of parts of (or even the whole of) the log, thus making restoring a model consume fewer resources.
 
 If you create multiple models, you will get seperate snapshots for each model. (Snapshots can't shared between models.)
 
 ## LogSchemaTool
-
 The `LogSchemaTool` is an analyzer tool for your event logs.
 It looks at a set of logs to determine what events it holds. It will show number of occurrences, the parameter names and types, as well as the first and last appearances of that event.
 
@@ -103,24 +94,34 @@ The `LogSchemaTool` is implemented as any other query model.
 ## Compared to other storage strategies
 
 //TODO: Discuss these features accross the different storage models
-
-### Simple to setup
-
-__Eventstore__ requires you to include its NPM package in your code, and runs in process. There is no need to set up or run a server process.
-
-Most document databases, relational databases or object database products will require the installation of a server process.
-
-Going directly to the filesystem is perhaps the simplest to set up, but you have no abstractions to handle concurrency nor transactions.
-
-### Simple to use
-### Concurrency and isolation
-### Transactions
-### Speed
-### Scalability
-
 - Eventstore
 - SQL Database or RDBMS (Relational DataBase Management System) like MS SQL Server, SqlLite, DB2, Oracle, Sybase, MySQL etc.
 - Files and folders
 - Document DBs
 - Object DBs?
+
+### Simple to setup
+__Eventstore__ requires you to include its NPM package in your code, and runs in process. There is no need to set up or run a server process.
+
+Most document databases or relational databases products will typically require the installation of a server process.
+
+Going directly to the filesystem is perhaps the simplest to set up, but you have no abstractions to handle concurrency nor transactions.
+
+### Simple to use
+
+### Concurrency and isolation
+
+### Transactions
+
+### Speed
+
+### Scalability (getting better throughput)
+//TODO: EventStore
+//TODO: Filesystem
+
+SQL Databases are easiest to scale up, which basically means to run on a bigger and better server. (Better CPU, more RAM, faster
+or larger disks etc.)
+If you want to scale out instead of scaling up, you typically will need to consider rethinking your database and the application using the database. (What data to split, to duplicate. Distributed queries are hard, do you need to rewrite your queries etc.?)
+
+//TODO: Document DBs - sharding?
 
