@@ -134,6 +134,7 @@ My initial simple comparissons show that with a workload of 15K transactions wit
 //TODO: Filesystem
 
 SQL Databases are easiy to scale up (ie. move to a bigger/better computer: Better CPU, more RAM, faster or larger disks etc.)
+
 If you want to scale out (ie. spread over multiple computers) instead of scaling up, you typically will need to consider rethinking your database and the application using the database. (What data to split, to duplicate. Distributed queries are hard, do you need to rewrite your queries etc.?)
 
 //TODO: Document DBs - sharding?
