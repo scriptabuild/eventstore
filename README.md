@@ -1,11 +1,13 @@
 ## Current status
 [![Build Status](https://travis-ci.org/scriptabuild/eventstore.svg?branch=master)](https://travis-ci.org/scriptabuild/eventstore)
 
-## @aeinbu/EventStore
+## EventStore
 
-@aeinbu/eventstore is a data store primarily for use with node.js. The store is based on eventsourcing principles (more information below).
+A simple filebased eventsourced data store for node.js.
 
-@aeinbu/eventstore is awailable as a npm package.
+Instead of storing the current state of our data, eventsourcing lets us record our intention while creating/manipulating our data.
+
+Eventstore is awailable as a npm package.
 ```bash
 npm install @aeinbu/eventstore
 ```
@@ -24,20 +26,4 @@ npm install @aeinbu/eventstore
 ## Tutorial and other documentation
 
 Documentations is currently work in progress. Look at [our github pages](https://scriptabuild.github.io/eventstore/) or in [the `/docs` folder](./docs) to see what we've got so far...
-
-# Eventstore
-
-A simple filebased eventsourced data store for node.js.
-
-Instead of storing the current state of our data, eventsourcing lets us record our intention while creating/manipulating our data.
-
-## Installation
-
-```bash
-npm install @aeinbu/eventstore
-```
-
-## Current status
-
-[![Build Status](https://travis-ci.org/scriptabuild/eventstore.svg?branch=master)](https://travis-ci.org/scriptabuild/eventstore)
 
