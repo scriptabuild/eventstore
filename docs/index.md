@@ -2,6 +2,29 @@
 ## Current status
 [![Build Status](https://travis-ci.org/scriptabuild/eventstore.svg?branch=master)](https://travis-ci.org/scriptabuild/eventstore)
 
+## @aeinbu/EventStore
+
+@aeinbu/eventstore is a data store primarily for use with node.js. The store is based on eventsourcing principles (more information below).
+
+@aeinbu/eventstore is awailable as a npm package.
+```bash
+npm install @aeinbu/eventstore
+```
+
+## Main functionality of @aeinbu/eventstore
+- It runs in-process in your javascript application, so no installation other than pulling in the npm package is neccessary.
+- In node.js, it uses the file system for persistance by default. The data is stored in sequentilly numbered json files in the folder you (the developer) specifies.
+- @aeinbu/eventstore will also run in other environments, like in the browser, but you will need to configure an alternative to the file system for persistance.
+- Transactional batches. A batch either runs to completion and is then committed and stored. If the batch fails or for other reasons is aborted, the state is rolled back to the state at the beginning of the batch operation. (Ie. a batch is either fully completed, or not recorded at all.)
+- Repeatable read isolation level.
+- Concurrency. Will retry concurrent batches.
+- All events to the eventstore will end up having an order, so that replay always will give the same result.
+
+[Check out the tutorial to get started.](./tutorial.md)
+
+For even further reading, you coud also go to [the important documentation for the "defineStore"](./defineStore.md) or
+[the really not so important documentation for "EventStore" class](./EventStore.md)
+
 ## Pretext
 In the classical main-stream architecture the applications we design and build
 are often stateful. This means that we usually store a snapshot of the objects we deal
@@ -37,19 +60,6 @@ Some of the new habits of working with the eventsource will be:
 
 [Martin Fowlers article on Eventsourcing](https://martinfowler.com/eaaDev/EventSourcing.html) examines more aspects of eventsourcing, and is worth the read.
 
-## Main functionality of @aeinbu/eventstore
-- Transactional batches. A batch either runs to completion and is then committed and stored. If the batch fails or for other reasons is aborted, the state is rolled back to the state at the beginning of the batch operation. (Ie. a batch is either fully completed, or not recorded at all.)
-- Repeatable read isolation level.
-- Will retry concurrent batches.
-- All events to the eventstore will end up having an order, so that replay always will give the same result.
-
-@aeinbu/eventstore offers repeatable read isolation level with the transaction/batch model. These transactions can be either commited or rolled back, and @aeinbu/eventstore will handle concurrent writes by retrying the write a preset number of times (before otherwise failing the transaction/batch).
-
-[Check out the tutorial to get started.](./tutorial.md)
-
-For even further reading, you coud also go to [the important documentation for the "defineStore"](./defineStore.md) or
-[the really not so important documentation for "EventStore" class](./EventStore.md)
-
 ## What doesn't it do?
 
 //TODO: Surely there must be something, mustn't it?
@@ -67,7 +77,7 @@ You can also have the concept of a _write only_ model. In this case, you don't a
 
 ## Transactional
 
-//TODO:
+@aeinbu/eventstore offers repeatable read isolation level with the transaction/batch model. These transactions can be either commited or rolled back, and @aeinbu/eventstore will handle concurrent writes by retrying the write a preset number of times (before otherwise failing the transaction/batch).
 
 ## Queries and multiple models
 You can design multiple different models to use when working with your event log. These models can be thought of as similar to views or even queries in a SQL database. @aeinbu/eventstore is designed to work with multiple models over the same store. These different models will allow you to view your data in different ways, or even work with them.
@@ -105,7 +115,7 @@ __Eventstore__ requires you to include its NPM package in your code, and runs in
 
 Most document databases or relational databases products will typically require the installation of a server process.
 
-Going directly to the filesystem is perhaps the simplest to set up, but you have no abstractions to handle concurrency nor transactions.
+Going directly to the filesystem is perhaps the simplest to set up, but you have no abstractions to handle concurrency nor transactions and more.
 
 ### Simple to use
 
@@ -115,13 +125,16 @@ Going directly to the filesystem is perhaps the simplest to set up, but you have
 
 ### Speed
 
+My initial simple comparissons show that with a workload of 15K transactions with each about 10 modifications in each and affecting a total of about 10K rows of data, a query will run about two times faster with C# and MS SQL Server compared to node.js and @aeinbu/eventstore on the same computer.
+
+//TODO: Show table of more comprehensive test results, showing different kinds of workloads.
+
 ### Scalability (getting better throughput)
 //TODO: EventStore
 //TODO: Filesystem
 
-SQL Databases are easiest to scale up, which basically means to run on a bigger and better server. (Better CPU, more RAM, faster
-or larger disks etc.)
-If you want to scale out instead of scaling up, you typically will need to consider rethinking your database and the application using the database. (What data to split, to duplicate. Distributed queries are hard, do you need to rewrite your queries etc.?)
+SQL Databases are easiy to scale up (ie. move to a bigger/better computer: Better CPU, more RAM, faster or larger disks etc.)
+If you want to scale out (ie. spread over multiple computers) instead of scaling up, you typically will need to consider rethinking your database and the application using the database. (What data to split, to duplicate. Distributed queries are hard, do you need to rewrite your queries etc.?)
 
 //TODO: Document DBs - sharding?
 
