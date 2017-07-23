@@ -15,7 +15,7 @@ module.exports = async function defineStore(folder, options = {}) {
 
 	let _eventStore = new EventStore(folder, options);
 
-	async function buildStoreModel(modelDefinition, latestSnapshotNo, latestLogFileNo){
+	async function buildLogAggregator(modelDefinition, latestSnapshotNo, latestLogFileNo){
 		let range = {
 			from: latestSnapshotNo + 1,
 			to: latestLogFileNo
@@ -26,8 +26,8 @@ module.exports = async function defineStore(folder, options = {}) {
 			let snapshotConfiguration = modelDefinition.snapshotConfiguration;
 			snapshotData = await _eventStore.restoreSnapshot(latestSnapshotNo, snapshotConfiguration.snapshotName);
 		}
-		let storeModel = modelDefinition.createStoreModel(snapshotData);
-		let eventHandlers = modelDefinition.getEventHandlers(storeModel);
+		let logAggregator = modelDefinition.createLogAggregator(snapshotData);
+		let eventHandlers = modelDefinition.getEventHandlers(logAggregator);
 
 		await _eventStore.replayEventStream((event, headers) => {
 			let eventhandler = eventHandlers["on" + camelToPascalCase(event.name)] || modelDefinition.fallbackEventHandler || (() => () => {});
@@ -35,13 +35,13 @@ module.exports = async function defineStore(folder, options = {}) {
 			return eventhandler(event.data, headers);
 		}, range);
 
-		return storeModel;
+		return logAggregator;
 	}
 
 
 
 	async function buildDomainModel(modelDefinition, latestSnapshotNo, latestLogFileNo, dispatch){
-		let storeModel = await buildStoreModel(modelDefinition, latestSnapshotNo, latestLogFileNo);
+		let storeModel = await buildLogAggregator(modelDefinition, latestSnapshotNo, latestLogFileNo);
 		let domainModel = modelDefinition.createDomainModel(dispatch, storeModel);
 		return domainModel;
 	}
@@ -70,7 +70,7 @@ module.exports = async function defineStore(folder, options = {}) {
 						let allFiles = await _eventStore.getAllFilenames();
 						let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${snapshotConfiguration.snapshotName}-snapshot`) || 0;
 						let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
-						let storeModel = await buildStoreModel(modelDefinition, latestSnapshotNo, latestLogFileNo);
+						let storeModel = await buildLogAggregator(modelDefinition, latestSnapshotNo, latestLogFileNo);
 
 						let snapshot = snapshotConfiguration.createSnapshotData(storeModel);
 						await _eventStore.saveSnapshot(snapshot, snapshotConfiguration.snapshotName, latestLogFileNo);

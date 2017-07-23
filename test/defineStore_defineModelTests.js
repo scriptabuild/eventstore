@@ -35,7 +35,7 @@ function MemberListDomainModel(dispatch, storeModel) {
 
 
 
-function MemberListStoreModel(snapshotData) {
+function MemberListLogAggregator(snapshotData) {
 	let members = snapshotData || {};	// This is where the model is materialized!
 
 	this.createSnapshotData = () => members;	// This is the method used to serialize to a snapshot. This method is the inverse of the above assignment of snapshotData
@@ -84,7 +84,7 @@ let modelDefinition = {
 		createSnapshotData: storeModel => storeModel.createSnapshotData()
 	},
 	getEventHandlers: storeModel => storeModel.eventHandlers,
-	createStoreModel: snapshotData => new MemberListStoreModel(snapshotData),
+	createLogAggregator: snapshotData => new MemberListLogAggregator(snapshotData),
 	createDomainModel: (dispatch, storeModel) => new MemberListDomainModel(dispatch, storeModel)
 }
 
@@ -209,7 +209,7 @@ suite("defineStore(folder, options)", function() {
 				assert.ok(fulfilled, "Async function wasn't called");
 			});
 
-			test("create readmodel from a snapshot file and one log file", async function() {
+			test("create read only instance from a snapshot file and one log file", async function() {
 				fs.files = {
 					"/not-a-real-folder/1.some-model-snapshot": `
 					{
