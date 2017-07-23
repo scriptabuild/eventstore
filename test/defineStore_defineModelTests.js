@@ -7,7 +7,7 @@ const FakeAwaitableFs = require("./FakeAwaitableFs");
 
 
 const log = () => {}; //console.log;
-function MemberListDomainModel(dispatch, storeModel) {
+function MemberListDomainModel(dispatch, logAggregator) {
 	this.registerNewMember = function(member) {
 		dispatch("newMemberRegistered", { member });
 		log("MAIL -> welcome to new member");
@@ -27,7 +27,7 @@ function MemberListDomainModel(dispatch, storeModel) {
 	}
 
 	this.listMembers = function() {
-		let members = storeModel.members;
+		let members = logAggregator.members;
 		let ret = Object.keys(members).map(key => Object.assign({ name: key }, members[key]));
 		return ret;
 	}
@@ -81,11 +81,11 @@ function MemberListLogAggregator(snapshotData) {
 let modelDefinition = {
 	snapshotConfiguration: {
 		snapshotName: "some-model",
-		createSnapshotData: storeModel => storeModel.createSnapshotData()
+		createSnapshotData: logAggregator => logAggregator.createSnapshotData()
 	},
-	getEventHandlers: storeModel => storeModel.eventHandlers,
+	getEventHandlers: logAggregator => logAggregator.eventHandlers,
 	createLogAggregator: snapshotData => new MemberListLogAggregator(snapshotData),
-	createDomainModel: (dispatch, storeModel) => new MemberListDomainModel(dispatch, storeModel)
+	createDomainModel: (dispatch, logAggregator) => new MemberListDomainModel(dispatch, logAggregator)
 }
 
 

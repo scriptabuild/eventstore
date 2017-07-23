@@ -41,8 +41,8 @@ module.exports = async function defineStore(folder, options = {}) {
 
 
 	async function buildDomainModel(modelDefinition, latestSnapshotNo, latestLogFileNo, dispatch){
-		let storeModel = await buildLogAggregator(modelDefinition, latestSnapshotNo, latestLogFileNo);
-		let domainModel = modelDefinition.createDomainModel(dispatch, storeModel);
+		let logAggregator = await buildLogAggregator(modelDefinition, latestSnapshotNo, latestLogFileNo);
+		let domainModel = modelDefinition.createDomainModel(dispatch, logAggregator);
 		return domainModel;
 	}
 
@@ -70,9 +70,9 @@ module.exports = async function defineStore(folder, options = {}) {
 						let allFiles = await _eventStore.getAllFilenames();
 						let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${snapshotConfiguration.snapshotName}-snapshot`) || 0;
 						let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
-						let storeModel = await buildLogAggregator(modelDefinition, latestSnapshotNo, latestLogFileNo);
+						let logAggregator = await buildLogAggregator(modelDefinition, latestSnapshotNo, latestLogFileNo);
 
-						let snapshot = snapshotConfiguration.createSnapshotData(storeModel);
+						let snapshot = snapshotConfiguration.createSnapshotData(logAggregator);
 						await _eventStore.saveSnapshot(snapshot, snapshotConfiguration.snapshotName, latestLogFileNo);
 					}
 					return this;	// allows chaining functions
