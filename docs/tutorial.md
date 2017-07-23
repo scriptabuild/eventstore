@@ -62,6 +62,7 @@ Everytime data is persisted, it is written to the event log. Its hard to use dat
 The user of the eventstore will not see the _storage model_ directly, but will instead interact with the _domain model_.
 
 Code in the _storage model_ must not do external integrations, as the event handlers on the _storage model_ will be called for each event each time the log is played back. External integrations (like sending email in this case) should happen in the _domain model_.
+
 ---
 MemberListStoreModel: class
 - constructor(snapshotData: any)
@@ -115,6 +116,7 @@ function MemberListStoreModel(snapshotData) {
 
 ## The _model definition_
 The _model definition_ object tells @aeinbu/eventstore how to initialize the different models.
+
 ---
 modelDefinition: object
 - snapshotConfiguration: object
