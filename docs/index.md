@@ -20,10 +20,7 @@ npm install @scriptabuild/eventstore
 - Concurrency. Will retry concurrent batches.
 - All events to the eventstore will end up having an order, so that replay always will give the same result.
 
-[Check out the tutorial to get started.](./tutorial.md)
-
-For even further reading, you coud also go to [the important documentation for the "defineStore"](./defineStore.md) or
-[the really not so important documentation for "EventStore" class](./EventStore.md)
+[Check out the tutorial to get started.](./tutorial.md), [the reference for `defineStore`](./defineStore.md) or [the patterns page](./patterns.md) for help on aggregating logs. 
 
 ## Pretext
 In the classical main-stream architecture the applications we design and build
