@@ -21,6 +21,7 @@ MemberListDomainModel: class
 - constructor(dispatch: function, storeModel: any)
 	- dispatch(eventName: string, eventData: any))
 - doSomething(...)
+
 ---
 ```javascript
 function MemberListDomainModel(dispatch, storeModel) {
@@ -67,6 +68,7 @@ MemberListStoreModel: class
 - this.eventHandlers: object
 	- onSomethingHappened(eventdata: any)
 - this.members: object
+
 ---
 ```javascript
 function MemberListStoreModel(snapshotData) {
@@ -119,6 +121,7 @@ modelDefinition: object
 - getEventHandlers(storeModel: object): object
 - createStoreModel(snapshotData: any): any
 - createDomainModel(dispatch: function, storeModel: object)
+
 ---
 ```javascript
 let modelDefinition = {
