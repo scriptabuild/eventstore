@@ -1,5 +1,5 @@
 # Patterns for creating a model from the eventlog
-With @aeinbu/eventstore, a model is created using javascript.
+With @scriptabuild/eventstore, a model is created using javascript.
 This document lists some "how-to" patterns to help create a model from events.
 
 ## Working with arrays

@@ -2,19 +2,19 @@
 ## Current status
 [![Build Status](https://travis-ci.org/scriptabuild/eventstore.svg?branch=master)](https://travis-ci.org/scriptabuild/eventstore)
 
-## @aeinbu/EventStore
+## @scriptabuild/EventStore
 
-@aeinbu/eventstore is a data store primarily for use with node.js. The store is based on eventsourcing principles (more information below).
+@scriptabuild/eventstore is a data store primarily for use with node.js. The store is based on eventsourcing principles (more information below).
 
-@aeinbu/eventstore is awailable as a npm package.
+@scriptabuild/eventstore is awailable as a npm package.
 ```bash
-npm install @aeinbu/eventstore
+npm install @scriptabuild/eventstore
 ```
 
-## Main functionality of @aeinbu/eventstore
+## Main functionality of @scriptabuild/eventstore
 - It runs in-process in your javascript application, so no installation other than pulling in the npm package is neccessary.
 - In node.js, it uses the file system for persistance by default. The data is stored in sequentilly numbered json files in the folder you (the developer) specifies.
-- @aeinbu/eventstore will also run in other environments, like in the browser, but you will need to configure an alternative to the file system for persistance.
+- @scriptabuild/eventstore will also run in other environments, like in the browser, but you will need to configure an alternative to the file system for persistance.
 - Transactional batches. A batch either runs to completion and is then committed and stored. If the batch fails or for other reasons is aborted, the state is rolled back to the state at the beginning of the batch operation. (Ie. a batch is either fully completed, or not recorded at all.)
 - Repeatable read isolation level.
 - Concurrency. Will retry concurrent batches.
@@ -77,10 +77,10 @@ You can also have the concept of a _write only_ model. In this case, you don't a
 
 ## Transactional
 
-@aeinbu/eventstore offers repeatable read isolation level with the transaction/batch model. These transactions can be either commited or rolled back, and @aeinbu/eventstore will handle concurrent writes by retrying the write a preset number of times (before otherwise failing the transaction/batch).
+@scriptabuild/eventstore offers repeatable read isolation level with the transaction/batch model. These transactions can be either commited or rolled back, and @scriptabuild/eventstore will handle concurrent writes by retrying the write a preset number of times (before otherwise failing the transaction/batch).
 
 ## Queries and multiple models
-You can design multiple different models to use when working with your event log. These models can be thought of as similar to views or even queries in a SQL database. @aeinbu/eventstore is designed to work with multiple models over the same store. These different models will allow you to view your data in different ways, or even work with them.
+You can design multiple different models to use when working with your event log. These models can be thought of as similar to views or even queries in a SQL database. @scriptabuild/eventstore is designed to work with multiple models over the same store. These different models will allow you to view your data in different ways, or even work with them.
 
 [Check out the super handy "Patterns for creating a model from the eventlog"](./patterns.md)
 
@@ -125,7 +125,7 @@ Going directly to the filesystem is perhaps the simplest to set up, but you have
 
 ### Speed
 
-My initial simple comparissons show that with a workload of 15K transactions with each about 10 modifications in each and affecting a total of about 10K rows of data, a query will run about two times faster with C# and MS SQL Server compared to node.js and @aeinbu/eventstore on the same computer.
+My initial simple comparissons show that with a workload of 15K transactions with each about 10 modifications in each and affecting a total of about 10K rows of data, a query will run about two times faster with C# and MS SQL Server compared to node.js and @scriptabuild/eventstore on the same computer.
 
 //TODO: Show table of more comprehensive test results, showing different kinds of workloads.
 

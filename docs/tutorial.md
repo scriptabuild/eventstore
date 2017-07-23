@@ -115,7 +115,7 @@ function MemberListStoreModel(snapshotData) {
 ```
 
 ## The _model definition_
-The _model definition_ object tells @aeinbu/eventstore how to initialize the different models.
+The _model definition_ object tells @scriptabuild/eventstore how to initialize the different models.
 
 ---
 modelDefinition: object
