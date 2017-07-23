@@ -27,7 +27,6 @@ function MemberListDomainModel(dispatch, storeModel) {
 	}
 
 	this.listMembers = function() {
-
 		let members = storeModel.members;
 		let ret = Object.keys(members).map(key => Object.assign({ name: key }, members[key]));
 		return ret;

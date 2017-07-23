@@ -12,6 +12,8 @@ Eventstore is awailable as a npm package.
 npm install @aeinbu/eventstore
 ```
 
+Documentations is currently work in progress. Look at [our github pages](https://scriptabuild.github.io/eventstore/) or in [the `/docs` folder](./docs) to see what we've got so far...
+
 ## Main functionality of @aeinbu/eventstore
 - It runs in-process in your javascript application, so no installation other than pulling in the npm package is neccessary.
 - In node.js, it uses the file system for persistance by default. The data is stored in sequentilly numbered json files in the folder you (the developer) specifies.
@@ -21,9 +23,4 @@ npm install @aeinbu/eventstore
 - Concurrency. Will retry concurrent batches.
 - All events to the eventstore will end up having an order, so that replay always will give the same result.
 
-[Check out the tutorial to get started.](./tutorial.md)
-
-## Tutorial and other documentation
-
-Documentations is currently work in progress. Look at [our github pages](https://scriptabuild.github.io/eventstore/) or in [the `/docs` folder](./docs) to see what we've got so far...
-
+[Check out the tutorial to get started.](https://scriptabuild.github.io/eventstore/tutorial.html)
