@@ -23,6 +23,7 @@ MemberListDomainModel: class
 - doSomething(...)
 
 ---
+
 ```javascript
 function MemberListDomainModel(dispatch, storeModel) {
 	this.registerNewMember = function(member) {
@@ -70,6 +71,7 @@ MemberListStoreModel: class
 - this.members: object
 
 ---
+
 ```javascript
 function MemberListStoreModel(snapshotData) {
 	this.members = snapshotData || {};	// This is where the model is materialized!
@@ -123,6 +125,7 @@ modelDefinition: object
 - createDomainModel(dispatch: function, storeModel: object)
 
 ---
+
 ```javascript
 let modelDefinition = {
 	snapshotConfiguration: {
