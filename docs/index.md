@@ -1,6 +1,3 @@
-
-[![Build Status](https://travis-ci.org/scriptabuild/eventstore.svg?branch=master)](https://travis-ci.org/scriptabuild/eventstore)
-
 ## EventStore
 
 Eventstore is a data store primarily for use with node.js. The store is based on eventsourcing principles (more information below).

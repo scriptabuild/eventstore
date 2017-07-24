@@ -1,3 +1,5 @@
+[< Back to frontpage](./index.md)
+
 # Getting started with EventStore
 To start using EventStore, you will first need to create 3 things:
 - The _domain model_ class

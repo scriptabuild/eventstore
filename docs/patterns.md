@@ -1,3 +1,5 @@
+[< Back to frontpage](./index.md)
+
 # Patterns for creating a model from the eventlog
 With Eventstore, a model is created using javascript.
 This document lists some "how-to" patterns to help create a model from events.

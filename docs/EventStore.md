@@ -1,3 +1,4 @@
+[< Back to frontpage](./index.md)
 
 # EventStore class
 
