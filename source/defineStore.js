@@ -76,7 +76,7 @@ module.exports = async function defineStore(folder, options = {}) {
 			return {
 				async snapshot() {
 					if(snapshotConfiguration){
-						let allFiles = await _eventStore.getAllFilenames();
+						let allFiles = await _eventStore.getAllFilenames(folder);
 						let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${snapshotConfiguration.snapshotName}-snapshot`) || 0;
 						let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
 						let logAggregator = await buildLogAggregator(modelDefinition, latestSnapshotNo, latestLogFileNo);
@@ -84,7 +84,6 @@ module.exports = async function defineStore(folder, options = {}) {
 						let snapshot = snapshotConfiguration.createSnapshotData(logAggregator);
 						await _eventStore.saveSnapshot(snapshot, snapshotConfiguration.snapshotName, latestLogFileNo);
 					}
-					return this;	// allows chaining functions
 				},
 
 				async withReadInstance(action) {
@@ -95,7 +94,6 @@ module.exports = async function defineStore(folder, options = {}) {
 					let domainModel = await buildDomainModel(modelDefinition, latestSnapshotNo, latestLogFileNo, () => {});
 
 					await action(domainModel);
-					return this;	// allows chaining functions
 				},
 
 				async withReadWriteInstance(action, maxRetries = 5) {
@@ -119,13 +117,13 @@ module.exports = async function defineStore(folder, options = {}) {
 						if (isReadyToCommit) {
 							try {
 								await _eventStore.saveEvents(events, ++latestLogFileNo);
-								return this;	// allows chaining functions
+								return;
 							} catch (err) {
 								retryCount++;
 								continue;
 							}
 						} else {
-							return this;	// allows chaining functions
+							return;
 						}
 
 					}

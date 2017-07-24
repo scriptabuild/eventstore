@@ -141,7 +141,8 @@ const log = console.log;
 
     let stopwatch = Stopwatch.start();
     console.log("*** before loop", stopwatch.elapsed());
-    for (let j = 0; j < 100; j++) {
+    for (let j = 0; j < 1000; j++) {
+        await currentMembers.snapshot();
         await currentMembers.withReadWriteInstance((membersModel, readyToCommit) => {
             for (let i = 0; i < 10; i++) {
                 membersModel.registerNewMember({
