@@ -141,6 +141,8 @@ modelDefinition: object
 - createDomainModel(dispatch: function, logAggregator: object)
 
 ---
+[More documentation on all methods and properties on the _model definition_](./modelDefinition.md)
+
 ```javascript
 let modelDefinition = {
 	snapshotConfiguration: {
