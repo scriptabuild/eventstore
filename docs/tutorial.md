@@ -124,8 +124,8 @@ function MemberListLogAggregator(snapshotData) {
 }
 ```
 
-## The _model definition_
-The _model definition_ object tells @scriptabuild/eventstore how to initialize the _domain model_ and the _log aggregator_.
+## The _Model Definition_
+The _model definition_ object tells Eventstore how to initialize the _domain model_ and the _log aggregator_.
 
 The following are the methods and properties on the _model definition_:
 
@@ -152,7 +152,7 @@ let modelDefinition = {
 ```
 
 ## Putting the parts together
-Use `defineStore` to point at where the physical store for the logs. For node.js applications, you can use the default file system provider. If you want to use @scriptabuild/eventstore in the browser, you can supply alternative options for how and where the logs are persisted.
+Use `defineStore` to point at where the physical store for the logs. For node.js applications, you can use the default file system provider. If you want to use Eventstore in the browser, you can supply alternative options for how and where the logs are persisted.
 
 The resulting object is the root for either writing straight to the event log or working with instances of the _domain model_.
 
@@ -168,7 +168,6 @@ await model.withReadWriteInstance((instance, readyToCommit) => {
 	readyToCommit();
 });
 ```
-
 
 See the [API reference for `defineStore`](./defineStore.md) for more information. 
 

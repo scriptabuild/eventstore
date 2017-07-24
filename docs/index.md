@@ -1,20 +1,27 @@
 
-## Current status
 [![Build Status](https://travis-ci.org/scriptabuild/eventstore.svg?branch=master)](https://travis-ci.org/scriptabuild/eventstore)
 
-## @scriptabuild/EventStore
+## EventStore
 
-@scriptabuild/eventstore is a data store primarily for use with node.js. The store is based on eventsourcing principles (more information below).
+Eventstore is a data store primarily for use with node.js. The store is based on eventsourcing principles (more information below).
 
-@scriptabuild/eventstore is awailable as a npm package.
+Eventstore is awailable as a npm package.
+
 ```bash
 npm install @scriptabuild/eventstore
 ```
+[![npm version](https://badge.fury.io/js/%40scriptabuild%2Feventstore.svg)](https://badge.fury.io/js/%40scriptabuild%2Feventstore)
 
-## Main functionality of @scriptabuild/eventstore
+## Compatibility
+
+Travis runs the test suite (mocha) in the latest version of node.js, as well as in v7.6.0.
+
+[![Build Status](https://travis-ci.org/scriptabuild/eventstore.svg?branch=master)](https://travis-ci.org/scriptabuild/eventstore)
+
+## Main functionality of eventstore
 - It runs in-process in your javascript application, so no installation other than pulling in the npm package is neccessary.
 - In node.js, it uses the file system for persistance by default. The data is stored in sequentilly numbered json files in the folder you (the developer) specifies.
-- @scriptabuild/eventstore will also run in other environments, like in the browser, but you will need to configure an alternative to the file system for persistance.
+- Eventstore will also run in other environments, like in the browser, but you will need to configure an alternative to the file system for persistance.
 - Transactional batches. A batch either runs to completion and is then committed and stored. If the batch fails or for other reasons is aborted, the state is rolled back to the state at the beginning of the batch operation. (Ie. a batch is either fully completed, or not recorded at all.)
 - Repeatable read isolation level.
 - Concurrency. Will retry concurrent batches.
@@ -61,10 +68,6 @@ Some of the new habits of working with the eventsource will be:
 
 //TODO: Surely there must be something, mustn't it?
 
-## Built-in audit log trail
-
-//TODO:
-
 ## Read/write models vs. Read models
 A _read/write model_ allows you to work with existing data in an eventlog in a persisent way. Any changes made through the model are stored to the eventlog as an ordered and transactional item.
 
@@ -74,10 +77,10 @@ You can also have the concept of a _write only_ model. In this case, you don't a
 
 ## Transactional
 
-@scriptabuild/eventstore offers repeatable read isolation level with the transaction/batch model. These transactions can be either commited or rolled back, and @scriptabuild/eventstore will handle concurrent writes by retrying the write a preset number of times (before otherwise failing the transaction/batch).
+Eventstore offers repeatable read isolation level with the transaction/batch model. These transactions can be either commited or rolled back, and Eventstore will handle concurrent writes by retrying the write a preset number of times (before otherwise failing the transaction/batch).
 
 ## Queries and multiple models
-You can design multiple different models to use when working with your event log. These models can be thought of as similar to views or even queries in a SQL database. @scriptabuild/eventstore is designed to work with multiple models over the same store. These different models will allow you to view your data in different ways, or even work with them.
+You can design multiple different models to use when working with your event log. These models can be thought of as similar to views or even queries in a SQL database. Eventstore is designed to work with multiple models over the same store. These different models will allow you to view your data in different ways, or even work with them.
 
 [Check out the super handy "Patterns for creating a model from the eventlog"](./patterns.md)
 
@@ -96,43 +99,23 @@ It looks at a set of logs to determine what events it holds. It will show number
 
 The `LogSchemaTool` was created to help create new models, but the information gathered and reported could also be helpful to determine when certain functionality was implemented, indicating periods of time when certain events would or wouldn't have been recorded, thus showing what data potentially is missing.
 
-The `LogSchemaTool` is implemented as any other query model.
+The `LogSchemaTool` is implemented as a read only domain model.
 
-## Compared to other storage strategies
+```javascript
+//TODO: show code to use the LogSchemaTool...
+```
 
-//TODO: Discuss these features accross the different storage models
-- Eventstore
-- SQL Database or RDBMS (Relational DataBase Management System) like MS SQL Server, SqlLite, DB2, Oracle, Sybase, MySQL etc.
-- Files and folders
-- Document DBs
-- Object DBs?
-
-### Simple to setup
+## Simple to setup
 __Eventstore__ requires you to include its NPM package in your code, and runs in process. There is no need to set up or run a server process.
 
 Most document databases or relational databases products will typically require the installation of a server process.
 
 Going directly to the filesystem is perhaps the simplest to set up, but you have no abstractions to handle concurrency nor transactions and more.
 
-### Simple to use
-
-### Concurrency and isolation
-
-### Transactions
-
 ### Speed
 
-My initial simple comparissons show that with a workload of 15K transactions with each about 10 modifications in each and affecting a total of about 10K rows of data, a query will run about two times faster with C# and MS SQL Server compared to node.js and @scriptabuild/eventstore on the same computer.
+My initial simple comparissons show that with a workload of 15K transactions with each about 10 modifications in each and affecting a total of about 10K rows of data, EventStore on node.js will run about two times slower than C# against MS SQL Server.
 
-//TODO: Show table of more comprehensive test results, showing different kinds of workloads.
+Replaying the event log through the log aggregator so that you can query the data with the _domain model_ is slower than working with data in SQL Server tables. Writing to the event log is about the same speed (or possibly faster) than inserting or modifying rows in the SQL Server tables.
 
-### Scalability (getting better throughput)
-//TODO: EventStore
-//TODO: Filesystem
-
-SQL Databases are easiy to scale up (ie. move to a bigger/better computer: Better CPU, more RAM, faster or larger disks etc.)
-
-If you want to scale out (ie. spread over multiple computers) instead of scaling up, you typically will need to consider rethinking your database and the application using the database. (What data to split, to duplicate. Distributed queries are hard, do you need to rewrite your queries etc.?)
-
-//TODO: Document DBs - sharding?
-
+//TODO: Create comprehensive table of more test results from different types of workloads.
