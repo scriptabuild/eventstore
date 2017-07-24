@@ -24,7 +24,11 @@ Travis runs the test suite (mocha) in the latest version of node.js, as well as 
 - Concurrency. Will retry concurrent batches.
 - All events to the eventstore will end up having an order, so that replay always will give the same result.
 
-[Check out the tutorial to get started.](./tutorial.md), [the API reference for `defineStore`](./defineStore.md), [documentation on creating the _model definition_](./modelDefinition.md) or [the patterns page](./patterns.md) for help on aggregating logs. 
+Have a look at
+- [the tutorial to get started.](./tutorial.md)
+- [the API reference for `defineStore`](./defineStore.md)
+- [the documentation for creating a _model definition_](./modelDefinition.md)
+- [the patterns page for help on aggregating logs](./patterns.md) 
 
 ## Pretext
 In the classical main-stream architecture the applications we design and build
