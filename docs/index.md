@@ -115,8 +115,4 @@ Going directly to the filesystem is perhaps the simplest to set up, but you have
 
 ### Speed
 
-My initial simple comparissons show that with a workload of 15K transactions with each about 10 modifications in each and affecting a total of about 10K rows of data, EventStore on node.js will run about two times slower than C# against MS SQL Server.
-
-Replaying the event log through the log aggregator so that you can query the data with the _domain model_ is slower than working with data in SQL Server tables. Writing to the event log is about the same speed (or possibly faster) than inserting or modifying rows in the SQL Server tables.
-
 //TODO: Create comprehensive table of more test results from different types of workloads.

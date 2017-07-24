@@ -149,7 +149,7 @@ let modelDefinition = {
 		snapshotName: "memberlist",
 		createSnapshotData: logAggregator => logAggregator.createSnapshotData()
 	},
-	getEventHandlers: storelogAggregatorModel => logAggregator.eventHandlers,
+	getEventHandlers: logAggregatorModel => logAggregator.eventHandlers,
 	createLogAggregator: snapshotData => new MemberListLogAggregator(snapshotData),
 	createDomainModel: (dispatch, logAggregator) => new MemberListDomainModel(dispatch, logAggregator)
 }

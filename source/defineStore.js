@@ -86,9 +86,9 @@ module.exports = async function defineStore(folder, options = {}) {
 					}
 					return this;	// allows chaining functions
 				},
-				async withReadInstance(action) {
 
-					let allFiles = await _eventStore.getAllFilenames();
+				async withReadInstance(action) {
+					let allFiles = await _eventStore.getAllFilenames(folder);
 					let latestSnapshotNo = snapshotConfiguration ? _eventStore.getLatestFileNo(allFiles, `.${snapshotConfiguration.snapshotName}-snapshot`) || 0 : 0;
 					let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
 
@@ -97,12 +97,13 @@ module.exports = async function defineStore(folder, options = {}) {
 					await action(domainModel);
 					return this;	// allows chaining functions
 				},
+
 				async withReadWriteInstance(action, maxRetries = 5) {
 					let isReadyToCommit = false;
 
 					let retryCount = 0;
 					while (retryCount < maxRetries) {
-						let allFiles = await _eventStore.getAllFilenames();
+						let allFiles = await _eventStore.getAllFilenames(folder);
 						let latestSnapshotNo = snapshotConfiguration ? _eventStore.getLatestFileNo(allFiles, `.${snapshotConfiguration.snapshotName}-snapshot`) || 0 : 0;
 						let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
 
