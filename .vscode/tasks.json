@@ -1,0 +1,52 @@
+{
+    "version": "0.1.0",
+    "command": "mocha",
+    "isShellCommand": true,
+    "showOutput": "always",
+    "args": [
+        "--reporter",
+        "tap",
+        "--watch"
+    ],
+    "tasks": [
+        {
+            "taskName": "mocha",
+            "suppressTaskName": true,
+            "isTestCommand": true,
+            "isBackground": true,
+            "showOutput": "silent",
+            "problemMatcher": {
+                "owner": "mocha",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceRoot}"
+                ],
+                "pattern": [
+                    {
+                        "regexp": "^not\\sok\\s\\d+\\s(.*)$"
+                    },
+                    {
+                        "regexp": "\\s+(.*)$",
+                        "message": 1
+                    },
+                    {
+                        "regexp": "\\s+at\\s(.*)\\s\\((.*):(\\d+):(\\d+)\\)",
+                        "file": 2,
+                        "line": 3,
+                        "column": 4
+                    }
+                ],
+                "background": {
+                    "activeOnStart": false,
+                    "beginsPattern":{
+                        "regexp": "\\d+\\.\\.\\d+"
+                    },
+                    "endsPattern":{
+                        "regexp": "# fail \\d+"
+                    }
+                },
+                "applyTo": "allDocuments"
+            }
+        }
+    ]
+}

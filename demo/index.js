@@ -137,12 +137,12 @@ const log = console.log;
     });
 
 
-    console.log("--- Test total 1500 extra events in 100 batches/transactions of 15 events each ---")
+    console.log("--- Test total 3000 extra events in 100 batches/transactions of 15 events each ---")
 
     let stopwatch = Stopwatch.start();
     console.log("*** before loop", stopwatch.elapsed());
-    for (let j = 0; j < 1000; j++) {
-        await currentMembers.snapshot();
+    for (let j = 0; j < 200; j++) {
+        await currentMembers.snapshot();    //TODO: Optimize, so that the snapshot isnt neccessary
         await currentMembers.withReadWriteInstance((membersModel, readyToCommit) => {
             for (let i = 0; i < 10; i++) {
                 membersModel.registerNewMember({
