@@ -31,7 +31,7 @@ function LogSchemaToolLogAggregator(snapshotData, wrapInReadOnlyProxy) {
 
     this.createSnapshotData = () => eventTypes;
 
-    this.fallbackEventhandler = (eventname, eventdata, headers) => {
+    this.fallbackEventHandler = (eventname, eventdata, headers) => {
         if (!eventTypes[eventname]) {
             eventTypes[eventname] = {};
         }
@@ -66,9 +66,12 @@ let logSchemaToolModelDefinition = {
         snapshotName: "log-schema",
         createSnapshotData: logAggregator => logAggregator.createSnapshotData()
 	},
-	// fallbackEventHandler: (eventName, eventData, headers) => 
+	// fallbackEventHandler: (eventName, eventData, headers) => {
+	// 	console.log(eventName, eventData, headers);
+	// },
 
-    fallbackEventHandler: logAggregator => logAggregator.fallbackEventHandler,
+    // fallbackEventHandler: logAggregator => (eventName, eventData, headers) => logAggregator.fallbackEventHandler(eventName, eventData, headers),
+    getFallbackEventHandler: logAggregator => logAggregator.fallbackEventHandler,
     createLogAggregator: (snapshotData, wrapInReadOnlyProxy) => new LogSchemaToolLogAggregator(snapshotData, wrapInReadOnlyProxy),
     createDomainModel: (dispatch, logAggregator) => new LogSchemaToolDomainModel(dispatch, logAggregator)
 };

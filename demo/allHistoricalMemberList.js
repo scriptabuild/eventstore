@@ -1,4 +1,4 @@
-function AllHistoricalMemberListDomainModel(dispatch, logAggregator) {
+function DomainModel(dispatch, logAggregator) {
     this.listMembers = function() {
 		let members = logAggregator.getMembers();
         return Object.keys(members).map(key => Object.assign({
@@ -8,7 +8,7 @@ function AllHistoricalMemberListDomainModel(dispatch, logAggregator) {
 }
 
 
-function AllHistoricalMemberListLogAggregator(snapshotData, wrapInReadOnlyProxy) {
+function LogAggregator(snapshotData, wrapInReadOnlyProxy) {
     let members = snapshotData || {};
 
     this.createSnapshotData = () => members;
@@ -41,8 +41,8 @@ let allHistoricalMemberListModelDefinition = {
 		snapshotName: "all-historical-members"
     },
     getEventHandlers: logAggregator => logAggregator.eventHandlers,
-    createLogAggregator: (snapshotData, wrapInReadOnlyProxy) => new AllHistoricalMemberListLogAggregator(snapshotData, wrapInReadOnlyProxy),
-    createDomainModel: (dispatch, logAggregator) => new AllHistoricalMemberListDomainModel(dispatch, logAggregator)
+    createLogAggregator: (snapshotData, wrapInReadOnlyProxy) => new LogAggregator(snapshotData, wrapInReadOnlyProxy),
+    createDomainModel: (dispatch, logAggregator) => new DomainModel(dispatch, logAggregator)
 };
 
 

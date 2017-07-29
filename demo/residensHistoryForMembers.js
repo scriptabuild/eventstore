@@ -1,4 +1,4 @@
-function ResidensHistoryForMembersDomainModel(dispatch, logAggregator) {
+function DomainModel(dispatch, logAggregator) {
 
     this.listMembers = function() {
 		let members = logAggregator.getMembers();
@@ -9,7 +9,7 @@ function ResidensHistoryForMembersDomainModel(dispatch, logAggregator) {
 }
 
 
-function ResidensHistoryForMembersLogAggregator(snapshotData, wrapInReadOnlyProxy) {
+function LogAggregator(snapshotData, wrapInReadOnlyProxy) {
     let members = snapshotData || {};
 
     this.createSnapshotData = () => wrapInReadOnlyProxy(members);
@@ -42,15 +42,15 @@ function ResidensHistoryForMembersLogAggregator(snapshotData, wrapInReadOnlyProx
 }
 
 
-let residensHistoryForMembersModelDefinition = {
+let modelDefinition = {
     snapshotConfiguration: {
         snapshotName: "residens-history",
         createSnapshotData: logAggregator => logAggregator.createSnapshotData()
     },
 	getEventHandlers: logAggregator => logAggregator.eventHandlers,
-	createLogAggregator: (snapshotData, wrapInReadOnlyProxy) => new ResidensHistoryForMembersLogAggregator(snapshotData, wrapInReadOnlyProxy),
-	createDomainModel: (dispatch, logAggregator) => new ResidensHistoryForMembersDomainModel(dispatch, logAggregator)
+	createLogAggregator: (snapshotData, wrapInReadOnlyProxy) => new LogAggregator(snapshotData, wrapInReadOnlyProxy),
+	createDomainModel: (dispatch, logAggregator) => new DomainModel(dispatch, logAggregator)
 }
 
 
-module.exports = residensHistoryForMembersModelDefinition;
+module.exports = modelDefinition;

@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha",
     "demo": "node ./demo/index.js",
-    "demo-analyze": "node ./demp/analyze.js"
+    "demo-analyze": "node ./demo/analyze.js"
   },
   "repository": {
     "type": "git",
@@ -15,7 +15,9 @@
   "keywords": [
     "eventstore",
     "eventsource",
-    "commands"
+    "filesystem",
+    "datastore",
+    "transactional"
   ],
   "author": "Arjan Einbu <arjan@einbu.no>",
   "license": "MIT",

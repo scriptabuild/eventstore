@@ -28,13 +28,13 @@ module.exports = async function defineStore(folder, options = {}) {
         eventHandlers = eventHandlers || {};
 
         await _eventStore.replayEventStream((event, headers) => {
-            let eventHandler = eventHandlers["on" + camelToPascalCase(event.name)] || modelDefinition.fallbackEventHandler || (() => () => {});
+            let eventHandler = eventHandlers["on" + camelToPascalCase(event.name)];
             if (eventHandler) {
                 eventHandler(event.data, headers);
                 return;
             }
 
-            let fallbackEventHandler = modelDefinition.fallbackEventHandler;
+            let fallbackEventHandler = modelDefinition.getFallbackEventHandler && modelDefinition.getFallbackEventHandler(logAggregator);
             if (fallbackEventHandler) {
                 fallbackEventHandler(event.name, event.data, headers);
                 return;

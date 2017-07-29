@@ -8,12 +8,13 @@ modelDefinition: object
 - snapshotConfiguration: object
 	- snapshotName: string
 	- createSnapshotData() : object
+- getFallbackEventHandler(logAggregator: object): function
+	- handleEvent(eventName: string, eventData: object, headers: object)
 - getEventHandlers(logAggregator: object): object
 	- on_EventName_(eventData: object, headers: object)
 - createLogAggregator(snapshotData: any, wrapInReadOnlyProxy: function): any
 	- wrapInReadOnlyProxy(model: object): object
 - createDomainModel(dispatch: function, logAggregator: object)
-- fallbackEventHandler(eventName: string, eventData: object, headers: object)
 
 ---
 

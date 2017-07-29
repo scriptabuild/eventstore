@@ -1,4 +1,4 @@
-function MemberListDomainModel(dispatch, logAggregator) {
+function DomainModel(dispatch, logAggregator) {
 
     // let log = console.log;
     let log = () => {};
@@ -40,7 +40,7 @@ function MemberListDomainModel(dispatch, logAggregator) {
 }
 
 
-function MemberListLogAggregator(snapshotData, wrapInReadOnlyProxy) {
+function LogAggregator(snapshotData, wrapInReadOnlyProxy) {
 	let members = snapshotData || [];
 
 	this.createSnapshotData = () => members;
@@ -79,15 +79,15 @@ function MemberListLogAggregator(snapshotData, wrapInReadOnlyProxy) {
 }
 
 
-let memberListModelDefinition = {
+let modelDefinition = {
     snapshotConfiguration: {
 		snapshotName: "memberlist",
 		createSnapshotData: logAggregator => logAggregator.createSnapshotData()
 	},
 	getEventHandlers: logAggregator => logAggregator.eventHandlers,
-	createLogAggregator: (snapshotData, wrapInReadOnlyProxy) => new MemberListLogAggregator(snapshotData, wrapInReadOnlyProxy),
-	createDomainModel: (dispatch, logAggregator) => new MemberListDomainModel(dispatch, logAggregator)
+	createLogAggregator: (snapshotData, wrapInReadOnlyProxy) => new LogAggregator(snapshotData, wrapInReadOnlyProxy),
+	createDomainModel: (dispatch, logAggregator) => new DomainModel(dispatch, logAggregator)
 };
 
 
-module.exports = memberListModelDefinition;
+module.exports = modelDefinition;
