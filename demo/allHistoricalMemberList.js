@@ -8,12 +8,12 @@ function AllHistoricalMemberListDomainModel(dispatch, logAggregator) {
 }
 
 
-function AllHistoricalMemberListLogAggregator(snapshotData) {
+function AllHistoricalMemberListLogAggregator(snapshotData, wrapInReadOnlyProxy) {
     let members = snapshotData || {};
 
-    this.getMembers = () => members;
-
     this.createSnapshotData = () => members;
+
+	this.getMembers = () => wrapInReadOnlyProxy(members);
 
     this.eventHandlers = {
         onNewMemberRegistered(eventdata) {
@@ -41,7 +41,7 @@ let allHistoricalMemberListModelDefinition = {
 		snapshotName: "all-historical-members"
     },
     getEventHandlers: logAggregator => logAggregator.eventHandlers,
-    createLogAggregator: snapshotData => new AllHistoricalMemberListLogAggregator(snapshotData),
+    createLogAggregator: (snapshotData, wrapInReadOnlyProxy) => new AllHistoricalMemberListLogAggregator(snapshotData, wrapInReadOnlyProxy),
     createDomainModel: (dispatch, logAggregator) => new AllHistoricalMemberListDomainModel(dispatch, logAggregator)
 };
 

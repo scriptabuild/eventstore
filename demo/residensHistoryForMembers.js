@@ -9,12 +9,12 @@ function ResidensHistoryForMembersDomainModel(dispatch, logAggregator) {
 }
 
 
-function ResidensHistoryForMembersLogAggregator(snapshotData) {
+function ResidensHistoryForMembersLogAggregator(snapshotData, wrapInReadOnlyProxy) {
     let members = snapshotData || {};
 
-    this.getMembers = () => members;
+    this.createSnapshotData = () => wrapInReadOnlyProxy(members);
 
-    this.createSnapshotData = () => members;
+	this.getMembers = () => wrapInReadOnlyProxy(members);
 
     this.eventHandlers = {
         onNewMemberRegistered(eventdata) {
@@ -48,7 +48,7 @@ let residensHistoryForMembersModelDefinition = {
         createSnapshotData: logAggregator => logAggregator.createSnapshotData()
     },
 	getEventHandlers: logAggregator => logAggregator.eventHandlers,
-	createLogAggregator: snapshotData => new ResidensHistoryForMembersLogAggregator(snapshotData),
+	createLogAggregator: (snapshotData, wrapInReadOnlyProxy) => new ResidensHistoryForMembersLogAggregator(snapshotData, wrapInReadOnlyProxy),
 	createDomainModel: (dispatch, logAggregator) => new ResidensHistoryForMembersDomainModel(dispatch, logAggregator)
 }
 

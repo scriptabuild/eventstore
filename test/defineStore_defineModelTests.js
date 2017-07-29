@@ -35,10 +35,11 @@ function MemberListDomainModel(dispatch, logAggregator) {
 
 
 
-function MemberListLogAggregator(snapshotData) {
+function MemberListLogAggregator(snapshotData, wrapInReadOnlyProxy = model => model) {
+
 	let members = snapshotData || {};	// This is where the model is materialized!
 
-	this.createSnapshotData = () => members;	// This is the method used to serialize to a snapshot. This method is the inverse of the above assignment of snapshotData
+	this.createSnapshotData = () => wrapInReadOnlyProxy(members);	// This is the method used to serialize to a snapshot. This method is the inverse of the above assignment of snapshotData
 
 	this.eventHandlers = {
 		onNewMemberRegistered(eventdata) {
@@ -84,7 +85,7 @@ let modelDefinition = {
 		createSnapshotData: logAggregator => logAggregator.createSnapshotData()
 	},
 	getEventHandlers: logAggregator => logAggregator.eventHandlers,
-	createLogAggregator: snapshotData => new MemberListLogAggregator(snapshotData),
+	createLogAggregator: (snapshotData, currentFileNo) => new MemberListLogAggregator(snapshotData, currentFileNo),
 	createDomainModel: (dispatch, logAggregator) => new MemberListDomainModel(dispatch, logAggregator)
 }
 

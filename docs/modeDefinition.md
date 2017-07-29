@@ -10,7 +10,8 @@ modelDefinition: object
 	- createSnapshotData() : object
 - getEventHandlers(logAggregator: object): object
 	- on_EventName_(eventData: object, headers: object)
-- createLogAggregator(snapshotData: any): any
+- createLogAggregator(snapshotData: any, wrapInReadOnlyProxy: function): any
+	- wrapInReadOnlyProxy(model: object): object
 - createDomainModel(dispatch: function, logAggregator: object)
 - fallbackEventHandler(eventName: string, eventData: object, headers: object)
 
@@ -40,12 +41,12 @@ let modelDefinition = {
 		};
 	},
 
-	createLogAggregator(snapshotData){
+	createLogAggregator(snapshotData, wrapInReadOnlyProxy){
 		// This method is used to instantiate the LogAggregator. This will usually be a constructor.
 		// If snapsshots are enabled for this model, the method should accept the snapshot data object.
 		// The snapshot data are deserialized from a json file.
 
-		let aLogAggregatorInstance = new SomeLogAggregator(snapshotData);
+		let aLogAggregatorInstance = new SomeLogAggregator(snapshotData, wrapInReadOnlyProxy);
 		return aLogAggregatorInstance;
 	},
 
@@ -74,7 +75,7 @@ let modelDefinition = {
 
 	getEventHandlers: logAggregator => logAggregator.eventHandlers,
 	
-	createLogAggregator: snapshotData => new SomeLogAggregator(snapshotData),
+	createLogAggregator: (snapshotData, wrapInReadOnlyProxy) => new SomeLogAggregator(snapshotData, wrapInReadOnlyProxy),
 
 	createDomainModel: (dispatch, logAggregator) => new DomainModel(dispatch, logAggregator),
 

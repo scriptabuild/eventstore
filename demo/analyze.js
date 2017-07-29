@@ -1,6 +1,6 @@
 const path = require("path");
 const defineStore = require("../source/defineStore.js");
-const LogSchemaTool = require("../source/LogSchemaTool");
+const logSchemaToolModelDefinition = require("../source/LogSchemaTool");
 const Stopwatch = require("../source/stopwatch");
 const folder = path.resolve(__dirname, "../temp");
 // TODO: remove folder before running tests
@@ -8,16 +8,13 @@ const folder = path.resolve(__dirname, "../temp");
 (async function () {
 
 	let store = await defineStore(folder);
-
-	const createLogSchemaToolCallback = (dispatch, configureStore) => new LogSchemaTool(dispatch, configureStore);
-	let logSchemaTool = store.defineReadModel("log-schema", createLogSchemaToolCallback);
-
+	let logSchemaTool = store.defineModel(logSchemaToolModelDefinition);
 
 	let stopwatch = Stopwatch.start();
 	console.log("Analyzing Log")
 	
 	// await logSchemaTool.snapshot();
-	await logSchemaTool.withReadModel((model) => {
+	await logSchemaTool.withReadInstance((model) => {
 		console.log(`Log Schema built in ${stopwatch.elapsed()} milliseconds`);
 
 		model.getLogSchema().forEach(eventTypeInformation => {
@@ -29,7 +26,5 @@ const folder = path.resolve(__dirname, "../temp");
 			});
 		})
 	});
-
-
 
 })();

@@ -12,9 +12,7 @@ module.exports = class FakeAwaitableFs {
 	}
 
 	readdir(folder){
-		// let filesInFolder = Object.keys(this.files).filter(x => x.indexOf(folder) == 0);
-		// return valueAsPromise(filesInFolder);
-		return valueAsPromise(Object.keys(this.files));
+		return valueAsPromise(Object.keys(this.files).filter(fullname => fullname.startsWith(folder)));
 	}
 
 	async readFile(filename){

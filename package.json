@@ -4,7 +4,9 @@
   "description": "A simple filebased eventsourced store",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "demo": "node ./demo/index.js",
+    "demo-analyze": "node ./demp/analyze.js"
   },
   "repository": {
     "type": "git",

@@ -59,7 +59,8 @@ function MemberListDomainModel(dispatch, logAggregator) {
 	}
 
 	this.getMember = function(name) {
-		return logAggregator[name];
+		let members = logAggregator.getMembersModel();
+		return members[name];
 	}
 }
 ```
@@ -75,7 +76,8 @@ The following are the methods and properties on the _log aggregator_ for our mem
 
 ---
 MemberListLogAggregator: class
-- constructor(snapshotData: any)
+- constructor(snapshotData: any, wrapInReadOnlyProxy: function)
+	- wrapInReadOnlyProxy: function(model: object): object
 - createSnapshotData(): any
 - this.eventHandlers: object
 	- onNewMemberRegistered(eventdata: object)
@@ -86,8 +88,10 @@ MemberListLogAggregator: class
 
 ---
 ```javascript
-function MemberListLogAggregator(snapshotData) {
-	this.members = snapshotData || {};	// This is where the model is materialized!
+function MemberListLogAggregator(snapshotData, wrapInReadOnlyProxy) {
+	let members = snapshotData || {};	// This is where the model is materialized!
+
+	this.getMembersModel = () => wrapInReadOnlyProxy(members);
 
 	this.createSnapshotData = () => members;	// This is the method used to serialize to a snapshot. This method is the inverse of the above assignment of snapshotData
 

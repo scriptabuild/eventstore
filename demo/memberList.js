@@ -40,12 +40,12 @@ function MemberListDomainModel(dispatch, logAggregator) {
 }
 
 
-function MemberListLogAggregator(snapshotData) {
+function MemberListLogAggregator(snapshotData, wrapInReadOnlyProxy) {
 	let members = snapshotData || [];
 
-	this.createSnapshotData = () => this.members;
+	this.createSnapshotData = () => members;
 
-	this.getMembers = () => members;
+	this.getMembers = () => wrapInReadOnlyProxy(members);
 
     this.eventHandlers = {
         onNewMemberRegistered(eventdata) {
@@ -85,7 +85,7 @@ let memberListModelDefinition = {
 		createSnapshotData: logAggregator => logAggregator.createSnapshotData()
 	},
 	getEventHandlers: logAggregator => logAggregator.eventHandlers,
-	createLogAggregator: snapshotData => new MemberListLogAggregator(snapshotData),
+	createLogAggregator: (snapshotData, wrapInReadOnlyProxy) => new MemberListLogAggregator(snapshotData, wrapInReadOnlyProxy),
 	createDomainModel: (dispatch, logAggregator) => new MemberListDomainModel(dispatch, logAggregator)
 };
 
