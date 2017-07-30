@@ -1,5 +1,11 @@
 .vscode
-tests/
+test/
 temp/
 demo/
 docs/
+
+.eslintrc.json
+.jsbeautifyrc
+.npmignore
+.travis.yml
+jsconfig.json
