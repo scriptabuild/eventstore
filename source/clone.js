@@ -12,12 +12,10 @@ function clone(orig, depth) {
 	for (var key in orig) {
 		if (orig.hasOwnProperty(key)) {
 			if(typeof(orig[key]) === "function") {
-				copy[key] = orig[key].bind(orig);
-			} else
-			if (depth === undefined || depth > 0) {
+				copy[key] = orig[key].bind(copy);
+			} else if (depth === undefined || depth > 0) {
 				copy[key] = clone(orig[key], depth === undefined ? undefined : depth - 1);
-			}
-			else {
+			} else {
 				copy[key] = orig[key];
 			}
 		}

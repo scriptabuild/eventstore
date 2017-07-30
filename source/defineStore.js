@@ -1,6 +1,6 @@
 const EventStore = require("./EventStore");
 const clone = require("./clone");
-const wrapInReadOnlyProxy = require("./wrapInReadOnlyProxy")
+const wrapInReadOnlyProxy = require("@scriptabuild/readonlyproxy")
 const camelToPascalCase = require("./camelToPascalCase");
 
 

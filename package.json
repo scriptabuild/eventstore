@@ -23,7 +23,10 @@
     "url": "https://github.com/scriptabuild/eventstore/issues"
   },
   "homepage": "https://scriptabuild.github.io/eventstore/",
-  "dependencies": {},
+  "dependencies": {
+    "@scriptabuild/awaitable": "^1.0.1",
+    "@scriptabuild/readonlyproxy": "^1.0.0"
+  },
   "devDependencies": {
     "mocha": "^3.4.2"
   }

@@ -4,7 +4,7 @@
 //
 
 const fs = require("fs");
-const awaitable = require("./awaitable");
+const awaitable = require("@scriptabuild/awaitable");
 
 const AwaitableFs = {
 	async mkdir(path, mode = 0o777){
