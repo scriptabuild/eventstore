@@ -7,74 +7,64 @@
 // - other version information
 //
 
-function LogSchemaToolDomainModel(dispatch, logAggregator) {
+function DomainModel(dispatch, logAggregator) {
 
-    this.getLogSchema = function() {
-        let logSchema = logAggregator.getLogSchema();
-        return Object.entries(logSchema)
-            .map(([eventname, versions]) => ({
-                eventname,
-                versions: Object.keys(versions).map(version => versions[version]).map(version => ({
-                    count: version.count,
-                    description: version.description,
-                    first: version.first,
-                    last: version.last
-                }))
-            }));
-    }
+	this.getLogSchema = function() {
+		let logSchema = logAggregator.data();
+		return Object.entries(logSchema)
+			.map(([eventname, versions]) => ({
+				eventname,
+				versions: Object.keys(versions).map(version => versions[version]).map(version => ({
+					count: version.count,
+					description: version.description,
+					first: version.first,
+					last: version.last
+				}))
+			}));
+	}
 }
 
-function LogSchemaToolLogAggregator(snapshotData, wrapInReadOnlyProxy) {
-    let eventTypes = {};
+function LogAggregator(snapshot, wrapInReadOnlyProxy) {
+	let eventTypes = snapshot || {};
 
-    this.getLogSchema = () => wrapInReadOnlyProxy(eventTypes);
+	Object.defineProperty(this, "data", { value: wrapInReadOnlyProxy(eventTypes), writable: false});
 
-    this.createSnapshotData = () => eventTypes;
+	this.fallbackEventHandler = (eventname, eventdata, headers) => {
+		if (!eventTypes[eventname]) {
+			eventTypes[eventname] = {};
+		}
 
-    this.fallbackEventHandler = (eventname, eventdata, headers) => {
-        if (!eventTypes[eventname]) {
-            eventTypes[eventname] = {};
-        }
+		let description = describe(eventdata);
 
-        let description = describe(eventdata);
+		let key = JSON.stringify(description);
+		let version = eventTypes[eventname][key];
+		if (!version) {
+			eventTypes[eventname][key] = { count: 1, first: headers, description, last: headers };
+		}
+		else {
+			version.count++;
+			version.last = headers;
+		}
+	}
 
-        let key = JSON.stringify(description);
-        let version = eventTypes[eventname][key];
-        if (!version) {
-            eventTypes[eventname][key] = { count: 1, first: headers, description, last: headers };
-        }
-        else {
-            version.count++;
-            version.last = headers;
-        }
-    }
-
-    function describe(obj) {
-        let description = {};
-        Object.keys(obj)
-            .sort()
-            .forEach(prop => {
-                description[prop] = typeof obj[prop] === "object" ? describe(obj[prop]) : typeof obj[prop];
-                // TODO: Describe arrays
-            });
-        return description;
-    }
+	function describe(obj) {
+		let description = {};
+		Object.keys(obj)
+			.sort()
+			.forEach(prop => {
+				description[prop] = typeof obj[prop] === "object" ? describe(obj[prop]) : typeof obj[prop];
+				// TODO: Describe arrays
+			});
+		return description;
+	}
 }
 
-let logSchemaToolModelDefinition = {
-    snapshotConfiguration: {
-        snapshotName: "log-schema",
-        createSnapshotData: logAggregator => logAggregator.createSnapshotData()
-	},
-	// fallbackEventHandler: (eventName, eventData, headers) => {
-	// 	console.log(eventName, eventData, headers);
-	// },
-
-    // fallbackEventHandler: logAggregator => (eventName, eventData, headers) => logAggregator.fallbackEventHandler(eventName, eventData, headers),
-    getFallbackEventHandler: logAggregator => logAggregator.fallbackEventHandler,
-    createLogAggregator: (snapshotData, wrapInReadOnlyProxy) => new LogSchemaToolLogAggregator(snapshotData, wrapInReadOnlyProxy),
-    createDomainModel: (dispatch, logAggregator) => new LogSchemaToolDomainModel(dispatch, logAggregator)
+let modelDefinition = {
+	snapshotName: "log-schema",
+	getFallbackEventHandler: logAggregator => logAggregator.fallbackEventHandler,
+	createLogAggregator: (snapshot, wrapInReadOnlyProxy) => new LogAggregator(snapshot, wrapInReadOnlyProxy),
+	createDomainModel: (dispatch, logAggregator) => new DomainModel(dispatch, logAggregator)
 };
 
 
-module.exports = logSchemaToolModelDefinition;
+module.exports = modelDefinition;

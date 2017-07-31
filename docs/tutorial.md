@@ -76,24 +76,20 @@ The following are the methods and properties on the _log aggregator_ for our mem
 
 ---
 MemberListLogAggregator: class
-- constructor(snapshotData: any, wrapInReadOnlyProxy: function)
+- constructor(snapshot: any, wrapInReadOnlyProxy: function)
 	- wrapInReadOnlyProxy: function(model: object): object
-- createSnapshotData(): any
+- this.data: object
 - this.eventHandlers: object
 	- onNewMemberRegistered(eventdata: object)
 	- onMembershipEnded(eventdata: object)
 	- onAddressCorrected(eventdata: object)
 	- onMemberHasMoved(eventdata: object)
-- this.members: object
 
 ---
 ```javascript
-function MemberListLogAggregator(snapshotData, wrapInReadOnlyProxy) {
-	let members = snapshotData || {};	// This is where the model is materialized!
-
-	this.getMembersModel = () => wrapInReadOnlyProxy(members);
-
-	this.createSnapshotData = () => members;	// This is the method used to serialize to a snapshot. This method is the inverse of the above assignment of snapshotData
+function MemberListLogAggregator(snapshot, wrapInReadOnlyProxy) {
+	let members = snapshot || {};	// This is where the model is materialized!
+	Object.defineProperty(this, "data", { value: wrapInReadOnlyProxy(members), writable: false});
 
 	this.eventHandlers = {
 		onNewMemberRegistered(eventdata) {
@@ -137,11 +133,9 @@ The following are the methods and properties on the _model definition_:
 
 ---
 modelDefinition: object
-- snapshotConfiguration: object
-	- snapshotName: string
-	- createSnapshotData() : object
+- snapshotName: string
 - getEventHandlers(logAggregator: object): object
-- createLogAggregator(snapshotData: any): any
+- createLogAggregator(snapshot: any): any
 - createDomainModel(dispatch: function, logAggregator: object)
 
 ---
@@ -149,12 +143,9 @@ modelDefinition: object
 
 ```javascript
 let modelDefinition = {
-	snapshotConfiguration: {
-		snapshotName: "memberlist",
-		createSnapshotData: logAggregator => logAggregator.createSnapshotData()
-	},
+	snapshotName: "memberlist",
 	getEventHandlers: logAggregatorModel => logAggregator.eventHandlers,
-	createLogAggregator: snapshotData => new MemberListLogAggregator(snapshotData),
+	createLogAggregator: snapshot => new MemberListLogAggregator(snapshot),
 	createDomainModel: (dispatch, logAggregator) => new MemberListDomainModel(dispatch, logAggregator)
 }
 ```

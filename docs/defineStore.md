@@ -107,11 +107,9 @@ let model = store.defineModel(modelDefinition);
 ```
 
 `modelDefinition` is an object with the following properties and functions:
-- snapshotConfiguration: object
-	- snapshotName: string
-	- createSnapshotData() : object
+- snapshotName: string
 - getEventHandlers(logAggregator: object): object
-- createLogAggregator(snapshotData: any): any
+- createLogAggregator(snapshot: any): any
 - createDomainModel(dispatch: function, logAggregator: object)
 
 ---
@@ -120,12 +118,9 @@ const defineStore = require("@scriptabuild/eventstore");
 let store = defineStore("/foldername");
 
 let modelDefinition = {
-	snapshotConfiguration: {
-		snapshotName: "some-model-name",
-		createSnapshotData: logAggregator => logAggregator.createSnapshotData()
-	},
+	snapshotName: "some-model-name",
 	getEventHandlers: logAggregator => logAggregator.eventHandlers,
-	createLogAggregator: snapshotData => new MyCustomLogAggregator(snapshotData),
+	createLogAggregator: snapshot => new MyCustomLogAggregator(snapshot),
 	createDomainModel: (dispatch, logAggregator) => new MyCustomDomainModel(dispatch, logAggregator)
 }
 

@@ -8,12 +8,12 @@ module.exports = async function defineStore(folder, options = {}) {
     let _eventStore = new EventStore(folder, options);
 
     async function initializeLogAggregator(modelDefinition, latestSnapshotNo) {
-        let snapshotData;
-        if (latestSnapshotNo) {
-            let snapshotConfiguration = modelDefinition.snapshotConfiguration;
-            snapshotData = await _eventStore.restoreSnapshot(latestSnapshotNo, snapshotConfiguration.snapshotName);
+        let snapshot;
+        if (latestSnapshotNo && modelDefinition.snapshotName) {
+            let snapshotName = modelDefinition.snapshotName;
+            snapshot = await _eventStore.restoreSnapshot(latestSnapshotNo, snapshotName);
         }
-		let logAggregator = modelDefinition.createLogAggregator(snapshotData, wrapInReadOnlyProxy);
+		let logAggregator = modelDefinition.createLogAggregator(snapshot, wrapInReadOnlyProxy);
 		logAggregator.currentFileNo = latestSnapshotNo;
 		return logAggregator;
 	}
@@ -68,26 +68,26 @@ module.exports = async function defineStore(folder, options = {}) {
         },
 
         defineModel(modelDefinition) {
-            let snapshotConfiguration = modelDefinition.snapshotConfiguration;
+            let snapshotName = modelDefinition.snapshotName;
             let logAggregator = undefined;
             
             return {
                 async snapshot() {
-                    if (snapshotConfiguration) {
+                    if (snapshotName) {
                         let allFiles = await _eventStore.getAllFilenames(folder);
-                        let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${snapshotConfiguration.snapshotName}-snapshot`) || 0;
+                        let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${snapshotName}-snapshot`) || 0;
                         let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
                         logAggregator = logAggregator || await initializeLogAggregator(modelDefinition, latestSnapshotNo);
 						await forwardLogAggregator(logAggregator, modelDefinition, latestLogFileNo);
 
-                        let snapshot = snapshotConfiguration.createSnapshotData(logAggregator);
-                        await _eventStore.saveSnapshot(snapshot, snapshotConfiguration.snapshotName, latestLogFileNo);
+                        let snapshot = logAggregator.data;
+                        await _eventStore.saveSnapshot(snapshot, snapshotName, latestLogFileNo);
                     }
                 },
 
                 async withReadInstance(action) {
                     let allFiles = await _eventStore.getAllFilenames(folder);
-                    let latestSnapshotNo = snapshotConfiguration ? _eventStore.getLatestFileNo(allFiles, `.${snapshotConfiguration.snapshotName}-snapshot`) || 0 : 0;
+                    let latestSnapshotNo = snapshotName ? _eventStore.getLatestFileNo(allFiles, `.${snapshotName}-snapshot`) || 0 : 0;
                     let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
 
 					let dispatch = () => {};
@@ -104,7 +104,7 @@ module.exports = async function defineStore(folder, options = {}) {
                     let retryCount = 0;
                     while (retryCount < maxRetries) {
                         let allFiles = await _eventStore.getAllFilenames(folder);
-                        let latestSnapshotNo = snapshotConfiguration ? _eventStore.getLatestFileNo(allFiles, `.${snapshotConfiguration.snapshotName}-snapshot`) || 0 : 0;
+                        let latestSnapshotNo = snapshotName ? _eventStore.getLatestFileNo(allFiles, `.${snapshotName}-snapshot`) || 0 : 0;
                         let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
 
                         let events = [];
