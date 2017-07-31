@@ -6,10 +6,6 @@ The `modelDefinition` object is created by you, to tell Eventstore how to initia
 ---
 modelDefinition: object
 - snapshotName: string
-- getFallbackEventHandler(logAggregator: object): function
-	- handleEvent(eventName: string, eventData: object, headers: object)
-- getEventHandlers(logAggregator: object): object
-	- on_EventName_(eventData: object, headers: object)
 - createLogAggregator(snapshot: any, wrapInReadOnlyProxy: function): any
 	- wrapInReadOnlyProxy(model: object): object
 - createDomainModel(dispatch: function, logAggregator: object)
@@ -22,17 +18,6 @@ let modelDefinition = {
 
 	// The snapshotName is optional. If none provided, snapshots are disabled for this model.
 	snapshotName: "name-of-the-model",
-
-	getEventHandlers(logAggregator){
-		return {
-			onSomeEvent(eventData, headers){
-				// Handle the event, and modify the internal state of the log aggregator object accordingly.
-			},
-			onSomeOtherEvent(eventData, headers){
-				// Handle the event, and modify the internal state of the log aggregator object accordingly.
-			}
-		};
-	},
 
 	createLogAggregator(snapshot, wrapInReadOnlyProxy){
 		// This method is used to instantiate the LogAggregator. This will usually be a constructor.
@@ -47,12 +32,6 @@ let modelDefinition = {
 		let aDomainModel = new DomainModel(dispatch, logAggregator);
 		return aDomainModel;
 	},
-
-	// Events that aren't handled by the event handlers from getEventHandlers(...), will be handled by the fallback event handler.
-	// The fallback event handler is optional. If none provided, unknown events will be ignored by this model.
-	fallbackEventHandler(eventName, eventData, headers){
-		// Handle the event, and modify the internal state of the log aggregator object accordingly.
-	}
 }
 ```
 
@@ -63,13 +42,8 @@ let modelDefinition = {
 	// Optional:
 	snapshotName: "name-of-the-model",
 
-	getEventHandlers: logAggregator => logAggregator.eventHandlers,
-	
 	createLogAggregator: (snapshot, wrapInReadOnlyProxy) => new SomeLogAggregator(snapshot, wrapInReadOnlyProxy),
 
 	createDomainModel: (dispatch, logAggregator) => new DomainModel(dispatch, logAggregator),
-
-	// Optional:
-	fallbackEventHandler: (eventName, eventData, headers) => { /* Handle event...*/ }
 }
 ```

@@ -24,8 +24,7 @@ module.exports = async function defineStore(folder, options = {}) {
             to: latestLogFileNo
 		};
 
-        let eventHandlers = modelDefinition.getEventHandlers && modelDefinition.getEventHandlers(logAggregator);
-        eventHandlers = eventHandlers || {};
+        let eventHandlers = logAggregator.eventHandlers || {};
 
         await _eventStore.replayEventStream((event, headers) => {
             let eventHandler = eventHandlers["on" + camelToPascalCase(event.name)];
@@ -34,7 +33,8 @@ module.exports = async function defineStore(folder, options = {}) {
                 return;
             }
 
-            let fallbackEventHandler = modelDefinition.getFallbackEventHandler && modelDefinition.getFallbackEventHandler(logAggregator);
+            let fallbackEventHandler = logAggregator.fallbackEventHandler;
+            // let fallbackEventHandler = modelDefinition.getFallbackEventHandler && modelDefinition.getFallbackEventHandler(logAggregator);
             if (fallbackEventHandler) {
                 fallbackEventHandler(event.name, event.data, headers);
                 return;

@@ -108,7 +108,6 @@ let model = store.defineModel(modelDefinition);
 
 `modelDefinition` is an object with the following properties and functions:
 - snapshotName: string
-- getEventHandlers(logAggregator: object): object
 - createLogAggregator(snapshot: any): any
 - createDomainModel(dispatch: function, logAggregator: object)
 
@@ -119,7 +118,6 @@ let store = defineStore("/foldername");
 
 let modelDefinition = {
 	snapshotName: "some-model-name",
-	getEventHandlers: logAggregator => logAggregator.eventHandlers,
 	createLogAggregator: snapshot => new MyCustomLogAggregator(snapshot),
 	createDomainModel: (dispatch, logAggregator) => new MyCustomDomainModel(dispatch, logAggregator)
 }

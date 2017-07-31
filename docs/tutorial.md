@@ -134,7 +134,6 @@ The following are the methods and properties on the _model definition_:
 ---
 modelDefinition: object
 - snapshotName: string
-- getEventHandlers(logAggregator: object): object
 - createLogAggregator(snapshot: any): any
 - createDomainModel(dispatch: function, logAggregator: object)
 
@@ -144,7 +143,6 @@ modelDefinition: object
 ```javascript
 let modelDefinition = {
 	snapshotName: "memberlist",
-	getEventHandlers: logAggregatorModel => logAggregator.eventHandlers,
 	createLogAggregator: snapshot => new MemberListLogAggregator(snapshot),
 	createDomainModel: (dispatch, logAggregator) => new MemberListDomainModel(dispatch, logAggregator)
 }

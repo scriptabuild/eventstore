@@ -78,7 +78,6 @@ function MemberListLogAggregator(snapshot, wrapInReadOnlyProxy = model => model)
 
 let modelDefinition = {
     snapshotName: "some-model",
-    getEventHandlers: logAggregator => logAggregator.eventHandlers,
     createLogAggregator: (snapshot, currentFileNo) => new MemberListLogAggregator(snapshot, currentFileNo),
     createDomainModel: (dispatch, logAggregator) => new MemberListDomainModel(dispatch, logAggregator)
 }
