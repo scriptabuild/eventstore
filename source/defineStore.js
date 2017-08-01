@@ -1,6 +1,5 @@
 const EventStore = require("./EventStore");
 const clone = require("./clone");
-const wrapInReadOnlyProxy = require("@scriptabuild/readonlyproxy")
 const camelToPascalCase = require("./camelToPascalCase");
 
 
@@ -13,7 +12,7 @@ module.exports = async function defineStore(folder, options = {}) {
             let snapshotName = modelDefinition.snapshotName;
             snapshot = await _eventStore.restoreSnapshot(latestSnapshotNo, snapshotName);
         }
-		let logAggregator = modelDefinition.createLogAggregator(snapshot, wrapInReadOnlyProxy);
+		let logAggregator = modelDefinition.createLogAggregator(snapshot);
 		logAggregator.currentFileNo = latestSnapshotNo;
 		return logAggregator;
 	}

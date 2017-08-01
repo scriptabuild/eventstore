@@ -4,6 +4,8 @@ const assert = require("assert");
 
 const defineStore = require("../source/defineStore");
 const FakeAwaitableFs = require("./FakeAwaitableFs");
+const wrapInReadOnlyProxy = require("@scriptabuild/readonlyproxy")
+
 
 
 const log = () => {}; //console.log;
@@ -35,9 +37,8 @@ function MemberListDomainModel(dispatch, logAggregator) {
 
 
 
-function MemberListLogAggregator(snapshot, wrapInReadOnlyProxy = model => model) {
-
-    let members = snapshot || {}; // This is where the model is materialized!
+function MemberListLogAggregator(snapshot = {}) {
+    let members = snapshot; // This is where the model is materialized!
     Object.defineProperty(this, "data", { value: wrapInReadOnlyProxy(members), writable: false });
 
     this.eventHandlers = {

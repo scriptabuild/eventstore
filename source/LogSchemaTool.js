@@ -6,6 +6,7 @@
 // - when params/payload change shape
 // - other version information
 //
+const wrapInReadOnlyProxy = require("@scriptabuild/readonlyproxy")
 
 function DomainModel(dispatch, logAggregator) {
 
@@ -24,8 +25,8 @@ function DomainModel(dispatch, logAggregator) {
 	}
 }
 
-function LogAggregator(snapshot, wrapInReadOnlyProxy) {
-	let eventTypes = snapshot || {};
+function LogAggregator(snapshot = {}) {
+	let eventTypes = snapshot;
 
 	Object.defineProperty(this, "data", { value: wrapInReadOnlyProxy(eventTypes), writable: false});
 
@@ -61,8 +62,7 @@ function LogAggregator(snapshot, wrapInReadOnlyProxy) {
 
 let modelDefinition = {
 	snapshotName: "log-schema",
-	getFallbackEventHandler: logAggregator => logAggregator.fallbackEventHandler,
-	createLogAggregator: (snapshot, wrapInReadOnlyProxy) => new LogAggregator(snapshot, wrapInReadOnlyProxy),
+	createLogAggregator: snapshot => new LogAggregator(snapshot),
 	createDomainModel: (dispatch, logAggregator) => new DomainModel(dispatch, logAggregator)
 };
 

@@ -6,8 +6,7 @@ The `modelDefinition` object is created by you, to tell Eventstore how to initia
 ---
 modelDefinition: object
 - snapshotName: string
-- createLogAggregator(snapshot: any, wrapInReadOnlyProxy: function): any
-	- wrapInReadOnlyProxy(model: object): object
+- createLogAggregator(snapshot: any): any
 - createDomainModel(dispatch: function, logAggregator: object)
 
 ---
@@ -19,12 +18,12 @@ let modelDefinition = {
 	// The snapshotName is optional. If none provided, snapshots are disabled for this model.
 	snapshotName: "name-of-the-model",
 
-	createLogAggregator(snapshot, wrapInReadOnlyProxy){
+	createLogAggregator(snapshot){
 		// This method is used to instantiate the LogAggregator. This will usually be a constructor.
 		// If snapsshots are enabled for this model, the method should accept the snapshot data object.
 		// The snapshot data are deserialized from a json file.
 
-		let aLogAggregatorInstance = new SomeLogAggregator(snapshot, wrapInReadOnlyProxy);
+		let aLogAggregatorInstance = new SomeLogAggregator(snapshot);
 		return aLogAggregatorInstance;
 	},
 
@@ -42,7 +41,7 @@ let modelDefinition = {
 	// Optional:
 	snapshotName: "name-of-the-model",
 
-	createLogAggregator: (snapshot, wrapInReadOnlyProxy) => new SomeLogAggregator(snapshot, wrapInReadOnlyProxy),
+	createLogAggregator: snapshot => new SomeLogAggregator(snapshot),
 
 	createDomainModel: (dispatch, logAggregator) => new DomainModel(dispatch, logAggregator),
 }

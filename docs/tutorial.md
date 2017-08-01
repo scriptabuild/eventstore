@@ -76,8 +76,7 @@ The following are the methods and properties on the _log aggregator_ for our mem
 
 ---
 MemberListLogAggregator: class
-- constructor(snapshot: any, wrapInReadOnlyProxy: function)
-	- wrapInReadOnlyProxy: function(model: object): object
+- constructor(snapshot: any)
 - this.data: object
 - this.eventHandlers: object
 	- onNewMemberRegistered(eventdata: object)
@@ -87,7 +86,9 @@ MemberListLogAggregator: class
 
 ---
 ```javascript
-function MemberListLogAggregator(snapshot, wrapInReadOnlyProxy) {
+const wrapInReadOnlyProxy = require("@scriptabuild/readonlyproxy")
+
+function MemberListLogAggregator(snapshot) {
 	let members = snapshot || {};	// This is where the model is materialized!
 	Object.defineProperty(this, "data", { value: wrapInReadOnlyProxy(members), writable: false});
 

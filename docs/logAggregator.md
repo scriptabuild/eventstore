@@ -11,8 +11,7 @@ The following are the methods and properties on the _log aggregator_:
 
 ---
 LogAggregator: class
-- constructor(snapshot: any, wrapInReadOnlyProxy: function)
-	- wrapInReadOnlyProxy: function(model: object): object
+- constructor(snapshot: any)
 - this.data: object
 - this.eventHandlers: object
 	- on_Event1_(eventdata: object, headers: object)
@@ -21,8 +20,10 @@ LogAggregator: class
 - this.fallbackEventHandler(eventname: string, eventdata: object, headers: object)
 ---
 ```javascript
-function LogAggregator(snapshot, wrapInReadOnlyProxy) {
-	let data = snapshot || {};	// This is where the model is materialized!
+const wrapInReadOnlyProxy = require("@scriptabuild/readonlyproxy")
+
+function LogAggregator(snapshot = {}) {
+	let data = snapshot;	// This is where the model is materialized!
 	Object.defineProperty(this, "data", { value: wrapInReadOnlyProxy(data), writable: false});
 
 	this.eventHandlers = {

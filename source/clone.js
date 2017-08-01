@@ -6,7 +6,8 @@ function clone(orig, depth) {
 	) return orig;
 	
 	// Make the clone share the same prototype as the original
-	var copy = new orig.constructor();
+	let copy = new orig.constructor();
+
 
 	// Copy every enumerable property not from the prototype
 	for (var key in orig) {
