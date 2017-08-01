@@ -156,7 +156,7 @@ The resulting object is the root for either writing straight to the event log or
 
 ---
 ```javascript
-const defineStore = require("@scriptabuild/eventstore");
+const {defineStore} = require("@scriptabuild/eventstore");
 
 let store = defineStore("/foldername");
 let model = store.defineModel(modelDefinition);

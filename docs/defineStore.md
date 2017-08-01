@@ -17,7 +17,7 @@ defineStore(folder: string, options: object)
 When using `defineStore` with node.js, the file system is used as the persistence by default.
 
 ```javascript
-const defineStore = require("@scriptabuild/eventstore");
+const {defineStore} = require("@scriptabuild/eventstore");
 
 let store = defineStore("/foldername");
 ```
@@ -30,7 +30,7 @@ You can supply a options object, to override the following settings:
 	Only a few methods are required, as shown in the listing below.
 
 ```javascript
-const defineStore = require("@scriptabuild/eventstore");
+const {defineStore} = require("@scriptabuild/eventstore");
 
 let options = {
 	createHeaders: (() => { /* custom implementation */ }),
@@ -54,7 +54,7 @@ let store = defineStore("/foldername", options);
 Writes an event to the eventlog without defining a model. This is for all practical purposes the write-only mode.
 
 ```javascript
-const defineStore = require("@scriptabuild/eventstore");
+const {defineStore} = require("@scriptabuild/eventstore");
 let store = defineStore("/foldername");
 
 store.log({name: "some-event-name", data: { /* custom object */ }})
@@ -66,7 +66,7 @@ Writes an block of events to the eventlog without defining a model. This is for 
 With logblock, the events are only written to the log when the block is marked as completed, by calling the `markAsComplete()` method. When this method is not called, the events are not persisted. This allows for all-or-nothing transactions.
 
 ```javascript
-const defineStore = require("@scriptabuild/eventstore");
+const {defineStore} = require("@scriptabuild/eventstore");
 let store = defineStore("/foldername");
 
 store.logBlock((log, markAsComplete) => {
@@ -81,7 +81,7 @@ store.logBlock((log, markAsComplete) => {
 Allows streaming (and reading) all event in the eventlog without defining a model.
 
 ```javascript
-const defineStore = require("@scriptabuild/eventstore");
+const {defineStore} = require("@scriptabuild/eventstore");
 let store = defineStore("/foldername");
 
 store.replayEventStream((event, headers) => {
@@ -100,7 +100,7 @@ This object exposes the following methods:
 These methods are described further below in the documentation.
 
 ```javascript
-const defineStore = require("@scriptabuild/eventstore");
+const {defineStore} = require("@scriptabuild/eventstore");
 let store = defineStore("/foldername");
 
 let model = store.defineModel(modelDefinition);
@@ -113,7 +113,7 @@ let model = store.defineModel(modelDefinition);
 
 ---
 ```javascript
-const defineStore = require("@scriptabuild/eventstore");
+const {defineStore} = require("@scriptabuild/eventstore");
 let store = defineStore("/foldername");
 
 let modelDefinition = {
