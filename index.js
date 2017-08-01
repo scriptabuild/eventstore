@@ -1,1 +1,3 @@
-module.exports = require("./source/defineStore.js");
+module.exports = {
+	defineStore: require("./source/defineStore.js")
+};
