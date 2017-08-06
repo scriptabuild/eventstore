@@ -3,7 +3,7 @@ const clone = require("./clone");
 const camelToPascalCase = require("./camelToPascalCase");
 
 
-module.exports = async function defineStore(folder, options = {}) {
+module.exports = function defineStore(folder, options = {}) {
     let _eventStore = new EventStore(folder, options);
 
     async function initializeLogAggregator(modelDefinition, latestSnapshotNo) {
