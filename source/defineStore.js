@@ -12,16 +12,16 @@ module.exports = async function defineStore(folder, options = {}) {
             let snapshotName = modelDefinition.snapshotName;
             snapshot = await _eventStore.restoreSnapshot(latestSnapshotNo, snapshotName);
         }
-		let logAggregator = modelDefinition.createLogAggregator(snapshot);
-		logAggregator.currentFileNo = latestSnapshotNo;
-		return logAggregator;
-	}
+        let logAggregator = modelDefinition.createLogAggregator(snapshot);
+        logAggregator.currentFileNo = latestSnapshotNo;
+        return logAggregator;
+    }
 
-	async function forwardLogAggregator(logAggregator, modelDefinition, latestLogFileNo) {
+    async function forwardLogAggregator(logAggregator, modelDefinition, latestLogFileNo) {
         let range = {
             from: logAggregator.currentFileNo + 1,
             to: latestLogFileNo
-		};
+        };
 
         let eventHandlers = logAggregator.eventHandlers || {};
 
@@ -33,14 +33,13 @@ module.exports = async function defineStore(folder, options = {}) {
             }
 
             let fallbackEventHandler = logAggregator.fallbackEventHandler;
-            // let fallbackEventHandler = modelDefinition.getFallbackEventHandler && modelDefinition.getFallbackEventHandler(logAggregator);
             if (fallbackEventHandler) {
                 fallbackEventHandler(event.name, event.data, headers);
                 return;
             }
-		}, range);
-		
-		logAggregator.currentFileNo = latestLogFileNo;
+        }, range);
+
+        logAggregator.currentFileNo = latestLogFileNo;
         return logAggregator;
     }
 
@@ -69,7 +68,7 @@ module.exports = async function defineStore(folder, options = {}) {
         defineModel(modelDefinition) {
             let snapshotName = modelDefinition.snapshotName;
             let logAggregator = undefined;
-            
+
             return {
                 async snapshot() {
                     if (snapshotName) {
@@ -77,7 +76,7 @@ module.exports = async function defineStore(folder, options = {}) {
                         let latestSnapshotNo = _eventStore.getLatestFileNo(allFiles, `.${snapshotName}-snapshot`) || 0;
                         let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
                         logAggregator = logAggregator || await initializeLogAggregator(modelDefinition, latestSnapshotNo);
-						await forwardLogAggregator(logAggregator, modelDefinition, latestLogFileNo);
+                        await forwardLogAggregator(logAggregator, modelDefinition, latestLogFileNo);
 
                         let snapshot = logAggregator.data;
                         await _eventStore.saveSnapshot(snapshot, snapshotName, latestLogFileNo);
@@ -89,10 +88,10 @@ module.exports = async function defineStore(folder, options = {}) {
                     let latestSnapshotNo = snapshotName ? _eventStore.getLatestFileNo(allFiles, `.${snapshotName}-snapshot`) || 0 : 0;
                     let latestLogFileNo = _eventStore.getLatestFileNo(allFiles, ".log");
 
-					let dispatch = () => {};
+                    let dispatch = () => {};
                     logAggregator = logAggregator || await initializeLogAggregator(modelDefinition, latestSnapshotNo);
-					await forwardLogAggregator(logAggregator, modelDefinition, latestLogFileNo);
-					let domainModel = modelDefinition.createDomainModel(dispatch, logAggregator);
+                    await forwardLogAggregator(logAggregator, modelDefinition, latestLogFileNo);
+                    let domainModel = modelDefinition.createDomainModel(dispatch, logAggregator);
 
                     await action(domainModel);
                 },
@@ -109,9 +108,9 @@ module.exports = async function defineStore(folder, options = {}) {
                         let events = [];
                         let dispatch = (eventName, eventData) => {
                             events.push({ name: eventName, data: eventData });
-						};
-						logAggregator = logAggregator || await initializeLogAggregator(modelDefinition, latestSnapshotNo);
-						await forwardLogAggregator(logAggregator, modelDefinition, latestLogFileNo);
+                        };
+                        logAggregator = logAggregator || await initializeLogAggregator(modelDefinition, latestSnapshotNo);
+                        await forwardLogAggregator(logAggregator, modelDefinition, latestLogFileNo);
 
                         let domainModel = modelDefinition.createDomainModel(dispatch, clone(logAggregator));
 

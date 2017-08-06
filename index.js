@@ -1,3 +1,4 @@
 module.exports = {
-	defineStore: require("./source/defineStore.js")
+	defineStore: require("./source/defineStore.js"),
+	readonlyProxy: require("@scriptabuild/readonlyproxy")
 };
