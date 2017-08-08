@@ -21,7 +21,14 @@ module.exports = class EventStore {
 	}
 
 	async getAllFilenames(folder) {
-		return await this._fs.readdir(folder);
+		try{
+			let filenames = await this._fs.readdir(folder);
+			return filenames || [];
+		} catch(err) {
+			if(err.code === "ENOENT"){
+				return [];
+			}
+		}
 	}
 
 	// snapshot stuff

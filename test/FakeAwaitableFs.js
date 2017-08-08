@@ -12,13 +12,20 @@ module.exports = class FakeAwaitableFs {
 	}
 
 	readdir(folder){
-		return valueAsPromise(Object.keys(this.files).filter(fullname => fullname.startsWith(folder)));
+		let fileNamesInFolder = Object.keys(this.files).filter(fullname => fullname.startsWith(folder));
+		if(fileNamesInFolder.length === 0){
+			let err = new Error("no such file or directory");
+			err.code = "ENOENT";
+			return rejection(err);
+		}
+		
+		return valueAsPromise(fileNamesInFolder);
 	}
 
 	async readFile(filename){
 		// filename = path.basename(filename);
 		if(this.files[filename] === undefined){
-			let err = new Error("File not found");
+			let err = new Error("no such file or directory");
 			err.code = "ENOENT";
 			return rejection(err);
 		}

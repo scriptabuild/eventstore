@@ -438,5 +438,34 @@ suite("new EventStore(folder, options)", function () {
 		});
 
 	});
+
+
+
+
+	suite("Filename and number utilities when directory doesn't exist", function () {
+
+		setup(async function () {
+			fs.files = {
+				"/wrong-folder/1.log": ``,
+				"/wrong-folder/2.log": ``,
+				"/wrong-folder/2.some-snapshot": ``,
+				"/wrong-folder/2.some-other-snapshot": ``,
+				"/wrong-folder/3.log": ``,
+				"/wrong-folder/3.some-snapshot": ``,
+				"/wrong-folder/4.log": ``
+			};
+		});
+
+		test(".getLatestLogFileNo() doesn't crash when directory doesn't exist", async function () {
+			let latestFileNo = await eventStore.getLatestLogFileNo();
+			assert.equal(latestFileNo, 0);
+		});
+
+		test(".getLatestSnapshotFileNo(snapshotName) doesn't crash when directory doesn't exist", async function () {
+			let latestFileNo = await eventStore.getLatestSnapshotFileNo("some");
+			assert.equal(latestFileNo, 0);
+		});
+
+	});
 });
 
