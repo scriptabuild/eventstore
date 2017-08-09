@@ -93,7 +93,7 @@ module.exports = function defineStore(folder, options = {}) {
                     await forwardLogAggregator(logAggregator, modelDefinition, latestLogFileNo);
                     let domainModel = modelDefinition.createDomainModel(dispatch, logAggregator);
 
-                    await action(domainModel);
+                    return await action(domainModel);
                 },
 
                 async withReadWriteInstance(action, maxRetries = 5) {
@@ -115,12 +115,12 @@ module.exports = function defineStore(folder, options = {}) {
                         let domainModel = modelDefinition.createDomainModel(dispatch, clone(logAggregator));
 
                         let readyToCommitCallback = () => { isReadyToCommit = true; };
-                        await action(domainModel, readyToCommitCallback);
+                        let ret = action(domainModel, readyToCommitCallback);
 
                         if (isReadyToCommit) {
                             try {
                                 await _eventStore.saveEvents(events, ++latestLogFileNo);
-                                return;
+                                return ret;
                             }
                             catch (err) {
                                 retryCount++;
