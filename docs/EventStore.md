@@ -7,6 +7,7 @@ This class represents the actual underlying eventstore, and has three responsibi
 - replaying the log
 - handling snapshots
 
+---
 ## new EventStore(folder, options);
 |parameters| |
 |-|-|
@@ -47,30 +48,78 @@ let options = {
 let evs = new EventStore("somefolder", options);
 ```
 
+---
 ## getLatestFileNo(files, ext)
+Given an array of filenames, will return the highest numbered file with the correct extension.
 
+|Parameters| |
+|-|-|
+|`files`|The array of filename to find the filename from.|
+|`ext`|The extension of the file looked for.|
+
+
+``` javascript
 //TODO:
+```
 
+---
 ## getAllFilenames(folder)
+Gets an array of all filenames in a folder.
 
+|Parameters| |
+|-|-|
+|`folder`|...|
+
+``` javascript
 //TODO:
+```
 
+---
 ## getLatestSnapshotFileNo(snapshotName)
+Return the highest numbered snapshot file.
 
+|Parameters| |
+|-|-|
+|`snapshotName`|...|
+
+``` javascript
 //TODO:
+```
 
+---
 ## restoreSnapshot(snapshotFileNo, snapshotName)
 
+|Parameters| |
+|-|-|
+|`snapshotFileNo`|Filename (number) for the snapshot to restore|.
+|`snapshotName`|The name of the snapshot to restore.|
+
+``` javascript
 //TODO:
+```
 
-## saveSnapshot(snapshot, modelName, fileNo)
+---
+## saveSnapshot(snapshot, snapshotName, fileNo)
 
+|Parameters| |
+|-|-|
+|`snapshot`|The data to save|
+|`snapshotName`|...|
+|`fileNo`|Filename (number) for this snapshot. This must be the same as the number of the latest log file included in this snapshot.|
+
+``` javascript
 //TODO:
+```
 
+---
 ## getLatestLogFileNo()
+Return the highest numbered log-file.
 
+``` javascript
 //TODO:
+```
 
+---
 ## async .log(eventObj [,fileNo])
 
 |parameters| |
@@ -92,6 +141,7 @@ let fileNo = 4;
 await evs.log({name: "first event", data: "some event data"}, fileNo);
 ```
 
+---
 ## async .logBlock(action [,fileNo])
 
 This method batches multiple event entries into the same file.
@@ -123,6 +173,7 @@ await evs.logBlock((log, markAsComplete) => {
 }, fileNo);
 ```
 
+---
 ## async replayEventStream(handleEvent [,fileRange [,stopReplayPredicates]])
 
 |parameters| |
@@ -161,6 +212,7 @@ await evs.replayEventStream((event, headers) => {
 }, fileRange, stopReplayPredicates)
 ```
 
+---
 ## saveEvents(events, fileNo)
 
 //TODO:

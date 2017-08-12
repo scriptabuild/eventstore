@@ -2,15 +2,15 @@
 
 # defineStore
 
----
-defineStore(folder: string, options: object)
-- defineModel(modelDefinition: object)
+defineStore(folder: string, options: object) : _store_
+- async ensureFolder()
+- async log(eventObj)
+- async logBlock(action)
+- async replayEventStream(handleEvents)
+- defineModel(modelDefinition: object) : _model_
 	- async snapshot()
 	- async withReadInstance(action(instance: domainModel))
 	- async withReadWriteInstance(action(instance: domainModel, readyToCommit()), maxRetries: number)
-- async log(eventObj)
-- async logBlock(action) {
-- async replayEventStream(handleEvents){
 
 ---
 ## defineStore(folder, options)
@@ -23,8 +23,8 @@ let store = defineStore("/foldername");
 ```
 
 You can supply a options object, to override the following settings:
-- `createHeaders()` returns extra optional headers to add to all log files and snapshot files.
-- `fs` returns an object to access the persistent store. As the name implies, the default is the file system.
+- `createHeaders()` function returns extra optional headers to add to all log files and snapshot files.
+- `fs` returns an object with methods to access the persistent store. As the name implies, the default is the file system.
 	Only a few methods are required, as shown in the listing below.
 - `console` returns an object used for writing console messages.
 	Only a few methods are required, as shown in the listing below.
@@ -50,6 +50,22 @@ let options = {
 let store = defineStore("/foldername", options);
 ```
 
+---
+## async _store_.ensureFolder()
+Ensures that the log folder exists, and creates it if it doesn't.
+
+```javascript
+const {defineStore} = require("@scriptabuild/eventstore");
+let store = defineStore("/foldername");
+
+store.ensureFolder();
+```
+
+NOTE: This function works recursivly, so it will create all missing folders from the root folder an up the folder for the store.
+
+NOTE: This function is not yet completely implemented for Windows, and will throw an exception if it needs to create recursive folders.
+
+---
 ## async _store_.log(eventObj)
 Writes an event to the eventlog without defining a model. This is for all practical purposes the write-only mode.
 
@@ -60,6 +76,7 @@ let store = defineStore("/foldername");
 store.log({name: "some-event-name", data: { /* custom object */ }})
 ```
 
+---
 ## async _store_.logBlock(action)
 Writes an block of events to the eventlog without defining a model. This is for all practical purposes the write-only mode.
 
@@ -77,6 +94,7 @@ store.logBlock((log, markAsComplete) => {
 });
 ```
 
+---
 ## async _store_.replayEventStream(handleEvents)
 Allows streaming (and reading) all event in the eventlog without defining a model.
 
@@ -89,6 +107,7 @@ store.replayEventStream((event, headers) => {
 });
 ```
 
+---
 ## _store_.defineModel(modelDefinition)
 Returns an object used to access the _domain model_.
 
@@ -111,7 +130,7 @@ let model = store.defineModel(modelDefinition);
 - createLogAggregator(snapshot: any): any
 - createDomainModel(dispatch: function, logAggregator: object)
 
----
+
 ```javascript
 const {defineStore} = require("@scriptabuild/eventstore");
 let store = defineStore("/foldername");
@@ -125,6 +144,7 @@ let modelDefinition = {
 let model = store.defineModel(modelDefinition);
 ```
 
+---
 ## async _model_.snapshot()
 Saves a snapshot of the current state
 
@@ -132,13 +152,25 @@ Saves a snapshot of the current state
 //TODO:
 ```
 
-## async _model_.withReadInstance(action)
-Creates a read instance of the model. Atempts to change the model inside here will not store the events to the eventstore.
+---
+## async _model_.getAggregatorData()
+Returns a readonly instance of the data in the aggregator. Atempts to change the model inside here will not store the events back to the aggregator nor eventstore.
+
+A domain model is not needed for this.
 
 ```javascript
 //TODO:
 ```
 
+---
+## async _model_.withReadInstance(action)
+Creates a readonly instance of the model. Atempts to change the model inside here will not change the model nor store the events back to the eventstore.
+
+```javascript
+//TODO:
+```
+
+---
 ## async _model_.withReadWriteInstance(action, maxRetries)
 Creates a read/write instance of the model. Any events fired on the model inside here will be stored to the eventstore.
 
