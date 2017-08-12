@@ -1,7 +1,6 @@
 const EventStore = require("./EventStore");
 const clone = require("./clone");
 const camelToPascalCase = require("./camelToPascalCase");
-const awaitable = require("@scriptabuild/awaitable");
 
 
 module.exports = function defineStore(folder, options = {}) {
@@ -48,7 +47,8 @@ module.exports = function defineStore(folder, options = {}) {
 		async ensureFolder() {
 			if (/^win/.test(process.platform)) {
 				try{
-					await options.fs.mkdir(folder, 0o777);					
+					await options.fs.mkdir(folder, 0o777);
+					return;					
 				}
 				catch(err){
 					throw new Error(".ensureFolder() will not recursivly create missing folders on Windows yet. Please submit a pull request if you fix this!");
