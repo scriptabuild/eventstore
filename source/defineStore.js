@@ -65,7 +65,7 @@ module.exports = function defineStore(folder, options = {}) {
 					await options.fs.mkdir(newFolder, 0o777);
 				}
 				catch (err) {
-					//if (err.code != 'EEXIST') throw err;
+					if (err.code != 'EEXIST') throw err;
 				}
 			}
 		},
