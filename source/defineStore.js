@@ -1,9 +1,10 @@
 const EventStore = require("./EventStore");
 const clone = require("./clone");
 const camelToPascalCase = require("./camelToPascalCase");
-
+const awaitableFs = require("./awaitableFs");
 
 module.exports = function defineStore(folder, options = {}) {
+	this._fs = options.fs || awaitableFs;	
 	let _eventStore = new EventStore(folder, options);
 
 	async function initializeLogAggregator(modelDefinition, latestSnapshotNo) {
@@ -64,7 +65,7 @@ module.exports = function defineStore(folder, options = {}) {
 					await options.fs.mkdir(newFolder, 0o777);
 				}
 				catch (err) {
-					if (err.code != 'EEXIST') throw err;
+					//if (err.code != 'EEXIST') throw err;
 				}
 			}
 		},
