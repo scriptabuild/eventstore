@@ -1,7 +1,7 @@
 const EventStore = require("./EventStore");
 const clone = require("./clone");
 const camelToPascalCase = require("./camelToPascalCase");
-const awaitableFs = require("./awaitableFs");
+const awaitableFs = require("./AwaitableFs");
 
 module.exports = function defineStore(folder, options = {}) {	
 	options.fs = options.fs || awaitableFs;	
