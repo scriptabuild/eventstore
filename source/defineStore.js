@@ -3,8 +3,8 @@ const clone = require("./clone");
 const camelToPascalCase = require("./camelToPascalCase");
 const awaitableFs = require("./awaitableFs");
 
-module.exports = function defineStore(folder, options = {}) {
-	this._fs = options.fs || awaitableFs;	
+module.exports = function defineStore(folder, options = {}) {	
+	options.fs = options.fs || awaitableFs;	
 	let _eventStore = new EventStore(folder, options);
 
 	async function initializeLogAggregator(modelDefinition, latestSnapshotNo) {
