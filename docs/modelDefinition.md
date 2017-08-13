@@ -6,8 +6,9 @@ The `modelDefinition` object is created by you, to tell Eventstore how to initia
 ---
 modelDefinition: object
 - snapshotName: string
-- createLogAggregator(snapshot: any): any
-- createDomainModel(dispatch: function, logAggregator: object)
+- initializeLogAggregatorData(): object
+- createLogAggregator(logAggregatorData: object): object
+- createDomainModel(dispatch: function, logAggregatorData: object)
 
 ---
 
@@ -18,17 +19,20 @@ let modelDefinition = {
 	// The snapshotName is optional. If none provided, snapshots are disabled for this model.
 	snapshotName: "name-of-the-model",
 
-	createLogAggregator(snapshot){
-		// This method is used to instantiate the LogAggregator. This will usually be a constructor.
-		// If snapsshots are enabled for this model, the method should accept the snapshot data object.
-		// The snapshot data are deserialized from a json file.
+	initializeLogAggregatorData(){
+		return {};
+	},
 
-		let aLogAggregatorInstance = new SomeLogAggregator(snapshot);
+	createLogAggregator(logAggregatorData){
+		// This method is used to instantiate the LogAggregator. This will usually be a constructor.
+		// The logAggregator must will manipulate the incomming logAggregatorData object.
+
+		let aLogAggregatorInstance = new SomeLogAggregator(logAggregatorData);
 		return aLogAggregatorInstance;
 	},
 
-	createDomainModel(dispatch, logAggregator){
-		let aDomainModel = new DomainModel(dispatch, logAggregator);
+	createDomainModel(dispatch, logAggregatorData){
+		let aDomainModel = new DomainModel(dispatch, logAggregatorData);
 		return aDomainModel;
 	},
 }
@@ -41,8 +45,10 @@ let modelDefinition = {
 	// Optional:
 	snapshotName: "name-of-the-model",
 
-	createLogAggregator: snapshot => new SomeLogAggregator(snapshot),
+	initializeLogAggregatorData: () => ({}),
 
-	createDomainModel: (dispatch, logAggregator) => new DomainModel(dispatch, logAggregator),
+	createLogAggregator: logAggregatorData => new SomeLogAggregator(logAggregatorData),
+
+	createDomainModel: (dispatch, logAggregatorData) => new DomainModel(dispatch, logAggregatorData),
 }
 ```

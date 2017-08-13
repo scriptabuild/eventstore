@@ -9,7 +9,8 @@ const wrapInReadOnlyProxy = require("@scriptabuild/readonlyproxy")
 
 
 const log = () => {}; //console.log;
-function MemberListDomainModel(dispatch, logAggregator) {
+
+function MemberListDomainModel(dispatch, members) {
     this.registerNewMember = function(member) {
         dispatch("newMemberRegistered", { member });
         log("MAIL -> welcome to new member");
@@ -29,7 +30,6 @@ function MemberListDomainModel(dispatch, logAggregator) {
     }
 
     this.listMembers = function() {
-        let members = logAggregator.data;
         let ret = Object.keys(members).map(key => Object.assign({ name: key }, members[key]));
         return ret;
     }
@@ -37,9 +37,8 @@ function MemberListDomainModel(dispatch, logAggregator) {
 
 
 
-function MemberListLogAggregator(snapshot = {}) {
-    let members = snapshot; // This is where the model is materialized!
-    Object.defineProperty(this, "data", { value: wrapInReadOnlyProxy(members), writable: false });
+function MemberListLogAggregator(members) {
+    // Object.defineProperty(this, "data", { value: wrapInReadOnlyProxy(members), writable: false });
 
     this.eventHandlers = {
         onNewMemberRegistered(eventdata) {
@@ -79,8 +78,9 @@ function MemberListLogAggregator(snapshot = {}) {
 
 let modelDefinition = {
     snapshotName: "some-model",
-    createLogAggregator: (snapshot, currentFileNo) => new MemberListLogAggregator(snapshot, currentFileNo),
-    createDomainModel: (dispatch, logAggregator) => new MemberListDomainModel(dispatch, logAggregator)
+    initializeLogAggregatorData: () => ({}),
+    createLogAggregator: (data) => new MemberListLogAggregator(data),
+    createDomainModel: (dispatch, data) => new MemberListDomainModel(dispatch, data)
 }
 
 
@@ -390,6 +390,34 @@ suite("defineStore(folder, options)", function() {
 
 
         suite(".withReadWriteInstance(action)", async function() {
+
+            test("ensure instance is populated", async function() {
+                fs.files = {
+                    "/not-a-real-folder/1.log": `
+					{
+						"headers": {
+							"time": "2016-12-31T23:59:59.999Z"
+						},
+						"events": [{
+							"name": "newMemberRegistered",
+							"data": {
+								"member":{
+									"name": "arjan einbu",
+									"address": "rykkinn",
+									"membershipLevel": "silver"
+								}
+							}
+						}]
+					}`
+                };
+
+                let fulfilled = false;
+                await model.withReadWriteInstance(instance => {
+                    assert.deepEqual(instance.listMembers()[0], { name: "arjan einbu", address: "rykkinn", membershipLevel: "silver" });
+                    fulfilled = true;
+                });
+                assert.ok(fulfilled, "Async function wasn't called");
+            });
 
             test("create a .log file when transaction is marked as ready to commit", async function() {
                 await model.withReadWriteInstance((instance, readyToCommit) => {

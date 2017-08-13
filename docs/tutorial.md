@@ -22,7 +22,7 @@ The following are the methods and properties on the _domain model_ for our membe
 
 ---
 MemberListDomainModel: class
-- constructor(dispatch: function, logAggregator: any)
+- constructor(dispatch: function, logAggregatorData: any)
 	- dispatch(eventName: string, eventData: any))
 - registerNewMember(member: object)
 - endMembership(name: string)
@@ -33,7 +33,7 @@ MemberListDomainModel: class
 
 ---
 ```javascript
-function MemberListDomainModel(dispatch, logAggregator) {
+function MemberListDomainModel(dispatch, logAggregatorData) {
 	this.registerNewMember = function(member) {
 		dispatch("newMemberRegistered", { member });
 		console.log("SEND MAIL -> welcome to new member");
@@ -53,13 +53,13 @@ function MemberListDomainModel(dispatch, logAggregator) {
 	}
 
 	this.listMembers = function() {
-		let members = logAggregator.members;
+		let members = logAggregatorData;
 		let ret = Object.keys(members).map(key => Object.assign({ name: key }, members[key]));
 		return ret;
 	}
 
 	this.getMember = function(name) {
-		let members = logAggregator.getMembersModel();
+		let members = logAggregatorData;
 		return members[name];
 	}
 }
@@ -76,8 +76,7 @@ The following are the methods and properties on the _log aggregator_ for our mem
 
 ---
 MemberListLogAggregator: class
-- constructor(snapshot: any)
-- this.data: object
+- constructor(logAggregatorData: any)
 - this.eventHandlers: object
 	- onNewMemberRegistered(eventdata: object)
 	- onMembershipEnded(eventdata: object)
@@ -86,42 +85,37 @@ MemberListLogAggregator: class
 
 ---
 ```javascript
-const wrapInReadOnlyProxy = require("@scriptabuild/readonlyproxy")
-
-function MemberListLogAggregator(snapshot) {
-	let members = snapshot || {};	// This is where the model is materialized!
-	Object.defineProperty(this, "data", { value: wrapInReadOnlyProxy(members), writable: false});
-
+function MemberListLogAggregator(logAggregatorData) {
 	this.eventHandlers = {
 		onNewMemberRegistered(eventdata) {
-			if (members[eventdata.member.name]) {
+			if (logAggregatorData[eventdata.member.name]) {
 				throw new Error(`onNewMemberRegistered failed. ${eventdata.member.name} is already a member.`)
 			}
-			members[eventdata.member.name] = {
+			logAggregatorData[eventdata.member.name] = {
 				address: eventdata.member.address,
 				membershipLevel: eventdata.member.membershipLevel
 			};
 		},
 
 		onMembershipEnded(eventdata) {
-			if (!members[eventdata.name]) {
+			if (!logAggregatorData[eventdata.name]) {
 				throw new Error(`onMembershipEnded failed. ${eventdata.name} is not a member.`)
 			}
-			delete members[eventdata.name];
+			delete logAggregatorData[eventdata.name];
 		},
 
 		onAddressCorrected(eventdata) {
-			if (!members[eventdata.name]) {
+			if (!logAggregatorData[eventdata.name]) {
 				throw new Error(`onAddressCorrected failed. ${eventdata.name} is not a member.`)
 			}
-			members[eventdata.name].address = eventdata.address;
+			logAggregatorData[eventdata.name].address = eventdata.address;
 		},
 
 		onMemberHasMoved(eventdata) {
-			if (!members[eventdata.name]) {
+			if (!logAggregatorData[eventdata.name]) {
 				throw new Error(`onMemberHasMoved failed. ${eventdata.name} is not a member.`)
 			}
-			members[eventdata.name].address = eventdata.address;
+			logAggregatorData[eventdata.name].address = eventdata.address;
 		}
 	}
 }
@@ -135,8 +129,9 @@ The following are the methods and properties on the _model definition_:
 ---
 modelDefinition: object
 - snapshotName: string
-- createLogAggregator(snapshot: any): any
-- createDomainModel(dispatch: function, logAggregator: object)
+- initializeLogAggregatorData(): any
+- createLogAggregator(logAggregatorData: any): any
+- createDomainModel(dispatch: function, logAggregatorData: object)
 
 ---
 [More documentation on all methods and properties on the _model definition_](./modelDefinition.md)
@@ -144,8 +139,9 @@ modelDefinition: object
 ```javascript
 let modelDefinition = {
 	snapshotName: "memberlist",
-	createLogAggregator: snapshot => new MemberListLogAggregator(snapshot),
-	createDomainModel: (dispatch, logAggregator) => new MemberListDomainModel(dispatch, logAggregator)
+	initializeLogAggregatorData: () => ({}),
+	createLogAggregator: logAggregatorData => new MemberListLogAggregator(logAggregatorData),
+	createDomainModel: (dispatch, logAggregatorData) => new MemberListDomainModel(dispatch, logAggregatorData)
 }
 ```
 

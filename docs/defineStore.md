@@ -113,6 +113,7 @@ Returns an object used to access the _domain model_.
 
 This object exposes the following methods:
 - `snapshot`
+- `getAggregatorData`
 - `withReadModel`
 - `withReadWriteModel`
 
@@ -137,8 +138,9 @@ let store = defineStore("/foldername");
 
 let modelDefinition = {
 	snapshotName: "some-model-name",
-	createLogAggregator: snapshot => new MyCustomLogAggregator(snapshot),
-	createDomainModel: (dispatch, logAggregator) => new MyCustomDomainModel(dispatch, logAggregator)
+	initializeLogAggregatorData: () => ({});
+	createLogAggregator: logAggregatorData => new MyCustomLogAggregator(logAggregatorData),
+	createDomainModel: (dispatch, logAggregatorData) => new MyCustomDomainModel(dispatch, logAggregatorData)
 }
 
 let model = store.defineModel(modelDefinition);
